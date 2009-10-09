@@ -8,18 +8,12 @@ var complex = {
       {name: "blue", current: false, url: "#Blue"}
   ],
   link: function() {
-    var v = this["current"] === true;
-    // print("link() returns " + v);
-    return v;
+    return this["current"] !== true;
   },
   list: function() {
-    var v = this.item.length !== 0;
-    // print("list() returns " + v);
-    return v;
+    return this.item.length !== 0;
   },
   empty: function() {
-    var v = this.item.length === 0;
-    // print("empty() returns " + v);
-    return v;
+    return this.item.length === 0;
   }
 };

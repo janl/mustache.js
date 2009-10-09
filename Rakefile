@@ -3,8 +3,9 @@ require 'rake/testtask'
 task :default => :test
 
 Rake::TestTask.new do |t|
-  t.libs << 'lib'
-  t.pattern = 'test/**/*_test.rb'
-  t.verbose = false
+  Dir.glob("examples/*.html") do |file|
+    test = File.basename(file, ".html")
+    cmd = "ruby test/mustache_test.rb #{test}"
+    print `#{cmd}`
+  end
 end
-
