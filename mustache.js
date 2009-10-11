@@ -1,13 +1,8 @@
 /*
   Shamless port of http://github.com/defunkt/mustache
-    by Jan Lehnardt <jan@apache.org>
+  by Jan Lehnardt <jan@apache.org>
 
   Thanks @defunkt for the awesome code
-  TBD: MIT, see LICENSE
-  
-  ChangeLog:
-   - 04.10.2009: Ininitial port at http://devhouseberlin.de/
-
 */
 
 var Mustache = {
