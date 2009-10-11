@@ -15,7 +15,7 @@ runner = <<-JS
 #{mustache}
 #{view}
 var template = #{template};
-var result = Mustache.to_html(#{testname}, template);
+var result = Mustache.to_html(template, #{testname});
 print(result);
 JS
 
@@ -24,11 +24,11 @@ File.open("runner.js", 'w') {|f| f << runner}
 result = `js runner.js`
 
 if(result == expect)
-  puts "."
+  puts "OK"
 else
   puts "Error in #{testname}"
   puts "Expected"
-  puts expect
+  puts "'#{expect}'"
   puts "Actual"
-  puts result
+  puts "'#{result}'"
 end

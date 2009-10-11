@@ -3,7 +3,7 @@
     by Jan Lehnardt <jan@apache.org>
 
   Thanks @defunkt for the awesome code
-  TBD: License
+  TBD: MIT, see LICENSE
   
   ChangeLog:
    - 04.10.2009: Ininitial port at http://devhouseberlin.de/
@@ -16,7 +16,7 @@ var Mustache = {
   debug: true,
   stack: " ",
   context: {},
-  to_html: function(view, template) {
+  to_html: function(template, view) {
     return this.render(template, view);
   },
 
@@ -29,8 +29,21 @@ var Mustache = {
     this.context = context = this.merge((this.context || {}), view);
     var html = this.render_section(template);
     // restore context, recursion might have messed it up
-    // this.context = context;
+    this.context = context;
     return this.render_tags(html);
+  },
+
+  render_partial: function(name) {
+    var evil_name = eval(name)
+    switch(typeof evil_name) {
+      case "string":
+        return this.to_html(evil_name, "");
+      case "object":
+        var tpl = name + "_template";
+        return this.to_html(eval(tpl), evil_name);
+      default:
+        throw("Unknown partial type.");
+    }
   },
 
   merge: function(a, b) {
@@ -47,11 +60,8 @@ var Mustache = {
       return template;
     }
     var that = this;
-    return template.replace(/\{\{\#(.+)\}\}\s*(.+)\s*\{\{\/\1\}\}\s*/mg,
+    return template.replace(/\{\{\#(.+)\}\}\s*([\s\S]+)\{\{\/\1\}\}\s*/mg,
       function(match, name, content) {
-        print(match);
-        print(name);
-        print(content);
         var value = that.find(name);
         if(that.is_array(value)) {
           return value.map(function(row) {
@@ -65,10 +75,10 @@ var Mustache = {
       }
     );
   },
-  
+
   is_array: function(a) {
-    return (a && 
-      typeof a === 'object' && 
+    return (a &&
+      typeof a === 'object' &&
       a.constructor === Array);
   },
 
@@ -77,18 +87,30 @@ var Mustache = {
     var that = this;
     return template.replace(/\{\{(!|<|\{)?([^\/#]+?)\1?\}\}+/mg,
       function (match, operator, name) {
-      switch(operator) {
-        case "!": // ignore comments
-          return match;
-        // TODO: partials
-        // case "<": // render partial
-        //   return this.render_partial()
-        case '{': // the triple mustache is unescaped
-          return that.find(name);
-        default: // escape the value
-          return that.find(name);
+        switch(operator) {
+          case "!": // ignore comments
+            return match;
+          case "<": // render partial
+            return that.render_partial(name);
+          case '{': // the triple mustache is unescaped
+            return that.find(name);
+          default: // escape the value
+            return that.escape(that.find(name));
+        }
+      }, this);
+  },
+  
+  escape: function(s) {
+    return s.toString().replace(/[&"<>\\]/g, function(s) {
+      switch(s) {
+        case "&": return "&amp;";
+        case "\\": return "\\\\";;
+        case '"': return '\"';;
+        case "<": return "&lt;";
+        case ">": return "&gt;";
+        default: return s;
       }
-    }, this);
+    });
   },
 
   find: function(name) {
@@ -109,32 +131,31 @@ var Mustache = {
   },
 };
 
-var complex = {
-  header: function() {
-    return "Colors";
+var view_partial = {
+  greeting: function() {
+    return "Welcome";
   },
-  item: [
-      {name: "red", current: true, url: "#Red"},
-      {name: "green", current: false, url: "#Green"},
-      {name: "blue", current: false, url: "#Blue"}
-  ],
-  link: function() {
-    var v = this["current"] === true;
-    // print("link() returns " + v);
-    return v;
-  },
-  list: function() {
-    var v = this.item.length !== 0;
-    // print("list() returns " + v);
-    return v;
-  },
-  empty: function() {
-    var v = this.item.length === 0;
-    // print("empty() returns " + v);
-    return v;
+
+  farewell: function() {
+    return "Fair enough, right?";
   }
 };
 
-var template = "<h1>{{header}}<\/h1>\n{{#list}}\n  <ul>\n  {{#item}}\n    {{#current}}\n      <li><strong>{{name}}<\/strong><\/li>\n    {{\/current}}\n    {{#link}}\n      <li><a href=\"{{url}}\">{{name}}<\/a><\/li>\n    {{\/link}}\n  {{\/item}}\n  <\/ul>\n{{\/list}}\n{{#empty}}\n  <p>The list is empty.<\/p>\n{{\/empty}}";
-var result = Mustache.to_html(complex, template);
+var simple = {
+  name: "Chris",
+  value: 10000,
+  taxed_value: function() {
+    return this.value - (this.value * 0.4);
+  },
+  in_ca: true
+};
+
+var simple_template = "Hello {{name}}\n" +
+"You have just won ${{value}}!\n" +
+"{{#in_ca}}\n" +
+"Well, ${{ taxed_value }}, after taxes.\n" +
+"{{/in_ca}}\n";
+
+var template = "<h1>{{greeting}}<\/h1>\n{{<simple}}\n<h3>{{farewell}}<\/h3>";
+var result = Mustache.to_html(template, view_partial);
 print(result);
