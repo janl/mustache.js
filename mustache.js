@@ -29,7 +29,7 @@ var Mustache = {
     }
 
     // keep context around for recursive calls
-    this.context = context = this.merge((this.context || {}), view);
+    var context = this.context = this.merge((this.context || {}), view);
 
     // first, render all sections 
     var html = this.render_section(template);
@@ -105,7 +105,7 @@ var Mustache = {
     // tit for tat
     var that = this;
 
-    regex = new_regex();
+    var regex = new_regex();
     var lines = template;
 
     // for each {{(!<{)?foo}} tag, do...
