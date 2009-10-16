@@ -52,7 +52,7 @@ var Mustache = {
     switch(typeof evil_name) {
       case "string": // a tring partial, we simply render
         return this.to_html(evil_name, "");
-      case "object": // a view partial needs a `name_template` template to render
+      case "object": // a view partial needs a `name_template` template
         var tpl = name + "_template";
         return this.to_html(eval(tpl), evil_name);
       default: // should not happen #famouslastwords
@@ -68,7 +68,9 @@ var Mustache = {
       return template;
     }
     var that = this;
-    var regex = new RegExp(this.otag + "\\#(.+)" + this.ctag + "\\s*([\\s\\S]+)" + this.otag + "\\/\\1" + this.ctag + "\\s*", "mg");
+    var regex = new RegExp(this.otag + "\\#(.+)" + this.ctag +
+      "\\s*([\\s\\S]+)" + this.otag + "\\/\\1" + this.ctag + "\\s*", "mg");
+
     // for each {{#foo}}{{/foo}} section do...
     return template.replace(regex, function(match, name, content) {
         var value = that.find(name);
@@ -96,14 +98,17 @@ var Mustache = {
     };
 
     var new_regex = function() {
-      return new RegExp(that.otag + "(=|!|<|\\{)?([^\/#]+?)\\1?" + that.ctag + "+", "m");
+      return new RegExp(that.otag + 
+        "(=|!|<|\\{)?([^\/#]+?)\\1?" + that.ctag + "+", "m");
     };
 
     // tit for tat
     var that = this;
-    // for each {{(!<{)?foo}} tag, do...
+
     regex = new_regex();
     var lines = template;
+
+    // for each {{(!<{)?foo}} tag, do...
     while(regex.test(lines)) {
       template = template.replace(regex, function (match, operator, name) {
         switch(operator) {
@@ -117,7 +122,6 @@ var Mustache = {
           case "{": // the triple mustache is unescaped
             return that.find(name);
           default: // escape the value
-            // print("render name: '" +name+ "'");
             return that.escape(that.find(name));
         }
       }, this);
