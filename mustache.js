@@ -40,16 +40,7 @@ var Mustache = {
     // finally, render tags
     
     // render until all is rendered
-    var new_result = "";
-    var result = this.render_tags(html);
-    // print(result);
-    // while(result != new_result) {
-    //   print(1);
-    //   result = new_result;
-    //   new_result = this.render_tags(result);
-    //   print(new_result);
-    // }
-    return result;
+    return this.render_tags(html);
   },
 
   /* 
@@ -98,10 +89,20 @@ var Mustache = {
     Replace {{foo}} and friends with values from our view
   */
   render_tags: function(template) {
+    var pop_first = function(lines) {
+      var lines_array = lines.split("\n");
+      lines_array.shift();
+      return lines_array.join("\n");
+    };
+
+    var new_regex = function() {
+      return new RegExp(that.otag + "(=|!|<|\\{)?([^\/#]+?)\\1?" + that.ctag + "+", "m");
+    };
+
     // tit for tat
     var that = this;
     // for each {{(!<{)?foo}} tag, do...
-    regex = this.new_regex();
+    regex = new_regex();
     var lines = template;
     while(regex.test(lines)) {
       template = template.replace(regex, function (match, operator, name) {
@@ -120,30 +121,12 @@ var Mustache = {
             return that.escape(that.find(name));
         }
       }, this);
-      regex = this.new_regex();
-      lines = this.pop_first(lines);
+      regex = new_regex();
+      lines = pop_first(lines);
     } 
     return template;
   },
   
-  pop_first: function(lines) {
-    var lines_array = lines.split("\n");
-    lines_array.shift();
-    return lines_array.join("\n");
-  },
-
-  new_regex: function() {
-    return new RegExp(this.otag + "(=|!|<|\\{)?([^\/#]+?)\\1?" + this.ctag + "+", "m");
-  },
-/*
-{{=<% %>=}}
-* <% first %>
-<%=| |=%>
-* | second |
-|={{ }}=|
-* {{ third }}
-*/
-
   set_delimiters: function(delimiters) {
     var dels = delimiters.split(" ");
     this.otag = this.escape_regex(dels[0]);
@@ -170,9 +153,6 @@ var Mustache = {
   */
   find: function(name) {
     name = this.trim(name);
-    if(name === "") {
-      // return "";
-    }
     var context = this.context;
     if(typeof context[name] === "function") {
       return context[name].apply(context);
