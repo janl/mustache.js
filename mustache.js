@@ -126,7 +126,7 @@ var Mustache = {
     } 
     return template;
   },
-  
+
   set_delimiters: function(delimiters) {
     var dels = delimiters.split(" ");
     this.otag = this.escape_regex(dels[0]);
