@@ -11,6 +11,8 @@ var Mustache = {
   name: "mustache.js",
   version: "0.1",
   context: {},
+  otag: "{{",
+  ctag: "}}",
 
   /*
     Public method. Turns a template and view into HTML
@@ -22,21 +24,32 @@ var Mustache = {
   // Private Methods
   render: function(template, view) {
     // fail fast
-    if(template.indexOf("{{") == -1) {
+    if(template.indexOf(this.otag) == -1) {
       return template;
     }
 
     // keep context around for recursive calls
     this.context = context = this.merge((this.context || {}), view);
 
-    // first, render all sections
+    // first, render all sections 
     var html = this.render_section(template);
 
     // restore context, recursion might have messed it up
     this.context = context;
-    
+
     // finally, render tags
-    return this.render_tags(html);
+    
+    // render until all is rendered
+    var new_result = "";
+    var result = this.render_tags(html);
+    // print(result);
+    // while(result != new_result) {
+    //   print(1);
+    //   result = new_result;
+    //   new_result = this.render_tags(result);
+    //   print(new_result);
+    // }
+    return result;
   },
 
   /* 
@@ -60,13 +73,13 @@ var Mustache = {
     Renders boolean and enumerable sections
   */
   render_section: function(template) {
-    if(template.indexOf("{{#") == -1) {
+    if(template.indexOf(this.otag + "#") == -1) {
       return template;
     }
     var that = this;
+    var regex = new RegExp(this.otag + "\\#(.+)" + this.ctag + "\\s*([\\s\\S]+)" + this.otag + "\\/\\1" + this.ctag + "\\s*", "mg");
     // for each {{#foo}}{{/foo}} section do...
-    return template.replace(/\{\{\#(.+)\}\}\s*([\s\S]+)\{\{\/\1\}\}\s*/mg,
-      function(match, name, content) {
+    return template.replace(regex, function(match, name, content) {
         var value = that.find(name);
         if(that.is_array(value)) { // Enumerable, Let's loop!
           return value.map(function(row) {
@@ -88,27 +101,78 @@ var Mustache = {
     // tit for tat
     var that = this;
     // for each {{(!<{)?foo}} tag, do...
-    return template.replace(/\{\{(!|<|\{)?([^\/#]+?)\1?\}\}+/mg,
-      function (match, operator, name) {
+    regex = this.new_regex();
+    var lines = template;
+    while(regex.test(lines)) {
+      template = template.replace(regex, function (match, operator, name) {
         switch(operator) {
           case "!": // ignore comments
             return match;
+          case "=": // set new delimiters
+            that.set_delimiters(name);
+            return "";
           case "<": // render partial
             return that.render_partial(name);
-          case '{': // the triple mustache is unescaped
+          case "{": // the triple mustache is unescaped
             return that.find(name);
           default: // escape the value
+            // print("render name: '" +name+ "'");
             return that.escape(that.find(name));
         }
       }, this);
+      regex = this.new_regex();
+      lines = this.pop_first(lines);
+    } 
+    return template;
   },
   
+  pop_first: function(lines) {
+    var lines_array = lines.split("\n");
+    lines_array.shift();
+    return lines_array.join("\n");
+  },
+
+  new_regex: function() {
+    return new RegExp(this.otag + "(=|!|<|\\{)?([^\/#]+?)\\1?" + this.ctag + "+", "m");
+  },
+/*
+{{=<% %>=}}
+* <% first %>
+<%=| |=%>
+* | second |
+|={{ }}=|
+* {{ third }}
+*/
+
+  set_delimiters: function(delimiters) {
+    var dels = delimiters.split(" ");
+    this.otag = this.escape_regex(dels[0]);
+    this.ctag = this.escape_regex(dels[1]);
+  },
+
+  escape_regex: function(text) {
+    // thank you Simon Willison
+    if(!arguments.callee.sRE) {
+      var specials = [
+        '/', '.', '*', '+', '?', '|',
+        '(', ')', '[', ']', '{', '}', '\\'
+      ];
+      arguments.callee.sRE = new RegExp(
+        '(\\' + specials.join('|\\') + ')', 'g'
+      );
+    }
+  return text.replace(arguments.callee.sRE, '\\$1');
+  },
+
   /*
     find `name` in current `context`. That is find me a value 
     from the view object
   */
   find: function(name) {
     name = this.trim(name);
+    if(name === "") {
+      // return "";
+    }
     var context = this.context;
     if(typeof context[name] === "function") {
       return context[name].apply(context);
