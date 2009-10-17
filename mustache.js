@@ -29,7 +29,7 @@ var Mustache = {
     }
 
     // keep context around for recursive calls
-    this.context = context = this.merge((this.context || {}), view);
+    this.context = context = this.merge((this.context || {}), this.create_context(view));
 
     // first, render all sections 
     var html = this.render_section(template);
@@ -42,7 +42,19 @@ var Mustache = {
     // render until all is rendered
     return this.render_tags(html);
   },
-
+  
+  create_context: function(_context) {
+    if(this.is_object(_context)) {
+      return _context;
+    } else {
+      return {'.': _context};
+    }
+  },
+  
+  is_object: function(a) {
+    return a && typeof a == 'object'
+  },
+  
   /* 
     Tries to find a partial in the global scope and render it
   */

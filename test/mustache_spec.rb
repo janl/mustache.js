@@ -18,11 +18,15 @@ describe "mustache" do
 
         mustache = File.read(__DIR__ + "/../mustache.js")
         runner = <<-JS
-        #{mustache}
-        #{view}
-        var template = #{template};
-        var result = Mustache.to_html(template, #{testname});
-        print(result);
+        try {
+          #{mustache}
+          #{view}
+          var template = #{template};
+          var result = Mustache.to_html(template, #{testname});
+          print(result);
+        } catch(e) {
+          print('ERROR: ' + e.message);
+        }
         JS
 
         File.open("runner.js", 'w') {|f| f << runner}
