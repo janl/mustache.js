@@ -12,18 +12,18 @@ describe "mustache" do
     @mustache = File.read(__DIR__ + "/../mustache.js")
   end
 
-  # it "should clear the context after each run" do
-  #   js = <<-JS
-  #     #{@mustache}
-  #     Mustache.to_html("{{#list}}{{x}}{{/list}}", {list: [{x: 1}]})
-  #     try {
-  #       print(Mustache.to_html("{{#list}}{{x}}{{/list}}", {list: [{}]}));
-  #     } catch(e) {
-  #       print('ERROR: ' + e);
-  #     }
-  #   JS
-  #   run_js(js).should == "ERROR: Can't find x in [object Object]\n"
-  # end
+  it "should clear the context after each run" do
+    js = <<-JS
+      #{@mustache}
+      Mustache.to_html("{{#list}}{{x}}{{/list}}", {list: [{x: 1}]})
+      try {
+        print(Mustache.to_html("{{#list}}{{x}}{{/list}}", {list: [{}]}));
+      } catch(e) {
+        print('ERROR: ' + e);
+      }
+    JS
+    run_js(js).should == "ERROR: Can't find x in [object Object]\n"
+  end
   
   testnames.each do |testname|
     describe testname do
