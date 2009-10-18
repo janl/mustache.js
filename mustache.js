@@ -14,25 +14,14 @@ var Mustache = function() {
     otag: "{{",
     ctag: "}}",
     
-    render: function(template, view) {
+    render: function(template, context) {
       // fail fast
       if(template.indexOf(this.otag) == -1) {
         return template;
       }
 
-      // keep context around for recursive calls
-      this.context = context = this.merge((this.context || {}), this.create_context(view));
-
-      // first, render all sections 
-      var html = this.render_section(template);
-
-      // restore context, recursion might have messed it up
-      this.context = context;
-
-      // finally, render tags
-
-      // render until all is rendered
-      return this.render_tags(html);
+      var html = this.render_section(template, context);
+      return this.render_tags(html, context);
     },
 
     create_context: function(_context) {
@@ -50,12 +39,12 @@ var Mustache = function() {
     /* 
       Tries to find a partial in the global scope and render it
     */
-    render_partial: function(name) {
+    render_partial: function(name, context) {
       // FIXME: too hacky
-      var evil_name = eval(name)
+      var evil_name = eval(name);
       switch(typeof evil_name) {
-        case "string": // a tring partial, we simply render
-          return this.render(evil_name, "");
+        case "string": // a string partial, we simply render
+          return this.render(evil_name, context);
         case "object": // a view partial needs a `name_template` template
           var tpl = name + "_template";
           return this.render(eval(tpl), evil_name);
@@ -67,7 +56,7 @@ var Mustache = function() {
     /*
       Renders boolean and enumerable sections
     */
-    render_section: function(template) {
+    render_section: function(template, context) {
       if(template.indexOf(this.otag + "#") == -1) {
         return template;
       }
@@ -77,13 +66,13 @@ var Mustache = function() {
 
       // for each {{#foo}}{{/foo}} section do...
       return template.replace(regex, function(match, name, content) {
-          var value = that.find(name);
+          var value = that.find(name, context);
           if(that.is_array(value)) { // Enumerable, Let's loop!
             return value.map(function(row) {
-              return that.render(content, row);
+              return that.render(content, that.merge(context, that.create_context(row)));
             }).join('');
           } else if(value) { // boolean section
-            return that.render(content);
+            return that.render(content, context);
           } else {
             return "";
           }
@@ -94,7 +83,7 @@ var Mustache = function() {
     /*
       Replace {{foo}} and friends with values from our view
     */
-    render_tags: function(template) {
+    render_tags: function(template, context) {
       var pop_first = function(lines) {
         var lines_array = lines.split("\n");
         lines_array.shift();
@@ -122,11 +111,11 @@ var Mustache = function() {
               that.set_delimiters(name);
               return "";
             case "<": // render partial
-              return that.render_partial(name);
+              return that.render_partial(name, context);
             case "{": // the triple mustache is unescaped
-              return that.find(name);
+              return that.find(name, context);
             default: // escape the value
-              return that.escape(that.find(name));
+              return that.escape(that.find(name, context));
           }
         }, this);
         regex = new_regex();
@@ -159,9 +148,8 @@ var Mustache = function() {
       find `name` in current `context`. That is find me a value 
       from the view object
     */
-    find: function(name) {
+    find: function(name, context) {
       name = this.trim(name);
-      var context = this.context;
       if(typeof context[name] === "function") {
         return context[name].apply(context);
       }
@@ -194,12 +182,18 @@ var Mustache = function() {
       `b.property` overwrites a.property`
     */
     merge: function(a, b) {
+      var _new = {};
+      for(var name in a) {
+        if(a.hasOwnProperty(name)) {
+          _new[name] = a[name];
+        }
+      };
       for(var name in b) {
         if(b.hasOwnProperty(name)) {
-          a[name] = b[name];
+          _new[name] = b[name];
         }
-      }
-      return a;
+      };
+      return _new;
     },
 
     /*
