@@ -84,44 +84,40 @@ var Mustache = function() {
       Replace {{foo}} and friends with values from our view
     */
     render_tags: function(template, context) {
-      var pop_first = function(lines) {
-        var lines_array = lines.split("\n");
-        lines_array.shift();
-        return lines_array.join("\n");
-      };
-
+      var lines = template.split("\n");
+     
       var new_regex = function() {
         return new RegExp(that.otag + 
-          "(=|!|<|\\{)?([^\/#]+?)\\1?" + that.ctag + "+", "m");
+                          "(=|!|<|\\{)?([^\/#]+?)\\1?" +
+                          that.ctag + "+",
+                          "g");
       };
 
       // tit for tat
       var that = this;
 
-      regex = new_regex();
-      var lines = template;
+      var regex = new_regex();
+      for (var i=0; i < lines.length; i++) {
+        lines[i] = lines[i].replace(regex,
+                function (match,operator,name) {
+                  switch(operator) {
+                    case "!": // ignore comments
+                      return match;
+                    case "=": // set new delimiters, rebuild the replace regexp
+                      that.set_delimiters(name);
+                      regex = new_regex();
+                      return "";
+                    case "<": // render partial
+                      return that.render_partial(name, context);
+                    case "{": // the triple mustache is unescaped
+                      return that.find(name, context);
+                    default: // escape the value
+                      return that.escape(that.find(name, context));
+                  }},
+                  this);
+      };
 
-      // for each {{(!<{)?foo}} tag, do...
-      while(regex.test(lines)) {
-        template = template.replace(regex, function (match, operator, name) {
-          switch(operator) {
-            case "!": // ignore comments
-              return match;
-            case "=": // set new delimiters
-              that.set_delimiters(name);
-              return "";
-            case "<": // render partial
-              return that.render_partial(name, context);
-            case "{": // the triple mustache is unescaped
-              return that.find(name, context);
-            default: // escape the value
-              return that.escape(that.find(name, context));
-          }
-        }, this);
-        regex = new_regex();
-        lines = pop_first(lines);
-      } 
-      return template;
+      return lines.join("\n");
     },
 
     set_delimiters: function(delimiters) {
