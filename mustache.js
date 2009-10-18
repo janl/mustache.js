@@ -1,6 +1,7 @@
 /*
   Shamless port of http://github.com/defunkt/mustache
-  by Jan Lehnardt <jan@apache.org>, Alexander Lang <alex@upstream-berlin.com>
+  by Jan Lehnardt <jan@apache.org>, Alexander Lang <alex@upstream-berlin.com>,
+     Sebastian Cohnen <sebastian.cohnen@googlemail.com>
 
   Thanks @defunkt for the awesome code.
   
@@ -106,6 +107,8 @@ var Mustache = function() {
                     case "=": // set new delimiters, rebuild the replace regexp
                       that.set_delimiters(name);
                       regex = new_regex();
+                      // redo the line in order to get tags with the new delimiters on the same line
+                      i--;
                       return "";
                     case "<": // render partial
                       return that.render_partial(name, context);
