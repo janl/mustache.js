@@ -28,3 +28,8 @@ mustache-commonjs/examples/view_partial.txt
 mustache-commonjs/lib/mustache.js
 mustache-commonjs/test/mustache_test.js
 mustache-commonjs/test/mustache_test.rb
+mustache-jquery/jquery.mustache.js
+mustache-jquery/LICENSE
+mustache-jquery/README.md
+mustache-jquery/examples/
+mustache-jquery/test/
