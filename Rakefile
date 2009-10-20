@@ -1,17 +1,17 @@
 require 'rake'
-require 'rake/testtask'
+require 'spec/rake/spectask'
 
-task :default => :test
+task :default => :spec
 
-task :test do
-  Rake::TestTask.new do |t|
-    Dir.glob("examples/*.html") do |file|
-      test = File.basename(file, ".html")
-      cmd = "ruby test/mustache_test.rb #{test}"
-      print `#{cmd}`
-    end
-  end
+Spec::Rake::SpecTask.new(:spec) do |t|
+  #t.spec_opts = ['--options', "\"#{File.dirname(__FILE__)}/spec/spec.opts\""]
+  t.spec_files = FileList['test/*_spec.rb']
 end
+
+desc "Run all specs"
+task :spec do
+end
+
 
 task :commonjs do
   print "Packaging for CommonJS\n"
