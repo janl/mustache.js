@@ -1,0 +1,6 @@
+
+  $.mustache = function(template, view) {
+    return Mustache.to_html(template, view);
+  };
+
+})(jQuery);
