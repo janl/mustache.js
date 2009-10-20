@@ -27,3 +27,6 @@ task :jquery do
   print "Done, see ./#{target_jq}\n"
 end
 
+task :clean do
+  `for file in \`cat .gitignore\`; do rm -rf $file; done`
+end
