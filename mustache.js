@@ -50,14 +50,15 @@ var Mustache = function() {
         return template;
       }
       var that = this;
+      // CSW - Added "+?" so it finds the tighest bound, not the widest
       var regex = new RegExp(this.otag + "\\#(.+)" + this.ctag +
-        "\\s*([\\s\\S]+)" + this.otag + "\\/\\1" + this.ctag + "\\s*", "mg");
+              "\\s*([\\s\\S]+?)" + this.otag + "\\/\\1" + this.ctag + "\\s*", "mg");
 
       // for each {{#foo}}{{/foo}} section do...
       return template.replace(regex, function(match, name, content) {
         var value = that.find(name, context);
         if(that.is_array(value)) { // Enumerable, Let's loop!
-          return value.map(function(row) {
+          return that.map(value, function(row) {
             return that.render(content, that.merge(context, that.create_context(row)));
           }).join('');
         } else if(value) { // boolean section
@@ -206,6 +207,22 @@ var Mustache = function() {
     */
     trim: function(s) {
       return s.replace(/^\s*|\s*$/g, '');
+    },
+
+    /*
+      Why, why, why? Because IE. Cry, cry cry.
+    */  
+    map: function(array, fn) {
+      if (typeof array.map == "function") {
+        return array.map(fn)
+      } else {
+        var r = [];
+        var l = array.length;
+        for(i=0;i<l;i++) {
+          r.push(fn(array[i]));
+        }
+        return r;
+      }
     }
   };
   
