@@ -50,13 +50,13 @@ Conditional sections begin with `{{#condition}}` and end with `{{/condition}}`. 
     {{/condition}}
 
 ### Enumerable Sections
-Enumerable Sections use the same syntax as condition sections do. `{{#shopping_items}}` and `{{/shopping_items}}`. Actually the view decides how mustache.js renders the section. If the view returns an array, it will iterator over the items. Use `{{.}}` to access the current item inside the enumeration section. 
+Enumerable Sections use the same syntax as condition sections do. `{{#shopping_items}}` and `{{/shopping_items}}`. Actually the view decides how mustache.js renders the section. If the view returns an array, it will iterator over the items. Use `{{.}}` to access the current item inside the enumeration section.
 
     var view = {name: "Joe's shopping card",
                 items: ["bananas", "apples"]}
-    
+
     var template = "{{name}}: <ul> {{#items}}<li>{{.}}</li>{{/items}} </ul>"
-    
+
     Outputs:
     Joe's shopping card: <ul><li>bananas</li><li>apples</li></ul>
 
