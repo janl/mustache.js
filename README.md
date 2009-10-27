@@ -93,6 +93,6 @@ See `examples/` for more goodies and read the [original mustache docs][m]
 
 
 
-[m]: http://github.com/defunkt/mustache/
+[m]: http://github.com/defunkt/mustache/#readme
 [node.js]: http://nodejs.org
 [couchdb]: http://couchdb.apache.org
