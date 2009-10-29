@@ -34,10 +34,10 @@ describe "mustache" do
       try {
         print(Mustache.to_html("{{#list}}{{x}}{{/list}}", {list: [{}]}));
       } catch(e) {
-        print('ERROR: ' + e);
+        print('ERROR: ' + e.message);
       }
     JS
-    run_js(js).should == "ERROR: Can't find x in [object Object]\n"
+    run_js(js).should == "ERROR: 'x' not found in context\n"
   end
   
   non_partials.each do |testname|

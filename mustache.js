@@ -136,7 +136,7 @@ var Mustache = function() {
       if(context[name] !== undefined) {
         return context[name];
       }
-      throw("Can't find " + name + " in " + context);
+      throw({message: "'" + name + "' not found in context"});
     },
 
     // Utility methods
