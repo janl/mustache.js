@@ -1,1 +1,1 @@
-ERROR: 'foo.5' not found in context
+ERROR: 'foo.5' not found in context: {foo:[1, 2]}

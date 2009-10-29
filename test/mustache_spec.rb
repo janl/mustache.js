@@ -37,7 +37,7 @@ describe "mustache" do
         print('ERROR: ' + e.message);
       }
     JS
-    run_js(js).should == "ERROR: 'x' not found in context\n"
+    run_js(js).should == "ERROR: 'x' not found in context: {list:[{}]}\n"
   end
   
   non_partials.each do |testname|

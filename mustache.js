@@ -30,10 +30,10 @@ var Mustache = function() {
     */
     render_partial: function(name, context, partials) {
 			if(typeof(context[name]) != "object") {
-				throw({message: "subcontext for '" + name + "' is not an object"});
+				throw({message: "Context for '" + name + "' is not an object."});
 			}
 	    if(!partials || !partials[name]) {
-        throw({message: "unknown_partial"});
+        throw({message: "No template for partial '" + name + "'."});
       }
       return this.render(partials[name], context[name], partials);
     },
@@ -134,10 +134,7 @@ var Mustache = function() {
       if(typeof value === "function") {
         return value.apply(context);
       }
-      if(value !== undefined) {
-        return value;
-      }
-      throw({message: "'" + name + "' not found in context"});
+      return value;
     },
 
     // Utility methods
@@ -167,7 +164,9 @@ var Mustache = function() {
       while(parts.length) {
         p = parts.shift();
         if(ctx[p] === undefined) {
-          throw({message: "'" + name + "' not found in context"});
+          src = context.toSource();
+          src = src.replace(/^\(|\)$/g, "");
+          throw({message: "'" + name + "' not found in context: " + src});
         }
         ctx = ctx[p];
       }

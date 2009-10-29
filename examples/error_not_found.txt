@@ -1,1 +1,1 @@
-ERROR: 'foo' not found in context
+ERROR: 'foo' not found in context: {bar:2}

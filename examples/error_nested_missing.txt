@@ -1,1 +1,1 @@
-ERROR: 'foo.bar' not found in context
+ERROR: 'foo.bar' not found in context: {not_foo:{not_bar:"yay error!"}}
