@@ -15,37 +15,33 @@ var Mustache = function() {
     otag: "{{",
     ctag: "}}",
 
-    render: function(template, context) {
+    render: function(template, context, partials) {
       // fail fast
       if(template.indexOf(this.otag) == -1) {
         return template;
       }
 
-      var html = this.render_section(template, context);
-      return this.render_tags(html, context);
+      var html = this.render_section(template, context, partials);
+      return this.render_tags(html, context, partials);
     },
 
     /* 
       Tries to find a partial in the global scope and render it
     */
-    render_partial: function(name, context) {
-      // FIXME: too hacky
-      var evil_name = eval(name);
-      switch(typeof evil_name) {
-        case "string": // a string partial, we simply render
-          return this.render(evil_name, context);
-        case "object": // a view partial needs a `name_template` template
-          var tpl = name + "_template";
-          return this.render(eval(tpl), evil_name);
-        default: // should not happen #famouslastwords
-          throw("Unknown partial type.");
+    render_partial: function(name, context, partials) {
+			if(typeof(context[name]) != "object") {
+				throw({message: "subcontext for '" + name + "' is not an object"});
+			}
+	    if(!partials || !partials[name]) {
+        throw({message: "unknown_partial"});
       }
+      return this.render(partials[name], context[name], partials);
     },
 
     /*
       Renders boolean and enumerable sections
     */
-    render_section: function(template, context) {
+    render_section: function(template, context, partials) {
       if(template.indexOf(this.otag + "#") == -1) {
         return template;
       }
@@ -59,10 +55,11 @@ var Mustache = function() {
         var value = that.find(name, context);
         if(that.is_array(value)) { // Enumerable, Let's loop!
           return that.map(value, function(row) {
-            return that.render(content, that.merge(context, that.create_context(row)));
+            return that.render(content, that.merge(context,
+                    that.create_context(row)), partials);
           }).join('');
         } else if(value) { // boolean section
-          return that.render(content, context);
+          return that.render(content, context, partials);
         } else {
           return "";
         }
@@ -72,7 +69,7 @@ var Mustache = function() {
     /*
       Replace {{foo}} and friends with values from our view
     */
-    render_tags: function(template, context) {
+    render_tags: function(template, context, partials) {
       var lines = template.split("\n");
 
       var new_regex = function() {
@@ -96,7 +93,7 @@ var Mustache = function() {
               i--;
               return "";
             case "<": // render partial
-              return that.render_partial(name, context);
+              return that.render_partial(name, context, partials);
             case "{": // the triple mustache is unescaped
               return that.find(name, context);
             default: // escape the value
@@ -233,8 +230,8 @@ var Mustache = function() {
     /*
       Turns a template and view into HTML
     */
-    to_html: function(template, view) {
-      return new Renderer().render(template, view);
+    to_html: function(template, view, partials) {
+      return new Renderer().render(template, view, partials);
     }
   });
 }();

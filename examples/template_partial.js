@@ -1,7 +1,8 @@
-var template_partial = {
+var partial_context = {
   title: function() {
     return "Welcome";
-  }
+  },
+	partial: {
+		again: "Goodbye"
+	}
 }
-
-var inner_partial = "Again, {{title}}!";

@@ -64,23 +64,27 @@ Enumerable Sections use the same syntax as condition sections do. `{{#shopping_i
 ### View Partials
 mustache.js supports a quite powerful but yet simple view partial mechanism. Use the following syntax for partials: `{{<partial_name}}`
 
-    var view = {name: "Joe"}
+    var view = {
+      name: "Joe",
+      winnings: {
+        value: 1000,
+        taxed_value: function() {
+            return this.value - (this.value * 0.4);
+        }
+      }
+    };
+
     var template = "Welcome, {{jow}}! {{<winnings}}"
+    var partials = {winnings: "You just won ${{value}} (which is ${{taxed_value}} after tax)"};
     
-    var winnings = {value: 1000,
-                    taxed_value: function() {
-                      return this.value - (this.value * 0.4);
-                    }
-                   }
-    var winnings_template = "You just won ${{value}} (which is ${{taxed_value}} after tax)"
-    
-    var output = Mustache.to_html(template, view)
+    var output = Mustache.to_html(template, view, partials)
     
     output will be:
     Welcome, Joe! You just won $1000 (which is $600 after tax)
 
-You invoke a partial with `{{<name}}`. When `name` is an object, mustache.js will look for a JavaScript object called `name_template` and uses this for the template and `name` for the view. If `name` is a simple string, mustache.js will simply render the strings context like a normal template.
-
+You invoke a partial with `{{<name}}`. Invoking the partial `name` will tell
+mustache.js to look for a object in the context's property `name`. It will then
+use that object as the context for the template found in `partials` for `name`.
 
 ## Escaping
 mustache.js does escape all values when using the standard double mustache syntax. Characters which will be escaped: `& \ " < >`. To disable escaping, simply use tripple mustaches like `{{{unescaped_variable}}}`.
