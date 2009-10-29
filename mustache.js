@@ -164,8 +164,11 @@ var Mustache = function() {
       while(parts.length) {
         p = parts.shift();
         if(ctx[p] === undefined) {
-          src = context.toSource();
-          src = src.replace(/^\(|\)$/g, "");
+          if(typeof(context.toSource) == "function") {
+            src = context.toSource().replace(/^\(|\)$/g, "");
+          } else {
+            src = context.toString();
+          }
           throw({message: "'" + name + "' not found in context: " + src});
         }
         ctx = ctx[p];
