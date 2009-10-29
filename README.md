@@ -37,6 +37,12 @@ Tags are always surrounded by mustaches like this `{{foobar}}`.
 
     template = "{{say_hello}}, {{name}}"
 
+### Dotted Tags
+Tags can also be nested to address object and array members in the context.
+
+    var view = {name: {first: "Chris", last: "Anderson"}, values: [1, 2]};
+    template = "{{name.last}}, {{name.first}} {{values.0}}";
+
 ### Conditional Sections
 Conditional sections begin with `{{#condition}}` and end with `{{/condition}}`. When `condition` evaluates to true, the section is rendered, otherwise the hole block will output nothing at all. `condition` may be a function returning true/false or a simple boolean.
 

@@ -1,0 +1,1 @@
+ERROR: 'foo.bar' not found in context

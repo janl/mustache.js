@@ -130,11 +130,12 @@ var Mustache = function() {
     */
     find: function(name, context) {
       name = this.trim(name);
-      if(typeof context[name] === "function") {
-        return context[name].apply(context);
+      var value = this.getValue(context, name);
+      if(typeof value === "function") {
+        return value.apply(context);
       }
-      if(context[name] !== undefined) {
-        return context[name];
+      if(value !== undefined) {
+        return value;
       }
       throw({message: "'" + name + "' not found in context"});
     },
@@ -155,6 +156,22 @@ var Mustache = function() {
           default: return s;
         }
       });
+    },
+
+    getValue: function(context, name) {
+      if(name == "." && context[name] != undefined) {
+        return context[name];
+      }
+      var ctx = context;
+      var parts = name.split(".");
+      while(parts.length) {
+        p = parts.shift();
+        if(ctx[p] === undefined) {
+          throw({message: "'" + name + "' not found in context"});
+        }
+        ctx = ctx[p];
+      }
+      return ctx
     },
 
     /*
