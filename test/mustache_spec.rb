@@ -34,7 +34,7 @@ describe "mustache" do
       try {
         print(Mustache.to_html("{{#list}}{{x}}{{/list}}", {list: [{}]}));
       } catch(e) {
-        print('ERROR: ' + e.message);
+        print('ERROR: ' + e);
       }
     JS
     run_js(js).should == "ERROR: 'x' not found in context: {list:[{}]}\n"
@@ -54,7 +54,7 @@ describe "mustache" do
             var result = Mustache.to_html(template, #{testname});
             print(result);
           } catch(e) {
-            print('ERROR: ' + e.message);
+            print('ERROR: ' + e);
           }
         JS
 
@@ -79,7 +79,7 @@ describe "mustache" do
             var result = Mustache.to_html(template, partial_context, partials);
             print(result);
           } catch(e) {
-            print('ERROR: ' + e.message);
+            print('ERROR: ' + e);
           }
         JS
       

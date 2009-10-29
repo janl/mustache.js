@@ -30,10 +30,10 @@ var Mustache = function() {
     */
     render_partial: function(name, context, partials) {
 			if(typeof(context[name]) != "object") {
-				throw({message: "Context for '" + name + "' is not an object."});
+				throw("Context for '" + name + "' is not an object.");
 			}
 	    if(!partials || !partials[name]) {
-        throw({message: "No template for partial '" + name + "'."});
+        throw("No template for partial '" + name + "'.");
       }
       return this.render(partials[name], context[name], partials);
     },
@@ -169,7 +169,7 @@ var Mustache = function() {
           } else {
             src = context.toString();
           }
-          throw({message: "'" + name + "' not found in context: " + src});
+          throw("'" + name + "' not found in context: " + src);
         }
         ctx = ctx[p];
       }
