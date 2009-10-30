@@ -29,10 +29,10 @@ var Mustache = function() {
       Tries to find a partial in the global scope and render it
     */
     render_partial: function(name, context, partials) {
-			if(typeof(context[name]) != "object") {
-				throw("Context for '" + name + "' is not an object.");
-			}
-	    if(!partials || !partials[name]) {
+      if(typeof(context[name]) != "object") {
+        throw("Context for '" + name + "' is not an object.");
+      }
+      if(!partials || !partials[name]) {
         throw("No template for partial '" + name + "'.");
       }
       return this.render(partials[name], context[name], partials);
@@ -89,7 +89,8 @@ var Mustache = function() {
             case "=": // set new delimiters, rebuild the replace regexp
               that.set_delimiters(name);
               regex = new_regex();
-              // redo the line in order to get tags with the new delimiters on the same line
+              // redo the line in order to get tags with the new 
+              // delimiters on the same line
               i--;
               return "";
             case "<": // render partial
