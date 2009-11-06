@@ -27,6 +27,16 @@ task :jquery do
   print "Done, see ./#{target_jq}\n"
 end
 
+
+task :dojo do
+  print "Packaging for dojo\n"
+  source = "mustache-dojo"
+  target_js = "dojo.mustache.js"
+  `cat #{source}/#{target_js}.tpl.pre mustache.js #{source}/#{target_js}.tpl.post > #{target_js}`
+  print "Done, see ./#{target_js}\n"
+end
+
+
 task :clean do
   `for file in \`cat .gitignore\`; do rm -rf $file; done`
 end
