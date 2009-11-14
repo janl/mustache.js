@@ -249,7 +249,7 @@ var Mustache = function() {
   
   return({
     name: "mustache.js",
-    version: "0.1",
+    version: "0.2",
     
     /*
       Turns a template and view into HTML
