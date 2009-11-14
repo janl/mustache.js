@@ -32,7 +32,7 @@ var Mustache = function() {
       if(typeof(context[name]) != "object") {
         throw({message: "subcontext for '" + name + "' is not an object"});
       }
-	    if(!partials || !partials[name]) {
+      if(!partials || !partials[name]) {
         throw({message: "unknown_partial"});
       }
       return this.render(partials[name], context[name], partials);
