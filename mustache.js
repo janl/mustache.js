@@ -14,6 +14,7 @@ var Mustache = function() {
   Renderer.prototype = {
     otag: "{{",
     ctag: "}}",
+    pragmas: {},
 
     render: function(template, context, partials) {
       // fail fast
@@ -21,8 +22,27 @@ var Mustache = function() {
         return template;
       }
 
+      template = this.render_pragmas(template);
       var html = this.render_section(template, context, partials);
       return this.render_tags(html, context, partials);
+    },
+
+    /*
+      Looks for %PRAGMAS
+    */
+    render_pragmas: function(template) {
+      // no pragmas
+      if(template.indexOf(this.otag + "%") == -1) {
+        return template;
+      }
+
+      var that = this;
+      var regex = new RegExp(this.otag + "%(.+)" + this.ctag);
+      return template.replace(regex, function(match, pragma) {
+        that.pragmas[pragma] = true;
+        return "";
+        // ignore unknown pragmas silently
+      });
     },
 
     /* 
@@ -73,7 +93,7 @@ var Mustache = function() {
       var lines = template.split("\n");
 
       var new_regex = function() {
-        return new RegExp(that.otag + "(=|!|>|\\{)?([^\/#]+?)\\1?" +
+        return new RegExp(that.otag + "(=|!|>|\\{|%)?([^\/#]+?)\\1?" +
           that.ctag + "+", "g");
       };
 
@@ -97,6 +117,7 @@ var Mustache = function() {
               return that.render_partial(name, context, partials);
             case "{": // the triple mustache is unescaped
               return that.find(name, context);
+              return "";
             default: // escape the value
               return that.escape(that.find(name, context));
           }
@@ -177,10 +198,11 @@ var Mustache = function() {
       return _new;
     },
 
+    // by @langalex, support for arrays of strings
     create_context: function(_context) {
       if(this.is_object(_context)) {
         return _context;
-      } else {
+      } else if(this.pragmas["ENABLE-STRING-ARRAYS"]) {
         return {'.': _context};
       }
     },
