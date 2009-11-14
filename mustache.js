@@ -158,7 +158,8 @@ var Mustache = function() {
       if(context[name] !== undefined) {
         return context[name];
       }
-      throw({message: "'" + name + "' not found in context"});
+      // silently ignore unkown variables
+      return "";
     },
 
     // Utility methods
