@@ -202,7 +202,7 @@ var Mustache = function() {
     create_context: function(_context) {
       if(this.is_object(_context)) {
         return _context;
-      } else if(this.pragmas["ENABLE-STRING-ARRAYS"]) {
+      } else if(this.pragmas["JSTACHE-ENABLE-STRING-ARRAYS"]) {
         return {'.': _context};
       }
     },
