@@ -1,6 +1,6 @@
 
-  $.mustache = function(template, view) {
-    return Mustache.to_html(template, view);
+  $.mustache = function(template, view, partials) {
+    return Mustache.to_html(template, view, partials);
   };
 
 })(jQuery);
