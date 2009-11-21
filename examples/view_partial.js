@@ -7,13 +7,13 @@ var partial_context = {
     return "Fair enough, right?";
   },
 
-	partial: {
-	  name: "Chris",
-	  value: 10000,
-	  taxed_value: function() {
-	    return this.value - (this.value * 0.4);
-	  },
-	  in_ca: true
-	}
+  partial: {
+    name: "Chris",
+    value: 10000,
+    taxed_value: function() {
+      return this.value - (this.value * 0.4);
+    },
+    in_ca: true
+  }
 };
 
