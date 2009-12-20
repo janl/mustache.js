@@ -74,7 +74,7 @@ mustache.js supports a quite powerful but yet simple view partial mechanism. Use
       }
     };
 
-    var template = "Welcome, {{jow}}! {{<winnings}}"
+    var template = "Welcome, {{name}}! {{<winnings}}"
     var partials = {winnings: "You just won ${{value}} (which is ${{taxed_value}} after tax)"};
     
     var output = Mustache.to_html(template, view, partials)
@@ -82,9 +82,9 @@ mustache.js supports a quite powerful but yet simple view partial mechanism. Use
     output will be:
     Welcome, Joe! You just won $1000 (which is $600 after tax)
 
-You invoke a partial with `{{<name}}`. Invoking the partial `name` will tell
-mustache.js to look for a object in the context's property `name`. It will then
-use that object as the context for the template found in `partials` for `name`.
+You invoke a partial with `{{<winnings}}`. Invoking the partial `winnings` will tell
+mustache.js to look for a object in the context's property `winnings`. It will then
+use that object as the context for the template found in `partials` for `winnings`.
 
 ## Escaping
 mustache.js does escape all values when using the standard double mustache syntax. Characters which will be escaped: `& \ " < >`. To disable escaping, simply use tripple mustaches like `{{{unescaped_variable}}}`.
