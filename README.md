@@ -74,7 +74,7 @@ mustache.js supports a quite powerful but yet simple view partial mechanism. Use
       }
     };
 
-    var template = "Welcome, {{name}}! {{<winnings}}"
+    var template = "Welcome, {{name}}! {{>winnings}}"
     var partials = {winnings: "You just won ${{value}} (which is ${{taxed_value}} after tax)"};
     
     var output = Mustache.to_html(template, view, partials)
