@@ -91,6 +91,13 @@ mustache.js does escape all values when using the standard double mustache synta
 
 Example: Using `{{variable}}` inside a template for `5 > 2` will result in `5 &gt; 2`, where as the usage of `{{{variable}}}` will result in `5 > 2`.
 
+## Streaming
+To stream template results out of mustache.js, you can pass an optional `send()` callback to the `to_html()` call:
+
+    Mustache.to_html(template, view, partials, function(line) {
+      print(line);
+    });
+
 
 ## More Examples and Documentation
 See `examples/` for more goodies and read the [original mustache docs][m]
