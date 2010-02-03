@@ -15,16 +15,34 @@ var Mustache = function() {
     otag: "{{",
     ctag: "}}",
     pragmas: {},
+    buffer: [],
 
-    render: function(template, context, partials) {
+    render: function(template, context, partials, in_recursion) {
       // fail fast
       if(template.indexOf(this.otag) == -1) {
         return template;
       }
 
+      if(!in_recursion) {
+        this.buffer = [];
+      }
+
       template = this.render_pragmas(template);
       var html = this.render_section(template, context, partials);
-      return this.render_tags(html, context, partials);
+      if(in_recursion) {
+        return this.render_tags(html, context, partials, in_recursion);
+      }
+
+      this.render_tags(html, context, partials, in_recursion);
+    },
+
+    /*
+      Sends parsed lines
+    */
+    send: function(line) {
+      if(line != "") {
+        this.buffer.push(line);
+      }
     },
 
     /*
@@ -55,7 +73,7 @@ var Mustache = function() {
       if(!partials || !partials[name]) {
         throw({message: "unknown_partial"});
       }
-      return this.render(partials[name], context[name], partials);
+      return this.render(partials[name], context[name], partials, true);
     },
 
     /*
@@ -76,10 +94,10 @@ var Mustache = function() {
         if(that.is_array(value)) { // Enumerable, Let's loop!
           return that.map(value, function(row) {
             return that.render(content, that.merge(context,
-                    that.create_context(row)), partials);
+                    that.create_context(row)), partials, true);
           }).join('');
         } else if(value) { // boolean section
-          return that.render(content, context, partials);
+          return that.render(content, context, partials, true);
         } else {
           return "";
         }
@@ -89,41 +107,39 @@ var Mustache = function() {
     /*
       Replace {{foo}} and friends with values from our view
     */
-    render_tags: function(template, context, partials) {
-      var lines = template.split("\n");
+    render_tags: function(template, context, partials, in_recursion) {
+      // tit for tat
+      var that = this;
 
       var new_regex = function() {
         return new RegExp(that.otag + "(=|!|>|\\{|%)?([^\/#]+?)\\1?" +
           that.ctag + "+", "g");
       };
 
-      // tit for tat
-      var that = this;
-
       var regex = new_regex();
-      for (var i=0; i < lines.length; i++) {
-        lines[i] = lines[i].replace(regex, function (match,operator,name) {
-          switch(operator) {
-            case "!": // ignore comments
-              return match;
-            case "=": // set new delimiters, rebuild the replace regexp
-              that.set_delimiters(name);
-              regex = new_regex();
-              // redo the line in order to get tags with the new delimiters 
-              // on the same line
-              i--;
-              return "";
-            case ">": // render partial
-              return that.render_partial(name, context, partials);
-            case "{": // the triple mustache is unescaped
-              return that.find(name, context);
-              return "";
-            default: // escape the value
-              return that.escape(that.find(name, context));
-          }
-        },this);
-      };
-      return lines.join("\n");
+      var lines = template.split("\n");
+       for (var i=0; i < lines.length; i++) {
+         lines[i] = lines[i].replace(regex, function(match, operator, name) {
+           switch(operator) {
+             case "!": // ignore comments
+               return match;
+             case "=": // set new delimiters, rebuild the replace regexp
+               that.set_delimiters(name);
+               regex = new_regex();
+               return "";
+             case ">": // render partial
+               return that.render_partial(name, context, partials);
+             case "{": // the triple mustache is unescaped
+               return that.find(name, context);
+             default: // escape the value
+               return that.escape(that.find(name, context));
+           }
+         }, this);
+         if(!in_recursion) {
+           this.send(lines[i]);
+         }
+       }
+       return lines.join("\n");
     },
 
     set_delimiters: function(delimiters) {
@@ -249,13 +265,18 @@ var Mustache = function() {
 
   return({
     name: "mustache.js",
-    version: "0.2",
+    version: "0.3a",
 
     /*
       Turns a template and view into HTML
     */
-    to_html: function(template, view, partials) {
-      return new Renderer().render(template, view, partials);
+    to_html: function(template, view, partials, send_fun) {
+      var renderer = new Renderer();
+      if(send_fun) {
+        renderer.send = send_fun;
+      }
+      renderer.render(template, view, partials);
+      return renderer.buffer.join("\n");
     }
   });
 }();
