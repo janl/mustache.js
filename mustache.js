@@ -55,9 +55,14 @@ var Mustache = function() {
       }
 
       var that = this;
-      var regex = new RegExp(this.otag + "%(.+)" + this.ctag);
-      return template.replace(regex, function(match, pragma) {
-        that.pragmas[pragma] = true;
+      var regex = new RegExp(this.otag + "%([A-Z0-9-]+) ?([a-z0-9]+=[a-z0-9]+)?"
+        + this.ctag);
+      return template.replace(regex, function(match, pragma, options) {
+        that.pragmas[pragma] = {};
+        if(options) {
+          var opts = options.split("=");
+          that.pragmas[pragma][opts[0]] = opts[1];
+        }
         return "";
         // ignore unknown pragmas silently
       });
@@ -219,8 +224,11 @@ var Mustache = function() {
     create_context: function(_context) {
       if(this.is_object(_context)) {
         return _context;
-      } else if(this.pragmas["JSTACHE-ENABLE-STRING-ARRAYS"]) {
-        return {'.': _context};
+      } else if(this.pragmas["IMPLICIT-ITERATOR"]) {
+        var iterator = this.pragmas["IMPLICIT-ITERATOR"].iterator || ".";
+        var ctx = {};
+        ctx[iterator] = _context
+        return ctx;
       }
     },
 
