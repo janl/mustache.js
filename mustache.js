@@ -100,7 +100,7 @@ var Mustache = function() {
           return that.map(value, function(row) {
             return that.render(content, that.merge(context,
                     that.create_context(row)), partials, true);
-          }).join('');
+          }).join("");
         } else if(value) { // boolean section
           return that.render(content, context, partials, true);
         } else {
@@ -233,7 +233,7 @@ var Mustache = function() {
     },
 
     is_object: function(a) {
-      return a && typeof a == 'object'
+      return a && typeof a == "object"
     },
 
     /*
@@ -243,7 +243,7 @@ var Mustache = function() {
     */
     is_array: function(a) {
       return (a &&
-        typeof a === 'object' &&
+        typeof a === "object" &&
         a.constructor === Array);
     },
 
@@ -251,7 +251,7 @@ var Mustache = function() {
       Gets rid of leading and trailing whitespace
     */
     trim: function(s) {
-      return s.replace(/^\s*|\s*$/g, '');
+      return s.replace(/^\s*|\s*$/g, "");
     },
 
     /*
