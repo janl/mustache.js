@@ -55,7 +55,7 @@ var Mustache = function() {
       }
 
       var that = this;
-      var regex = new RegExp(this.otag + "%([A-Z0-9-]+) ?([a-z0-9]+=[a-z0-9]+)?"
+      var regex = new RegExp(this.otag + "%([\\w_-]+) ?([\\w]+=[\\w]+)?"
         + this.ctag);
       return template.replace(regex, function(match, pragma, options) {
         that.pragmas[pragma] = {};
