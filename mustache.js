@@ -21,7 +21,11 @@ var Mustache = function() {
     render: function(template, context, partials, in_recursion) {
       // fail fast
       if(template.indexOf(this.otag) == -1) {
-        return template;
+        if(in_recursion) {
+          return template;
+        } else {
+          this.send(template);
+        }
       }
 
       if(!in_recursion) {
