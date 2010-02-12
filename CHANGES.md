@@ -1,6 +1,6 @@
 # mustache.js Changes
 
-## 0.2 (??-??-????)
+## 0.2.2 (11-02-2010)
 
 * ctemplate compat: Partials are indicated by >, not <.
 * Add support for {{%PRAGMA}} to enable features.
