@@ -238,30 +238,11 @@ var Mustache = function() {
     },
 
     is_object: function(a) {
-      return this.typeOf(a) === "object";
+      return a && typeof a == "object";
     },
 
     is_array: function(a) {
-      return this.typeOf(a) === "array";
-    },
-
-    /*
-      Thanks Doug Crockford http://javascript.crockford.com/remedial.html
-    */
-    typeOf: function(value) {
-      var s = typeof value;
-      if(s === "object") {
-        if(value) {
-          if(typeof value.length === "number" &&
-          !(value.propertyIsEnumerable("length")) &&
-          typeof value.splice === "function") {
-            s = "array";
-          }
-        } else {
-          s = "null";
-        }
-      }
-      return s;
+      return Object.prototype.toString.call(a) === '[object Array]';
     },
 
     /*
