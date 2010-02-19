@@ -9,3 +9,4 @@ Mustache.js wouldn't kick ass if it weren't for these fine souls
  * Tom Robinson / tlrobinson
  * Aaron Quint / quirkey
  * Douglas Crockford
+ * Nikita Vasilyev / NV
