@@ -1,5 +1,8 @@
 # mustache.js Changes
 
+## 0.2.3 (??-??-????)
+* Added more robust type detection.
+
 ## 0.2.2 (11-02-2010)
 
 * ctemplate compat: Partials are indicated by >, not <.

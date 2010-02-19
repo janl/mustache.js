@@ -8,3 +8,4 @@ Mustache.js wouldn't kick ass if it weren't for these fine souls
  * J Chris Anderson / jchris
  * Tom Robinson / tlrobinson
  * Aaron Quint / quirkey
+ * Douglas Crockford

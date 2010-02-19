@@ -238,18 +238,30 @@ var Mustache = function() {
     },
 
     is_object: function(a) {
-      return a && typeof a == "object"
+      return this.typeOf(a) === "object";
+    },
+
+    is_array: function(a) {
+      return this.typeOf(a) === "array";
     },
 
     /*
-      Thanks Doug Crockford
-      JavaScript — The Good Parts lists an alternative that works better with
-      frames. Frames can suck it, we use the simple version.
+      Thanks Doug Crockford http://javascript.crockford.com/remedial.html
     */
-    is_array: function(a) {
-      return (a &&
-        typeof a === "object" &&
-        a.constructor === Array);
+    typeOf: function(value) {
+      var s = typeof value;
+      if(s === "object") {
+        if(value) {
+          if(typeof value.length === "number" &&
+          !(value.propertyIsEnumerable("length")) &&
+          typeof value.splice === "function") {
+            s = "array";
+          }
+        } else {
+          s = "null";
+        }
+      }
+      return s;
     },
 
     /*
@@ -278,7 +290,7 @@ var Mustache = function() {
 
   return({
     name: "mustache.js",
-    version: "0.2.2",
+    version: "0.2.3-dev",
 
     /*
       Turns a template and view into HTML
