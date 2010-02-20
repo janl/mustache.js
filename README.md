@@ -62,7 +62,7 @@ Enumerable Sections use the same syntax as condition sections do. `{{#shopping_i
 
 
 ### View Partials
-mustache.js supports a quite powerful but yet simple view partial mechanism. Use the following syntax for partials: `{{<partial_name}}`
+mustache.js supports a quite powerful but yet simple view partial mechanism. Use the following syntax for partials: `{{>partial_name}}`
 
     var view = {
       name: "Joe",
@@ -82,7 +82,7 @@ mustache.js supports a quite powerful but yet simple view partial mechanism. Use
     output will be:
     Welcome, Joe! You just won $1000 (which is $600 after tax)
 
-You invoke a partial with `{{<winnings}}`. Invoking the partial `winnings` will tell
+You invoke a partial with `{{>winnings}}`. Invoking the partial `winnings` will tell
 mustache.js to look for a object in the context's property `winnings`. It will then
 use that object as the context for the template found in `partials` for `winnings`.
 
