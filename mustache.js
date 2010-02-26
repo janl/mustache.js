@@ -81,7 +81,7 @@ var Mustache = function() {
         throw({message: "subcontext for '" + name + "' is not an object"});
       }
       if(!partials || !partials[name]) {
-        throw({message: "unknown_partial"});
+        throw({message: "unknown_partial '" + name + "'"});
       }
       return this.render(partials[name], context[name], partials, true);
     },
