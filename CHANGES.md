@@ -1,9 +1,10 @@
 # mustache.js Changes
 
 ## 0.2.3 (??-??-????)
+
 * Better error message for missing partials.
 * Added more robust type detection.
-
+* Parse pragmas only once.
 
 ## 0.2.2 (11-02-2010)
 
