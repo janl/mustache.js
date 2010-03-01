@@ -17,6 +17,7 @@ var Mustache = function() {
     ctag: "}}",
     pragmas: {},
     buffer: [],
+    pragmas_parsed: false,
 
     render: function(template, context, partials, in_recursion) {
       // fail fast
@@ -32,7 +33,9 @@ var Mustache = function() {
         this.buffer = [];
       }
 
-      template = this.render_pragmas(template);
+      if(!this.pragmas_parsed) {
+        template = this.render_pragmas(template);
+      }
       var html = this.render_section(template, context, partials);
       if(in_recursion) {
         return this.render_tags(html, context, partials, in_recursion);
@@ -54,6 +57,7 @@ var Mustache = function() {
       Looks for %PRAGMAS
     */
     render_pragmas: function(template) {
+      this.pragmas_parsed = true;
       // no pragmas
       if(template.indexOf(this.otag + "%") == -1) {
         return template;
