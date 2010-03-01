@@ -7,8 +7,13 @@ by Jan Lehnardt <jan@apache.org>.
 
 Thanks @defunkt for the awesome code.
 
-## Where to use?
+## Where to Use?
 You can use mustache.js rendering stuff in various scenarios. E.g. you can render templates in your browser, or rendering server-side stuff with [node.js][node.js], use it for rendering stuff in [CouchDB][couchdb]'s views.
+
+
+## Who Uses Mustache?
+
+An updated list is kept on the Github wiki. Add yourself, if you use mustache.js: [http://wiki.github.com/janl/mustache.js/beard-competition]()
 
 
 ## Usage
