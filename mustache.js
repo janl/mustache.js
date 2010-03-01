@@ -1,5 +1,5 @@
 /*
-  Shamless port of http://github.com/defunkt/mustache
+  Shameless port of http://github.com/defunkt/mustache
   by Jan Lehnardt <jan@apache.org>, 
      Alexander Lang <alex@upstream-berlin.com>,
      Sebastian Cohnen <sebastian.cohnen@googlemail.com>
