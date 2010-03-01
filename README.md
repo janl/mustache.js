@@ -133,6 +133,43 @@ callback to the `to_html()` call:
     });
 
 
+## Pragmas
+
+Pragma tags let you alter the behaviour of mustache.js. They have the format of
+
+    {{%PRAGMANAME}}
+
+and they accept options:
+
+    {{%PRAGMANAME option=value}}
+
+
+### IMPLICIT-ITERATOR
+
+When using a block to iterate over an enumerable (Array), mustache.js expects an
+objects as enumerable items. The implicit iterator pragma enables optional behaviour
+of allowing literals as enumerable items. Consider this view:
+
+    var view = {
+      foo: [1, 2, 3, 4, 5, "french"]
+    };
+
+The following template can iterate over the member `foo`:
+
+    {{%IMPLICIT-ITERATOR}}
+    {{#foo}}
+      {{.}}
+    {{/foo}}
+
+If you don't like the dot in there, the pragma accepts an option to set your own
+iteration marker:
+
+    {{%IMPLICIT-ITERATOR iterator=bob}}
+    {{#foo}}
+      {{bob}}
+    {{/foo}}
+
+
 ## More Examples and Documentation
 
 See `examples/` for more goodies and read the [original mustache docs][m]
