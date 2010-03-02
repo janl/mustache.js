@@ -286,7 +286,9 @@ var Mustache = function() {
         renderer.send = send_fun;
       }
       renderer.render(template, view, partials);
-      return renderer.buffer.join("\n");
+      if(!send_fun) {
+        return renderer.buffer.join("\n");
+      }
     }
   });
 }();
