@@ -154,7 +154,10 @@ var Mustache = function() {
            this.send(lines[i]);
          }
        }
-       return lines.join("\n");
+
+       if(in_recursion) {
+         return lines.join("\n");
+       }
     },
 
     set_delimiters: function(delimiters) {

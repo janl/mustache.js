@@ -126,7 +126,7 @@ describe "mustache" do
                 chunks.push(chunk);
               }
             }
-            Mustache.to_html(template, partial_context, partials, null, sendFun);
+            Mustache.to_html(template, partial_context, partials, sendFun);
             print(chunks.join("\\n"));
           } catch(e) {
             print('ERROR: ' + e.message);
