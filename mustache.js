@@ -26,6 +26,7 @@ var Mustache = function() {
           return template;
         } else {
           this.send(template);
+          return;
         }
       }
 
