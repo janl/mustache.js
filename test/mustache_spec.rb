@@ -70,7 +70,9 @@ describe "mustache" do
             #{view}
             var chunks = [];
             var sendFun = function(chunk) {
-              chunks.push(chunk);
+              if (chunk != "") {
+                chunks.push(chunk);
+              }
             }
             var template = #{template};
             Mustache.to_html(template, #{testname}, null, sendFun);
@@ -118,8 +120,14 @@ describe "mustache" do
             #{view};
             var template = #{template};
             var partials = {"partial": #{partial}};
-            var result = Mustache.to_html(template, partial_context, partials);
-            print(result);
+            var chunks = [];
+            var sendFun = function(chunk) {
+              if (chunk != "") {
+                chunks.push(chunk);
+              }
+            }
+            Mustache.to_html(template, partial_context, partials, null, sendFun);
+            print(chunks.join("\\n"));
           } catch(e) {
             print('ERROR: ' + e.message);
           }
