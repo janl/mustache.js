@@ -7,6 +7,9 @@ by Jan Lehnardt <jan@apache.org>.
 
 Thanks @defunkt for the awesome code.
 
+For a list of implementations (other than JavaScript) and editor
+plugins, see <http://defunkt.github.com/mustache/>.
+
 
 ## Where to Use?
 
@@ -17,7 +20,9 @@ use it for rendering stuff in [CouchDB][couchdb]'s views.
 
 ## Who Uses Mustache?
 
-An updated list is kept on the Github wiki. Add yourself, if you use mustache.js: [http://wiki.github.com/janl/mustache.js/beard-competition]()
+An updated list is kept on the Github wiki. Add yourself, if you use
+mustache.js:
+<http://wiki.github.com/janl/mustache.js/beard-competition>
 
 
 ## Usage
@@ -42,6 +47,9 @@ A quick example how to use mustache.js:
 
 There are several types of tags currently implemented in mustache.js.
 
+For a language-agnostic overview of Mustache's template syntax, see
+the `mustache(5)` manpage or
+<http://defunkt.github.com/mustache/mustache.5.html>.
 
 ### Simple Tags
 
@@ -174,6 +182,16 @@ iteration marker:
 
 See `examples/` for more goodies and read the [original mustache docs][m]
 
+## Command Line
+
+See `mustache(1)` man page or
+<http://defunkt.github.com/mustache/mustache.1.html>
+for command line docs.
+
+Or just install it as a RubyGem:
+
+    $ gem install mustache
+    $ mustache -h
 
 [m]: http://github.com/defunkt/mustache/#readme
 [node.js]: http://nodejs.org
