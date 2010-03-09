@@ -18,6 +18,9 @@ var Mustache = function() {
     pragmas: {},
     buffer: [],
     pragmas_parsed: false,
+    pragmas_implemented: {
+      "IMPLICIT-ITERATOR": true
+    },
 
     render: function(template, context, partials, in_recursion) {
       // fail fast
@@ -68,6 +71,10 @@ var Mustache = function() {
       var regex = new RegExp(this.otag + "%([\\w_-]+) ?([\\w]+=[\\w]+)?"
         + this.ctag);
       return template.replace(regex, function(match, pragma, options) {
+        if(!that.pragmas_implemented[pragma]) {
+          throw({message: "This implementation of mustache doesn't understand the '"
+            + pragma + "' pragma"});
+        }
         that.pragmas[pragma] = {};
         if(options) {
           var opts = options.split("=");

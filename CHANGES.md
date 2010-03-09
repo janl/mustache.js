@@ -5,6 +5,8 @@
 * Better error message for missing partials.
 * Added more robust type detection.
 * Parse pragmas only once.
+* Throw exception when encountering an unknown pragma.
+
 
 ## 0.2.2 (11-02-2010)
 

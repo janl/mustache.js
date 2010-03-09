@@ -1,0 +1,1 @@
+ERROR: This implementation of mustache doesn't understand the 'I-HAVE-THE-GREATEST-MUSTACHE' pragma
