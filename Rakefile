@@ -37,6 +37,14 @@ task :dojo do
   print "Done, see ./dojox/string/#{target_js} Include using dojo.require('dojox.string.mustache.'); \n"
 end
 
+task :yui3 do
+  print "Packaging for YUI3\n"
+  source = "mustache-yui3"
+  target_js = "mustache.js"
+  `mkdir -p yui3; mkdir -p yui3/mustache`
+  `cat #{source}/#{target_js}.tpl.pre mustache.js #{source}/#{target_js}.tpl.post > yui3/mustache/#{target_js}`
+  print "Done, see ./yui3/mustache/#{target_js}\n"
+end
 
 task :clean do
   `for file in \`cat .gitignore\`; do rm -rf $file; done`
