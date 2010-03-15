@@ -1,6 +1,6 @@
 /*
   Shameless port of http://github.com/defunkt/mustache
-  by Jan Lehnardt <jan@apache.org>, 
+  by Jan Lehnardt <jan@apache.org>,
      Alexander Lang <alex@upstream-berlin.com>,
      Sebastian Cohnen <sebastian.cohnen@googlemail.com>
 
@@ -247,7 +247,7 @@ var Mustache = function() {
       } else if(this.pragmas["IMPLICIT-ITERATOR"]) {
         var iterator = this.pragmas["IMPLICIT-ITERATOR"].iterator || ".";
         var ctx = {};
-        ctx[iterator] = _context
+        ctx[iterator] = _context;
         return ctx;
       }
     },
@@ -272,11 +272,11 @@ var Mustache = function() {
     */
     map: function(array, fn) {
       if (typeof array.map == "function") {
-        return array.map(fn)
+        return array.map(fn);
       } else {
         var r = [];
         var l = array.length;
-        for(i=0;i<l;i++) {
+        for(var i=0;i<l;i++) {
           r.push(fn(array[i]));
         }
         return r;
