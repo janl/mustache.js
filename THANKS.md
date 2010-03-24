@@ -11,4 +11,4 @@ Mustache.js wouldn't kick ass if it weren't for these fine souls
  * Douglas Crockford
  * Nikita Vasilyev / NV
  * Elise Wood / glytch
- * J Chris Anderson / jchris
+ * Damien Mathieu / dmathieu
