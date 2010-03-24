@@ -97,7 +97,7 @@ describe "mustache" do
         runner = <<-JS
           try {
             #{@mustache}
-            #{view};
+            #{view}
             var template = #{template};
             var partials = {"partial": #{partial}};
             var result = Mustache.to_html(template, partial_context, partials);
