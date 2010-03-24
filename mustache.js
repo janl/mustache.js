@@ -85,11 +85,11 @@ var Mustache = function() {
       Tries to find a partial in the global scope and render it
     */
     render_partial: function(name, context, partials) {
-      if(typeof(context[name]) != "object") {
-        throw({message: "subcontext for '" + name + "' is not an object"});
-      }
       if(!partials || !partials[name]) {
         throw({message: "unknown_partial '" + name + "'"});
+      }
+      if(typeof(context[name]) != "object") {
+        return partials[name];
       }
       return this.render(partials[name], context[name], partials, true);
     },

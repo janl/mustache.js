@@ -6,6 +6,7 @@
 * Added more robust type detection.
 * Parse pragmas only once.
 * Throw exception when encountering an unknown pragma.
+* Ignore undefined partial contexts. Returns verbatim partials.
 
 
 ## 0.2.2 (11-02-2010)
