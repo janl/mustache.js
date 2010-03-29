@@ -47,5 +47,5 @@ task :yui3 do
 end
 
 task :clean do
-  git clean -fdx
+  `git clean -fdx`
 end
