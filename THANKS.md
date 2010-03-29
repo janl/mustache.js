@@ -12,3 +12,5 @@ Mustache.js wouldn't kick ass if it weren't for these fine souls
  * Nikita Vasilyev / NV
  * Elise Wood / glytch
  * Damien Mathieu / dmathieu
+ * Jakub Kuźma / qoobaa
+ * Will Leinweber / will
