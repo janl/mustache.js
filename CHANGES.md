@@ -1,6 +1,9 @@
 # mustache.js Changes
 
-## 0.2.3 (??-??-????)
+## 0.3.0 (??-??-????)
+
+
+## 0.2.3 (28-03-2010)
 
 * Better error message for missing partials.
 * Added more robust type detection.
