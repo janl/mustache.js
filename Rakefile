@@ -47,5 +47,5 @@ task :yui3 do
 end
 
 task :clean do
-  `for file in \`cat .gitignore\`; do rm -rf $file; done`
+  git clean -fdx
 end
