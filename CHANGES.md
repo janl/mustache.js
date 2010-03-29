@@ -7,6 +7,7 @@
 * Parse pragmas only once.
 * Throw exception when encountering an unknown pragma.
 * Ignore undefined partial contexts. Returns verbatim partials.
+* Added yui3 packaging.
 
 
 ## 0.2.2 (11-02-2010)
