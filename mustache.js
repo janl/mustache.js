@@ -1,12 +1,7 @@
 /*
-  Shameless port of http://github.com/defunkt/mustache
-  by Jan Lehnardt <jan@apache.org>,
-     Alexander Lang <alex@upstream-berlin.com>,
-     Sebastian Cohnen <sebastian.cohnen@googlemail.com>
+  mustache.js — Logic-less templates in JavaScript
 
-  Thanks @defunkt for the awesome code.
-
-  See http://github.com/defunkt/mustache for more info.
+  See http://mustache.github.com/ for more info.
 */
 
 var Mustache = function() {

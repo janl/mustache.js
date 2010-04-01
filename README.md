@@ -1,14 +1,9 @@
-# mustache.js
+# mustache.js — Logic-less templates with JavaScript
 
 > What could be more logical awesome than no logic at all?
 
-Shamless port of http://github.com/defunkt/mustache
-by Jan Lehnardt <jan@apache.org>.
-
-Thanks @defunkt for the awesome code.
-
 For a list of implementations (other than JavaScript) and editor
-plugins, see <http://defunkt.github.com/mustache/>.
+plugins, see <http://mustache.github.com/>.
 
 
 ## Where to Use?
@@ -49,7 +44,7 @@ There are several types of tags currently implemented in mustache.js.
 
 For a language-agnostic overview of Mustache's template syntax, see
 the `mustache(5)` manpage or
-<http://defunkt.github.com/mustache/mustache.5.html>.
+<http://mustache.github.com/mustache.5.html>.
 
 ### Simple Tags
 
