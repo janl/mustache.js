@@ -9,9 +9,9 @@ Spec::Rake::SpecTask.new(:spec) do |t|
 end
 
 desc "Run all specs"
-task :spec do
-end
+task :spec
 
+desc "Package for CommonJS"
 task :commonjs do
   puts "Packaging for CommonJS"
   `mkdir lib`
@@ -19,6 +19,7 @@ task :commonjs do
   puts "Done."
 end
 
+desc "Package for jQuery"
 task :jquery do
   puts "Packaging for jQuery"
   source = "mustache-jquery"
@@ -27,7 +28,7 @@ task :jquery do
   puts "Done, see ./#{target_jq}"
 end
 
-
+desc "Package for dojo"
 task :dojo do
   puts "Packaging for dojo"
   source = "mustache-dojo"
@@ -37,6 +38,7 @@ task :dojo do
   puts "Done, see ./dojox/string/#{target_js} Include using dojo.require('dojox.string.mustache.'); "
 end
 
+desc "Package for YUI3"
 task :yui3 do
   puts "Packaging for YUI3"
   source = "mustache-yui3"
@@ -46,6 +48,7 @@ task :yui3 do
   puts "Done, see ./yui3/mustache/#{target_js}"
 end
 
+desc "Remove temporary files."
 task :clean do
   `git clean -fdx`
 end
