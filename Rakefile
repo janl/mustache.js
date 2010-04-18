@@ -13,37 +13,37 @@ task :spec do
 end
 
 task :commonjs do
-  print "Packaging for CommonJS\n"
+  puts "Packaging for CommonJS"
   `mkdir lib`
   `cp mustache.js lib/mustache.js`
-  print "Done.\n"
+  puts "Done."
 end
 
 task :jquery do
-  print "Packaging for jQuery\n"
+  puts "Packaging for jQuery"
   source = "mustache-jquery"
   target_jq = "jquery.mustache.js"
   `cat #{source}/#{target_jq}.tpl.pre mustache.js #{source}/#{target_jq}.tpl.post > #{target_jq}`
-  print "Done, see ./#{target_jq}\n"
+  puts "Done, see ./#{target_jq}"
 end
 
 
 task :dojo do
-  print "Packaging for dojo\n"
+  puts "Packaging for dojo"
   source = "mustache-dojo"
   target_js = "mustache.js"
   `mkdir -p dojox; mkdir -p dojox/string`
   `cat #{source}/#{target_js}.tpl.pre mustache.js #{source}/#{target_js}.tpl.post > dojox/string/#{target_js}`
-  print "Done, see ./dojox/string/#{target_js} Include using dojo.require('dojox.string.mustache.'); \n"
+  puts "Done, see ./dojox/string/#{target_js} Include using dojo.require('dojox.string.mustache.'); "
 end
 
 task :yui3 do
-  print "Packaging for YUI3\n"
+  puts "Packaging for YUI3"
   source = "mustache-yui3"
   target_js = "mustache.js"
   `mkdir -p yui3; mkdir -p yui3/mustache`
   `cat #{source}/#{target_js}.tpl.pre mustache.js #{source}/#{target_js}.tpl.post > yui3/mustache/#{target_js}`
-  print "Done, see ./yui3/mustache/#{target_js}\n"
+  puts "Done, see ./yui3/mustache/#{target_js}"
 end
 
 task :clean do
