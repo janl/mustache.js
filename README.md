@@ -88,6 +88,34 @@ the items. Use `{{.}}` to access the current item inside the enumeration section
     Joe's shopping card: <ul><li>bananas</li><li>apples</li></ul>
 
 
+### Higher Order Sections
+
+If a section key returns a function, it will be called and passed both the unrendered
+block of text and a renderer convenience function.
+
+Given this JS:
+
+    "name": "Tater",
+    "bolder": function() {
+      return function(text, render) {
+        return "<b>" + render(text) + '</b>'
+      }
+    }
+
+And this template:
+
+    {{#bolder}}Hi {{name}}.{{/bolder}}
+
+We'll get this output:
+
+    <b>Hi Tater.</b>
+
+As you can see, we're pre-processing the text in the block. This can be used to
+implement caching, filters (like syntax highlighting), etc.
+
+You can use `this.name` to access the attribute `name` from your view.
+
+
 ### View Partials
 
 mustache.js supports a quite powerful but yet simple view partial mechanism. Use the

@@ -1,6 +1,7 @@
 # mustache.js Changes
 
 ## 0.3.0 (??-??-????)
+* Added higher order sections.
 
 
 ## 0.2.3 (28-03-2010)

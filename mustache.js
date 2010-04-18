@@ -109,6 +109,11 @@ var Mustache = function() {
             return that.render(content, that.merge(context,
                     that.create_context(row)), partials, true);
           }).join("");
+        } else if(typeof value === "function") {
+          // higher order section
+          return value.call(context, content, function(text) {
+            return that.render(text, context, partials, true);
+          })
         } else if(value) { // boolean section
           return that.render(content, context, partials, true);
         } else {
