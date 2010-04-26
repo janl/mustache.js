@@ -8,6 +8,7 @@
 * Added higher order sections.
 
 
+
 ## 0.2.3 (28-03-2010)
 
 * Better error message for missing partials.

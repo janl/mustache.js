@@ -149,7 +149,6 @@ Here is the result:
         <li>listitem2</li>
       </ul>
 
-
 ### Inverted Sections
 
 An inverted section opens with `{{^section}}` instead of `{{#section}}` and uses a
