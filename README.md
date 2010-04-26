@@ -115,6 +115,40 @@ implement caching, filters (like syntax highlighting), etc.
 
 You can use `this.name` to access the attribute `name` from your view.
 
+### Dereferencing Section
+
+If you have a nested object structure in your view, it can sometimes be easier
+to use sections like this:
+
+    var objects = {
+      a_object: {
+        title: 'this is an object',
+        description: 'one of its attributes is a list',
+        a_list: [{label: 'listitem1'}, {label: 'listitem2'}]
+      }
+    };
+
+This is our template:
+
+    {{#a_object}}
+      <h1>{{title}}</h1>
+      <p>{{description}}</p>
+      <ul>
+        {{#a_list}}
+          <li>{{label}}</li>
+        {{/a_list}}
+      </ul>
+    {{/a_object}}
+
+Here is the result:
+
+    <h1>this is an object</h1>
+      <p>one of its attributes is a list</p>
+      <ul>
+        <li>listitem1</li>
+        <li>listitem2</li>
+      </ul>
+
 
 ### View Partials
 
