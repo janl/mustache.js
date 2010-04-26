@@ -150,6 +150,27 @@ Here is the result:
       </ul>
 
 
+### Inverted Sections
+
+An inverted section opens with `{{^section}}` instead of `{{#section}}` and uses a
+boolean negative to evaluate. Empty arrays are considered falsy.
+
+View:
+
+    var inverted_section =  {
+      "repo": []
+    }
+
+Template:
+
+    {{#repo}}<b>{{name}}</b>{{/repo}}
+    {{^repo}}No repos :({{/repo}}
+
+Result:
+
+    No repos :(
+
+
 ### View Partials
 
 mustache.js supports a quite powerful but yet simple view partial mechanism. Use the

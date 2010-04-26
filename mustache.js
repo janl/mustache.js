@@ -93,35 +93,45 @@ var Mustache = function() {
       Renders inverted (^) and normal (#) sections
     */
     render_section: function(template, context, partials) {
-      if(!this.includes("#", template)) {
+      if(!this.includes("#", template) && !this.includes("^", template)) {
         return template;
       }
 
       var that = this;
       // CSW - Added "+?" so it finds the tighest bound, not the widest
-      var regex = new RegExp(this.otag + "\\#(.+)" + this.ctag +
-              "\\s*([\\s\\S]+?)" + this.otag + "\\/\\1" + this.ctag + "\\s*", "mg");
+      var regex = new RegExp(this.otag + "(\\^|\\#)(.+)" + this.ctag +
+              "\\s*([\\s\\S]+?)" + this.otag + "\\/\\2" + this.ctag +
+              "\\s*", "mg");
 
       // for each {{#foo}}{{/foo}} section do...
-      return template.replace(regex, function(match, name, content) {
+      return template.replace(regex, function(match, type, name, content) {
         var value = that.find(name, context);
-        if(that.is_array(value)) { // Enumerable, Let's loop!
-          return that.map(value, function(row) {
-            return that.render(content, that.merge(context,
-                    that.create_context(row)), partials, true);
-          }).join("");
-        } else if(that.is_object(value)) { // Object, Use it as subcontext!
-          return that.render(content, 
-            that.merge(context, that.create_context(value)), partials, true);
-        } else if(typeof value === "function") {
-          // higher order section
-          return value.call(context, content, function(text) {
-            return that.render(text, context, partials, true);
-          })
-        } else if(value) { // boolean section
-          return that.render(content, context, partials, true);
-        } else {
-          return "";
+        if(type == "^") { // inverted section
+          if(!value || that.is_array(value) && value.length == 0) {
+            // false or empty list, render it
+            return that.render(content, context, partials, true);
+          } else {
+            return "";
+          }
+        } else if(type == "#") { // normal section
+          if(that.is_array(value)) { // Enumerable, Let's loop!
+            return that.map(value, function(row) {
+              return that.render(content, that.merge(context,
+                      that.create_context(row)), partials, true);
+            }).join("");
+          } else if(that.is_object(value)) { // Object, Use it as subcontext!
+            return that.render(content,
+              that.merge(context, that.create_context(value)), partials, true);
+          } else if(typeof value === "function") {
+            // higher order section
+            return value.call(context, content, function(text) {
+              return that.render(text, context, partials, true);
+            })
+          } else if(value) { // boolean section
+            return that.render(content, context, partials, true);
+          } else {
+            return "";
+          }
         }
       });
     },
@@ -134,7 +144,7 @@ var Mustache = function() {
       var that = this;
 
       var new_regex = function() {
-        return new RegExp(that.otag + "(=|!|>|\\{|%)?([^\/#]+?)\\1?" +
+        return new RegExp(that.otag + "(=|!|>|\\{|%)?([^\/#\^]+?)\\1?" +
           that.ctag + "+", "g");
       };
 

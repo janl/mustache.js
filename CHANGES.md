@@ -2,6 +2,7 @@
 
 ## 0.3.0 (??-??-????)
 
+* Added inverted sections.
 * Avoid double encoding of entities.
 * Use sections to dereference subcontexts.
 * Added higher order sections.
