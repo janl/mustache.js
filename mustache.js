@@ -18,7 +18,7 @@ var Mustache = function() {
 
     render: function(template, context, partials, in_recursion) {
       // fail fast
-      if(template.indexOf(this.otag) == -1) {
+      if(!this.includes("", template)) {
         if(in_recursion) {
           return template;
         } else {
@@ -54,7 +54,7 @@ var Mustache = function() {
     */
     render_pragmas: function(template) {
       // no pragmas
-      if(template.indexOf(this.otag + "%") == -1) {
+      if(!this.includes("%", template)) {
         return template;
       }
 
@@ -90,12 +90,13 @@ var Mustache = function() {
     },
 
     /*
-      Renders boolean and enumerable sections
+      Renders inverted (^) and normal (#) sections
     */
     render_section: function(template, context, partials) {
-      if(template.indexOf(this.otag + "#") == -1) {
+      if(!this.includes("#", template)) {
         return template;
       }
+
       var that = this;
       // CSW - Added "+?" so it finds the tighest bound, not the widest
       var regex = new RegExp(this.otag + "\\#(.+)" + this.ctag +
@@ -203,6 +204,11 @@ var Mustache = function() {
     },
 
     // Utility methods
+
+    /* includes tag */
+    includes: function(needle, haystack) {
+      return haystack.indexOf(this.otag + needle) != -1;
+    },
 
     /*
       Does away with nasty characters
