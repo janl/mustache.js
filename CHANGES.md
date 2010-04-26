@@ -1,6 +1,8 @@
 # mustache.js Changes
 
 ## 0.3.0 (??-??-????)
+
+* Avoid double encoding of entities.
 * Use sections to dereference subcontexts.
 * Added higher order sections.
 

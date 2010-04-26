@@ -14,3 +14,4 @@ Mustache.js wouldn't kick ass if it weren't for these fine souls:
  * Damien Mathieu / dmathieu
  * Jakub Kuźma / qoobaa
  * Will Leinweber / will
+ * dpree
