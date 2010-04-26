@@ -109,6 +109,9 @@ var Mustache = function() {
             return that.render(content, that.merge(context,
                     that.create_context(row)), partials, true);
           }).join("");
+        } else if(that.is_object(value)) { // Object, Use it as subcontext!
+          return that.render(content, 
+            that.merge(context, that.create_context(value)), partials, true);
         } else if(typeof value === "function") {
           // higher order section
           return value.call(context, content, function(text) {
