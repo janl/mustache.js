@@ -208,7 +208,7 @@ var Mustache = function() {
       Does away with nasty characters
     */
     escape: function(s) {
-      return ((s == null) ? "" : s).toString().replace(/[&"<>\\]/g, function(s) {
+      return ((s == null) ? "" : s).toString().replace(/&(?!\w+;)|["<>\\]/g, function(s) {
         switch(s) {
           case "&": return "&amp;";
           case "\\": return "\\\\";;
