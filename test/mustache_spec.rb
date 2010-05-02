@@ -26,6 +26,16 @@ describe "mustache" do
   before(:all) do
     @mustache = File.read(__DIR__ + "/../mustache.js")
   end
+  
+  it "should return the same when invoked multiple times" do
+    js = <<-JS
+      #{@mustache}
+      Mustache.to_html("x")
+      print(Mustache.to_html("x"));
+    JS
+    run_js(js).should == "x\n"
+    
+  end
 
   it "should clear the context after each run" do
     js = <<-JS
