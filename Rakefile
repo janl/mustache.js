@@ -25,6 +25,7 @@ def templated_build(name, opts={})
     puts "Packaging for #{name}"
     sh "mkdir -p #{opts[:location]}" if opts[:location]
     sh "cat #{source}/#{target_js}.tpl.pre mustache.js #{source}/#{target_js}.tpl.post > #{opts[:location] || '.'}/#{target_js}"
+    puts "Done, see #{opts[:location] || '.'}/#{target_js}"
   end
 end
 
