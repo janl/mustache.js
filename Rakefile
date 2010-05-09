@@ -11,43 +11,27 @@ end
 desc "Run all specs"
 task :spec
 
-desc "Package for CommonJS"
-task :commonjs do
-  puts "Packaging for CommonJS"
-  source = "mustache-commonjs"
-  target_jq = "commonjs.mustache.js"
-  sh "cat #{source}/#{target_jq}.tpl.pre mustache.js #{source}/#{target_jq}.tpl.post > #{target_jq}"
-  puts "Done."
+def templated_build(name, opts={})
+  # Create a rule that uses the .tmpl.{pre,post} stuff to make a final, wrapped, output file.
+  # There is some extra complexity because Dojo and YUI3 use different template files and final locations.
+  short = name.downcase
+  source = "mustache-#{short}"
+  dependencies = ["mustache.js"] + Dir.glob("#{source}/*.tpl.*")
+
+  desc "Package for #{name}"
+  task short.to_sym => dependencies do
+    target_js = opts[:location] ? "mustache.js" : "#{short}.mustache.js"
+
+    puts "Packaging for #{name}"
+    sh "mkdir -p #{opts[:location]}" if opts[:location]
+    sh "cat #{source}/#{target_js}.tpl.pre mustache.js #{source}/#{target_js}.tpl.post > #{opts[:location] || '.'}/#{target_js}"
+  end
 end
 
-desc "Package for jQuery"
-task :jquery do
-  puts "Packaging for jQuery"
-  source = "mustache-jquery"
-  target_jq = "jquery.mustache.js"
-  sh "cat #{source}/#{target_jq}.tpl.pre mustache.js #{source}/#{target_jq}.tpl.post > #{target_jq}"
-  puts "Done, see ./#{target_jq}"
-end
-
-desc "Package for dojo"
-task :dojo do
-  puts "Packaging for dojo"
-  source = "mustache-dojo"
-  target_js = "mustache.js"
-  sh "mkdir -p dojox; mkdir -p dojox/string"
-  sh "cat #{source}/#{target_js}.tpl.pre mustache.js #{source}/#{target_js}.tpl.post > dojox/string/#{target_js}"
-  puts "Done, see ./dojox/string/#{target_js} Include using dojo.require('dojox.string.mustache.'); "
-end
-
-desc "Package for YUI3"
-task :yui3 do
-  puts "Packaging for YUI3"
-  source = "mustache-yui3"
-  target_js = "mustache.js"
-  sh "kdir -p yui3; mkdir -p yui3/mustache"
-  sh "cat #{source}/#{target_js}.tpl.pre mustache.js #{source}/#{target_js}.tpl.post > yui3/mustache/#{target_js}"
-  puts "Done, see ./yui3/mustache/#{target_js}"
-end
+templated_build "CommonJS"
+templated_build "jQuery"
+templated_build "Dojo", :location => "dojox/string"
+templated_build "YUI3", :location => "yui3/mustache"
 
 desc "Remove temporary files."
 task :clean do
