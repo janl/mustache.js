@@ -14,8 +14,9 @@ task :spec
 desc "Package for CommonJS"
 task :commonjs do
   puts "Packaging for CommonJS"
-  `mkdir lib`
-  `cp mustache.js lib/mustache.js`
+  source = "mustache-commonjs"
+  target_jq = "commonjs.mustache.js"
+  `cat #{source}/#{target_jq}.tpl.pre mustache.js #{source}/#{target_jq}.tpl.post > #{target_jq}`
   puts "Done."
 end
 
