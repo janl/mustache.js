@@ -157,7 +157,7 @@ var Mustache = function() {
          lines[i] = lines[i].replace(regex, function(match, operator, name) {
            switch(operator) {
              case "!": // ignore comments
-               return match;
+               return "";
              case "=": // set new delimiters, rebuild the replace regexp
                that.set_delimiters(name);
                regex = new_regex();

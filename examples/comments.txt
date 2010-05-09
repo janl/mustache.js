@@ -1,1 +1,1 @@
-<h1>A Comedy of Errors{{! just something interesting... or not... }}</h1>
+<h1>A Comedy of Errors</h1>
