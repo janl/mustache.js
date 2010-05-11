@@ -2,6 +2,7 @@
 
 ## 0.3.0 (??-??-????)
 
+* Fix Comments.
 * Added inverted sections.
 * Avoid double encoding of entities.
 * Use sections to dereference subcontexts.

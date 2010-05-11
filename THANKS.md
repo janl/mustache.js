@@ -15,3 +15,4 @@ Mustache.js wouldn't kick ass if it weren't for these fine souls:
  * Jakub Kuźma / qoobaa
  * Will Leinweber / will
  * dpree
+ * Jason Smith / jhs
