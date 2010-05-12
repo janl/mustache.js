@@ -19,7 +19,8 @@ var Mustache = function() {
     render: function(template, context, partials, in_recursion) {
       // reset buffer
       // TODO: make this non-lazy
-      this.buffer = [];
+      if(!in_recursion)
+        this.buffer = [];
       // fail fast
       if(!this.includes("", template)) {
         if(in_recursion) {
