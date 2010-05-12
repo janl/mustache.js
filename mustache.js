@@ -84,6 +84,7 @@ var Mustache = function() {
       Tries to find a partial in the global scope and render it
     */
     render_partial: function(name, context, partials) {
+      name = this.trim(name);
       if(!partials || !partials[name]) {
         throw({message: "unknown_partial '" + name + "'"});
       }
@@ -103,8 +104,8 @@ var Mustache = function() {
 
       var that = this;
       // CSW - Added "+?" so it finds the tighest bound, not the widest
-      var regex = new RegExp(this.otag + "(\\^|\\#)(.+)" + this.ctag +
-              "\\s*([\\s\\S]+?)" + this.otag + "\\/\\2" + this.ctag +
+      var regex = new RegExp(this.otag + "(\\^|\\#)\\s*(.+)\\s*" + this.ctag +
+              "\\s*([\\s\\S]+?)" + this.otag + "\\/\\s*\\2\\s*" + this.ctag +
               "\\s*", "mg");
 
       // for each {{#foo}}{{/foo}} section do...
