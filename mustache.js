@@ -10,7 +10,7 @@ var Mustache = function() {
   Renderer.prototype = {
     otag: "{{",
     ctag: "}}",
-    pragmas: {},
+    pragmas: {},thi
     buffer: [],
     pragmas_implemented: {
       "IMPLICIT-ITERATOR": true
@@ -87,10 +87,8 @@ var Mustache = function() {
       if(!partials || !partials[name]) {
         throw({message: "unknown_partial '" + name + "'"});
       }
-      if(typeof(context[name]) != "object") {
-        return partials[name];
-      }
-      return this.render(partials[name], context[name], partials, true);
+
+      return this.render(partials[name], context, partials, true);
     },
 
     /*
