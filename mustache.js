@@ -164,7 +164,7 @@ var Mustache = function() {
                regex = new_regex();
                return "";
              case ">": // render partial
-               return that.render_partial(name, context, partials);
+               return that.render_partial(name.replace(/^\s+/,""), context, partials);
              case "{": // the triple mustache is unescaped
                return that.find(name, context);
              default: // escape the value
