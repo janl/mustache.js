@@ -12,8 +12,10 @@ desc "Run all specs"
 task :spec
 
 def templated_build(name, opts={})
-  # Create a rule that uses the .tmpl.{pre,post} stuff to make a final, wrapped, output file.
-  # There is some extra complexity because Dojo and YUI3 use different template files and final locations.
+  # Create a rule that uses the .tmpl.{pre,post} stuff to make a final,
+  # wrapped, output file.
+  # There is some extra complexity because Dojo and YUI3 use different
+  # template files and final locations.
   short = name.downcase
   source = "mustache-#{short}"
   dependencies = ["mustache.js"] + Dir.glob("#{source}/*.tpl.*")
@@ -24,12 +26,13 @@ def templated_build(name, opts={})
 
     puts "Packaging for #{name}"
     sh "mkdir -p #{opts[:location]}" if opts[:location]
-    sh "cat #{source}/#{target_js}.tpl.pre mustache.js #{source}/#{target_js}.tpl.post > #{opts[:location] || '.'}/#{target_js}"
+    sh "cat #{source}/#{target_js}.tpl.pre mustache.js \
+     #{source}/#{target_js}.tpl.post > #{opts[:location] || '.'}/#{target_js}"
     puts "Done, see #{opts[:location] || '.'}/#{target_js}"
   end
 end
 
-templated_build "CommonJS"
+templated_build "CommonJS", :location => "lib"
 templated_build "jQuery"
 templated_build "Dojo", :location => "dojox/string"
 templated_build "YUI3", :location => "yui3/mustache"
