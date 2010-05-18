@@ -10,7 +10,7 @@ var Mustache = function() {
   Renderer.prototype = {
     otag: "{{",
     ctag: "}}",
-    pragmas: {},thi
+    pragmas: {},
     buffer: [],
     pragmas_implemented: {
       "IMPLICIT-ITERATOR": true
