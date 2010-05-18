@@ -16,3 +16,4 @@ Mustache.js wouldn't kick ass if it weren't for these fine souls:
  * Will Leinweber / will
  * dpree
  * Jason Smith / jhs
+ * Aaron Gibralter / agibralter

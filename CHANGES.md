@@ -2,6 +2,10 @@
 
 ## 0.3.0 (??-??-????)
 
+* CommonJS packaging is no longer a special case.
+* DRY Rakefile.
+* Allow whitespace around tag names.
+* Fix partial scope.
 * Fix Comments.
 * Added inverted sections.
 * Avoid double encoding of entities.
