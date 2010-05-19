@@ -1,6 +1,6 @@
 var partial_context = {
   name: '1',
-  children: [
+  kids: [
     {
       name: '1.1',
       children: [
