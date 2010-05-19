@@ -15,6 +15,7 @@ var Mustache = function() {
     pragmas_implemented: {
       "IMPLICIT-ITERATOR": true
     },
+    context: {},
 
     render: function(template, context, partials, in_recursion) {
       // reset buffer
@@ -32,6 +33,7 @@ var Mustache = function() {
       }
 
       if(!in_recursion) {
+        this.context = context;
         this.buffer = [];
       }
 
@@ -81,7 +83,7 @@ var Mustache = function() {
     },
 
     /*
-      Tries to find a partial in the global scope and render it
+      Tries to find a partial in the cuurent scope and render it
     */
     render_partial: function(name, context, partials) {
       name = this.trim(name);
@@ -121,17 +123,17 @@ var Mustache = function() {
         } else if(type == "#") { // normal section
           if(that.is_array(value)) { // Enumerable, Let's loop!
             return that.map(value, function(row) {
-              return that.render(content, that.merge(context,
-                      that.create_context(row)), partials, true);
+              return that.render(content, that.create_context(row),
+                partials, true);
             }).join("");
           } else if(that.is_object(value)) { // Object, Use it as subcontext!
-            return that.render(content,
-              that.merge(context, that.create_context(value)), partials, true);
+            return that.render(content, that.create_context(value),
+              partials, true);
           } else if(typeof value === "function") {
             // higher order section
             return value.call(context, content, function(text) {
               return that.render(text, context, partials, true);
-            })
+            });
           } else if(value) { // boolean section
             return that.render(content, context, partials, true);
           } else {
@@ -208,11 +210,23 @@ var Mustache = function() {
     */
     find: function(name, context) {
       name = this.trim(name);
-      if(typeof context[name] === "function") {
-        return context[name].apply(context);
+
+      // Checks whether a value is thruthy or false or 0
+      function is_kinda_truthy(bool) {
+        return bool === false || bool === 0 || bool;
       }
-      if(context[name] !== undefined) {
-        return context[name];
+
+      if(is_kinda_truthy(context[name])) {
+        var value = context[name];
+      } else if(is_kinda_truthy(this.context[name])) {
+        var value = this.context[name];
+      }
+
+      if(typeof value === "function") {
+        return value.apply(context);
+      }
+      if(value !== undefined) {
+        return value;
       }
       // silently ignore unkown variables
       return "";
@@ -239,25 +253,6 @@ var Mustache = function() {
           default: return s;
         }
       });
-    },
-
-    /*
-      Merges all properties of object `b` into object `a`.
-      `b.property` overwrites a.property`
-    */
-    merge: function(a, b) {
-      var _new = {};
-      for(var name in a) {
-        if(a.hasOwnProperty(name)) {
-          _new[name] = a[name];
-        }
-      };
-      for(var name in b) {
-        if(b.hasOwnProperty(name)) {
-          _new[name] = b[name];
-        }
-      };
-      return _new;
     },
 
     // by @langalex, support for arrays of strings
