@@ -2,6 +2,7 @@
 
 ## 0.3.0 (??-??-????)
 
+* Fix Rhino compat.
 * CommonJS packaging is no longer a special case.
 * DRY Rakefile.
 * Allow whitespace around tag names.
