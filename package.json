@@ -1,7 +1,0 @@
-{
-    "name": "mustache",
-    "author": "Jan Lehnardt",
-    "description": "{{mustaches}} in JavaScript — shameless port from @defunkt",
-    "keywords": ["template"],
-    "version": "0.2.3"
-}

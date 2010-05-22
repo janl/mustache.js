@@ -28,14 +28,26 @@ def templated_build(name, opts={})
     sh "mkdir -p #{opts[:location]}" if opts[:location]
     sh "cat #{source}/#{target_js}.tpl.pre mustache.js \
      #{source}/#{target_js}.tpl.post > #{opts[:location] || '.'}/#{target_js}"
-    puts "Done, see #{opts[:location] || '.'}/#{target_js}"
+
+    # extra
+    if opts[:extra]
+      sh "cat #{source}/#{opts[:extra]} | sed -e 's/{{version}}/#{version}/' > #{opts[:location]}/#{opts[:extra]}"
+     end
+
+   puts "Done, see #{opts[:location] || '.'}/#{target_js}"
+
   end
 end
 
-templated_build "CommonJS", :location => "lib"
+templated_build "CommonJS", :location => "lib", :extra => "package.json"
 templated_build "jQuery"
 templated_build "Dojo", :location => "dojox/string"
 templated_build "YUI3", :location => "yui3/mustache"
+
+def version
+  File.read("mustache.js").match('version: "([^\"]+)",$')[1]
+end
+
 
 desc "Remove temporary files."
 task :clean do
