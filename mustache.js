@@ -62,12 +62,13 @@ var Mustache = function() {
       }
 
       var that = this;
-      var regex = new RegExp(this.otag + "%([\\w_-]+) ?([\\w]+=[\\w]+)?"
-        + this.ctag);
+      var regex = new RegExp(this.otag + "%([\\w_-]+) ?([\\w]+=[\\w]+)?" +
+            this.ctag);
       return template.replace(regex, function(match, pragma, options) {
         if(!that.pragmas_implemented[pragma]) {
-          throw({message: "This implementation of mustache doesn't understand the '"
-            + pragma + "' pragma"});
+          throw({message: 
+            "This implementation of mustache doesn't understand the '" +
+            pragma + "' pragma"});
         }
         that.pragmas[pragma] = {};
         if(options) {
@@ -111,7 +112,7 @@ var Mustache = function() {
       return template.replace(regex, function(match, type, name, content) {
         var value = that.find(name, context);
         if(type == "^") { // inverted section
-          if(!value || that.is_array(value) && value.length == 0) {
+          if(!value || that.is_array(value) && value.length === 0) {
             // false or empty list, render it
             return that.render(content, context, partials, true);
           } else {
@@ -148,29 +149,31 @@ var Mustache = function() {
       var that = this;
 
       var new_regex = function() {
-        return new RegExp(that.otag + "(=|!|>|\\{|%)?([^\/#\^]+?)\\1?" +
+        return new RegExp(that.otag + "(=|!|>|\\{|%)?([^\\/#\\^]+?)\\1?" +
           that.ctag + "+", "g");
       };
 
       var regex = new_regex();
+      var tag_replace_callback = function(match, operator, name) {
+        switch(operator) {
+          case "!": // ignore comments
+            return "";
+          case "=": // set new delimiters, rebuild the replace regexp
+            that.set_delimiters(name);
+            regex = new_regex();
+            return "";
+          case ">": // render partial
+            return that.render_partial(name, context, partials);
+          case "{": // the triple mustache is unescaped
+            return that.find(name, context);
+          default: // escape the value
+            return that.escape(that.find(name, context));
+        }
+      };
       var lines = template.split("\n");
+
        for (var i=0; i < lines.length; i++) {
-         lines[i] = lines[i].replace(regex, function(match, operator, name) {
-           switch(operator) {
-             case "!": // ignore comments
-               return "";
-             case "=": // set new delimiters, rebuild the replace regexp
-               that.set_delimiters(name);
-               regex = new_regex();
-               return "";
-             case ">": // render partial
-               return that.render_partial(name, context, partials);
-             case "{": // the triple mustache is unescaped
-               return that.find(name, context);
-             default: // escape the value
-               return that.escape(that.find(name, context));
-           }
-         }, this);
+         lines[i] = lines[i].replace(regex, tag_replace_callback, this);
          if(!in_recursion) {
            this.send(lines[i]);
          }
@@ -213,10 +216,11 @@ var Mustache = function() {
         return bool === false || bool === 0 || bool;
       }
 
+      var value;
       if(is_kinda_truthy(context[name])) {
-        var value = context[name];
+        value = context[name];
       } else if(is_kinda_truthy(this.context[name])) {
-        var value = this.context[name];
+        value = this.context[name];
       }
 
       if(typeof value === "function") {
@@ -240,12 +244,12 @@ var Mustache = function() {
       Does away with nasty characters
     */
     escape: function(s) {
-      s = String(s == null ? "" : s);
+      s = String(s === null ? "" : s);
       return s.replace(/&(?!\w+;)|["<>\\]/g, function(s) {
         switch(s) {
           case "&": return "&amp;";
-          case "\\": return "\\\\";;
-          case '"': return '\"';;
+          case "\\": return "\\\\";
+          case '"': return '\"';
           case "<": return "&lt;";
           case ">": return "&gt;";
           default: return s;
