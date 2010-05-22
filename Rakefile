@@ -31,7 +31,7 @@ def templated_build(name, opts={})
 
     # extra
     if opts[:extra]
-      sh "cat #{source}/#{opts[:extra]} | sed -e 's/{{version}}/#{version}/' \
+      sh "sed -e 's/{{version}}/#{version}/' #{source}/#{opts[:extra]} \
             > #{opts[:location]}/#{opts[:extra]}"
      end
 
