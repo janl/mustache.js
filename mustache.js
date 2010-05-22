@@ -156,32 +156,31 @@ var Mustache = function() {
       var regex = new_regex();
       var tag_replace_callback = function(match, operator, name) {
         switch(operator) {
-          case "!": // ignore comments
-            return "";
-          case "=": // set new delimiters, rebuild the replace regexp
-            that.set_delimiters(name);
-            regex = new_regex();
-            return "";
-          case ">": // render partial
-            return that.render_partial(name, context, partials);
-          case "{": // the triple mustache is unescaped
-            return that.find(name, context);
-          default: // escape the value
-            return that.escape(that.find(name, context));
+        case "!": // ignore comments
+          return "";
+        case "=": // set new delimiters, rebuild the replace regexp
+          that.set_delimiters(name);
+          regex = new_regex();
+          return "";
+        case ">": // render partial
+          return that.render_partial(name, context, partials);
+        case "{": // the triple mustache is unescaped
+          return that.find(name, context);
+        default: // escape the value
+          return that.escape(that.find(name, context));
         }
       };
       var lines = template.split("\n");
+      for(var i = 0; i < lines.length; i++) {
+        lines[i] = lines[i].replace(regex, tag_replace_callback, this);
+        if(!in_recursion) {
+          this.send(lines[i]);
+        }
+      }
 
-       for (var i=0; i < lines.length; i++) {
-         lines[i] = lines[i].replace(regex, tag_replace_callback, this);
-         if(!in_recursion) {
-           this.send(lines[i]);
-         }
-       }
-
-       if(in_recursion) {
-         return lines.join("\n");
-       }
+      if(in_recursion) {
+        return lines.join("\n");
+      }
     },
 
     set_delimiters: function(delimiters) {
@@ -201,7 +200,7 @@ var Mustache = function() {
           '(\\' + specials.join('|\\') + ')', 'g'
         );
       }
-    return text.replace(arguments.callee.sRE, '\\$1');
+      return text.replace(arguments.callee.sRE, '\\$1');
     },
 
     /*
@@ -247,12 +246,12 @@ var Mustache = function() {
       s = String(s === null ? "" : s);
       return s.replace(/&(?!\w+;)|["<>\\]/g, function(s) {
         switch(s) {
-          case "&": return "&amp;";
-          case "\\": return "\\\\";
-          case '"': return '\"';
-          case "<": return "&lt;";
-          case ">": return "&gt;";
-          default: return s;
+        case "&": return "&amp;";
+        case "\\": return "\\\\";
+        case '"': return '\"';
+        case "<": return "&lt;";
+        case ">": return "&gt;";
+        default: return s;
         }
       });
     },
@@ -293,7 +292,7 @@ var Mustache = function() {
       } else {
         var r = [];
         var l = array.length;
-        for(var i=0;i<l;i++) {
+        for(var i = 0; i < l; i++) {
           r.push(fn(array[i]));
         }
         return r;
