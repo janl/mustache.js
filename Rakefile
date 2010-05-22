@@ -31,7 +31,8 @@ def templated_build(name, opts={})
 
     # extra
     if opts[:extra]
-      sh "cat #{source}/#{opts[:extra]} | sed -e 's/{{version}}/#{version}/' > #{opts[:location]}/#{opts[:extra]}"
+      sh "cat #{source}/#{opts[:extra]} | sed -e 's/{{version}}/#{version}/' \
+            > #{opts[:location]}/#{opts[:extra]}"
      end
 
    puts "Done, see #{opts[:location] || '.'}/#{target_js}"
