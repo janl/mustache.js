@@ -104,12 +104,13 @@ var Mustache = function() {
 
       var that = this;
       // CSW - Added "+?" so it finds the tighest bound, not the widest
-      var regex = new RegExp(this.otag + "(\\^|\\#)\\s*(.+)\\s*" + this.ctag +
-              "\\s*([\\s\\S]+?)" + this.otag + "\\/\\s*\\2\\s*" + this.ctag +
+      var regex = new RegExp(this.otag + "(\\^|\\#)\\s*((.+?)(\\(.*\\))?)\\s*" + this.ctag +
+              "\\s*([\\s\\S]+?)" + this.otag + "\\/\\s*\\3\\s*" + this.ctag +
               "\\s*", "mg");
 
       // for each {{#foo}}{{/foo}} section do...
-      return template.replace(regex, function(match, type, name, content) {
+      return template.replace(regex, function(match, type, name, reserved1, reserved2, content) {
+	    // the reserved variables are not being used
         var value = that.find(name, context);
         if(type == "^") { // inverted section
           if(!value || that.is_array(value) && value.length === 0) {
@@ -221,13 +222,28 @@ var Mustache = function() {
       } else if(is_kinda_truthy(this.context[name])) {
         value = this.context[name];
       }
-
       if(typeof value === "function") {
         return value.apply(context);
       }
       if(value !== undefined) {
         return value;
       }
+      if (value === undefined && name.indexOf('(') != -1) {
+        // if value turned out to not exist on the context, then check to see if the function is parameterized
+        var matches = name.match(/(.+)\((.+,?)+\)/);
+
+        if (matches.length === 3) {
+          name = matches[1];
+          value = this.context[name];
+
+          if (typeof value === "function" && matches[2]) {
+            var that = this;
+            var args = this.map(matches[2].split(/\s*,/), 
+              function(ele) { return that.find(ele, that.context); });
+            return value.apply(context, args);
+          }
+        }
+      }	  
       // silently ignore unkown variables
       return "";
     },
