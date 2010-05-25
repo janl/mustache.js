@@ -15,12 +15,15 @@ var Mustache = function() {
     pragmas_implemented: {
       "IMPLICIT-ITERATOR": true
     },
+    context: {},
 
     render: function(template, context, partials, in_recursion) {
-      // reset buffer
-      // TODO: make this non-lazy
-      if(!in_recursion)
-        this.buffer = [];
+      // reset buffer & set context
+      if(!in_recursion) {
+        this.context = context;
+        this.buffer = []; // TODO: make this non-lazy
+      }
+
       // fail fast
       if(!this.includes("", template)) {
         if(in_recursion) {
@@ -29,10 +32,6 @@ var Mustache = function() {
           this.send(template);
           return;
         }
-      }
-
-      if(!in_recursion) {
-        this.buffer = [];
       }
 
       template = this.render_pragmas(template);
@@ -63,12 +62,13 @@ var Mustache = function() {
       }
 
       var that = this;
-      var regex = new RegExp(this.otag + "%([\\w_-]+) ?([\\w]+=[\\w]+)?"
-        + this.ctag);
+      var regex = new RegExp(this.otag + "%([\\w-]+) ?([\\w]+=[\\w]+)?" +
+            this.ctag);
       return template.replace(regex, function(match, pragma, options) {
         if(!that.pragmas_implemented[pragma]) {
-          throw({message: "This implementation of mustache doesn't understand the '"
-            + pragma + "' pragma"});
+          throw({message: 
+            "This implementation of mustache doesn't understand the '" +
+            pragma + "' pragma"});
         }
         that.pragmas[pragma] = {};
         if(options) {
@@ -81,14 +81,17 @@ var Mustache = function() {
     },
 
     /*
-      Tries to find a partial in the global scope and render it
+      Tries to find a partial in the curent scope and render it
     */
     render_partial: function(name, context, partials) {
+      name = this.trim(name);
       if(!partials || !partials[name]) {
         throw({message: "unknown_partial '" + name + "'"});
       }
-
-      return this.render(partials[name], context, partials, true);
+      if(typeof(context[name]) != "object") {
+        return this.render(partials[name], context, partials, true);
+      }
+      return this.render(partials[name], context[name], partials, true);
     },
 
     /*
@@ -101,15 +104,15 @@ var Mustache = function() {
 
       var that = this;
       // CSW - Added "+?" so it finds the tighest bound, not the widest
-      var regex = new RegExp(this.otag + "(\\^|\\#)(.+)" + this.ctag +
-              "\\s*([\\s\\S]+?)" + this.otag + "\\/\\2" + this.ctag +
+      var regex = new RegExp(this.otag + "(\\^|\\#)\\s*(.+)\\s*" + this.ctag +
+              "\\s*([\\s\\S]+?)" + this.otag + "\\/\\s*\\2\\s*" + this.ctag +
               "\\s*", "mg");
 
       // for each {{#foo}}{{/foo}} section do...
       return template.replace(regex, function(match, type, name, content) {
         var value = that.find(name, context);
         if(type == "^") { // inverted section
-          if(!value || that.is_array(value) && value.length == 0) {
+          if(!value || that.is_array(value) && value.length === 0) {
             // false or empty list, render it
             return that.render(content, context, partials, true);
           } else {
@@ -118,17 +121,17 @@ var Mustache = function() {
         } else if(type == "#") { // normal section
           if(that.is_array(value)) { // Enumerable, Let's loop!
             return that.map(value, function(row) {
-              return that.render(content, that.merge(context,
-                      that.create_context(row)), partials, true);
+              return that.render(content, that.create_context(row),
+                partials, true);
             }).join("");
           } else if(that.is_object(value)) { // Object, Use it as subcontext!
-            return that.render(content,
-              that.merge(context, that.create_context(value)), partials, true);
+            return that.render(content, that.create_context(value),
+              partials, true);
           } else if(typeof value === "function") {
             // higher order section
             return value.call(context, content, function(text) {
               return that.render(text, context, partials, true);
-            })
+            });
           } else if(value) { // boolean section
             return that.render(content, context, partials, true);
           } else {
@@ -146,37 +149,38 @@ var Mustache = function() {
       var that = this;
 
       var new_regex = function() {
-        return new RegExp(that.otag + "(=|!|>|\\{|%)?([^\/#\^]+?)\\1?" +
+        return new RegExp(that.otag + "(=|!|>|\\{|%)?([^\\/#\\^]+?)\\1?" +
           that.ctag + "+", "g");
       };
 
       var regex = new_regex();
+      var tag_replace_callback = function(match, operator, name) {
+        switch(operator) {
+        case "!": // ignore comments
+          return "";
+        case "=": // set new delimiters, rebuild the replace regexp
+          that.set_delimiters(name);
+          regex = new_regex();
+          return "";
+        case ">": // render partial
+          return that.render_partial(name, context, partials);
+        case "{": // the triple mustache is unescaped
+          return that.find(name, context);
+        default: // escape the value
+          return that.escape(that.find(name, context));
+        }
+      };
       var lines = template.split("\n");
-       for (var i=0; i < lines.length; i++) {
-         lines[i] = lines[i].replace(regex, function(match, operator, name) {
-           switch(operator) {
-             case "!": // ignore comments
-               return "";
-             case "=": // set new delimiters, rebuild the replace regexp
-               that.set_delimiters(name);
-               regex = new_regex();
-               return "";
-             case ">": // render partial
-               return that.render_partial(name.replace(/^\s+/,""), context, partials);
-             case "{": // the triple mustache is unescaped
-               return that.find(name, context);
-             default: // escape the value
-               return that.escape(that.find(name, context));
-           }
-         }, this);
-         if(!in_recursion) {
-           this.send(lines[i]);
-         }
-       }
+      for(var i = 0; i < lines.length; i++) {
+        lines[i] = lines[i].replace(regex, tag_replace_callback, this);
+        if(!in_recursion) {
+          this.send(lines[i]);
+        }
+      }
 
-       if(in_recursion) {
-         return lines.join("\n");
-       }
+      if(in_recursion) {
+        return lines.join("\n");
+      }
     },
 
     set_delimiters: function(delimiters) {
@@ -196,7 +200,7 @@ var Mustache = function() {
           '(\\' + specials.join('|\\') + ')', 'g'
         );
       }
-    return text.replace(arguments.callee.sRE, '\\$1');
+      return text.replace(arguments.callee.sRE, '\\$1');
     },
 
     /*
@@ -205,11 +209,24 @@ var Mustache = function() {
     */
     find: function(name, context) {
       name = this.trim(name);
-      if(typeof context[name] === "function") {
-        return context[name].apply(context);
+
+      // Checks whether a value is thruthy or false or 0
+      function is_kinda_truthy(bool) {
+        return bool === false || bool === 0 || bool;
       }
-      if(context[name] !== undefined) {
-        return context[name];
+
+      var value;
+      if(is_kinda_truthy(context[name])) {
+        value = context[name];
+      } else if(is_kinda_truthy(this.context[name])) {
+        value = this.context[name];
+      }
+
+      if(typeof value === "function") {
+        return value.apply(context);
+      }
+      if(value !== undefined) {
+        return value;
       }
       // silently ignore unkown variables
       return "";
@@ -226,35 +243,17 @@ var Mustache = function() {
       Does away with nasty characters
     */
     escape: function(s) {
-      return ((s == null) ? "" : s).toString().replace(/&(?!\w+;)|["<>\\]/g, function(s) {
+      s = String(s === null ? "" : s);
+      return s.replace(/&(?!\w+;)|["<>\\]/g, function(s) {
         switch(s) {
-          case "&": return "&amp;";
-          case "\\": return "\\\\";;
-          case '"': return '\"';;
-          case "<": return "&lt;";
-          case ">": return "&gt;";
-          default: return s;
+        case "&": return "&amp;";
+        case "\\": return "\\\\";
+        case '"': return '\"';
+        case "<": return "&lt;";
+        case ">": return "&gt;";
+        default: return s;
         }
       });
-    },
-
-    /*
-      Merges all properties of object `b` into object `a`.
-      `b.property` overwrites a.property`
-    */
-    merge: function(a, b) {
-      var _new = {};
-      for(var name in a) {
-        if(a.hasOwnProperty(name)) {
-          _new[name] = a[name];
-        }
-      };
-      for(var name in b) {
-        if(b.hasOwnProperty(name)) {
-          _new[name] = b[name];
-        }
-      };
-      return _new;
     },
 
     // by @langalex, support for arrays of strings
@@ -293,7 +292,7 @@ var Mustache = function() {
       } else {
         var r = [];
         var l = array.length;
-        for(var i=0;i<l;i++) {
+        for(var i = 0; i < l; i++) {
           r.push(fn(array[i]));
         }
         return r;

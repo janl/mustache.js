@@ -2,12 +2,16 @@
 
 ## 0.3.0 (??-??-????)
 
+* Fix Rhino compat.
+* CommonJS packaging is no longer a special case.
+* DRY Rakefile.
+* Allow whitespace around tag names.
+* Fix partial scope.
 * Fix Comments.
 * Added inverted sections.
 * Avoid double encoding of entities.
 * Use sections to dereference subcontexts.
 * Added higher order sections.
-
 
 
 ## 0.2.3 (28-03-2010)
