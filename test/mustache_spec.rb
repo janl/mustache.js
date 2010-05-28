@@ -68,7 +68,7 @@ describe "mustache" do
           }
         JS
 
-        run_js(runner).should == expect
+        run_js(runner).should == expect + "\n"
       end
       it "should sendFun the correct html" do
 
@@ -86,7 +86,7 @@ describe "mustache" do
             }
             var template = #{template};
             Mustache.to_html(template, #{testname}, null, sendFun);
-            print(chunks.join("\\n"));
+            print(chunks.join(""));
           } catch(e) {
             print('ERROR: ' + e.message);
           }
@@ -137,7 +137,7 @@ describe "mustache" do
               }
             }
             Mustache.to_html(template, partial_context, partials, sendFun);
-            print(chunks.join("\\n"));
+            print(chunks.join(""));
           } catch(e) {
             print('ERROR: ' + e.message);
           }
