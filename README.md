@@ -8,16 +8,15 @@ plugins, see <http://mustache.github.com/>.
 
 ## Where to Use?
 
-You can use mustache.js rendering stuff in various scenarios. E.g. you can render
-templates in your browser, or rendering server-side stuff with [node.js][node.js],
-use it for rendering stuff in [CouchDB][couchdb]'s views.
+You can use mustache.js rendering stuff in various scenarios. E.g. you can
+render templates in your browser, or rendering server-side stuff with
+[node.js][node.js], use it for rendering stuff in [CouchDB][couchdb]’s views.
 
 
 ## Who Uses Mustache?
 
 An updated list is kept on the Github wiki. Add yourself, if you use
-mustache.js:
-<http://wiki.github.com/janl/mustache.js/beard-competition>
+mustache.js: <http://wiki.github.com/janl/mustache.js/beard-competition>
 
 
 ## Usage
@@ -35,16 +34,16 @@ A quick example how to use mustache.js:
 
     var html = Mustache.to_html(template, view);
 
-`template` is a simple string with mustache tags and `view` is a JavaScript object containing the.
+`template` is a simple string with mustache tags and `view` is a JavaScript
+object containing the data and any code to render the template.
 
 
 ## Template Tag Types
 
 There are several types of tags currently implemented in mustache.js.
 
-For a language-agnostic overview of Mustache's template syntax, see
-the `mustache(5)` manpage or
-<http://mustache.github.com/mustache.5.html>.
+For a language-agnostic overview of Mustache’s template syntax, see the
+`mustache(5)` manpage or <http://mustache.github.com/mustache.5.html>.
 
 ### Simple Tags
 
@@ -57,10 +56,10 @@ Tags are always surrounded by mustaches like this `{{foobar}}`.
 
 ### Conditional Sections
 
-Conditional sections begin with `{{#condition}}` and end with `{{/condition}}`. When
-`condition` evaluates to true, the section is rendered, otherwise the hole block will
-output nothing at all. `condition` may be a function returning true/false or a simple
-boolean.
+Conditional sections begin with `{{#condition}}` and end with
+`{{/condition}}`. When `condition` evaluates to true, the section is rendered,
+otherwise the hole block will output nothing at all. `condition` may be a
+function returning true/false or a simple boolean.
 
     var view = {condition: function() {
       // [...your code goes here...]
@@ -76,8 +75,9 @@ boolean.
 
 Enumerable Sections use the same syntax as condition sections do.
 `{{#shopping_items}}` and `{{/shopping_items}}`. Actually the view decides how
-mustache.js renders the section. If the view returns an array, it will iterator over
-the items. Use `{{.}}` to access the current item inside the enumeration section.
+mustache.js renders the section. If the view returns an array, it will
+iterator over the items. Use `{{.}}` to access the current item inside the
+enumeration section.
 
     var view = {name: "Joe's shopping card",
                 items: ["bananas", "apples"]}
@@ -90,8 +90,8 @@ the items. Use `{{.}}` to access the current item inside the enumeration section
 
 ### Higher Order Sections
 
-If a section key returns a function, it will be called and passed both the unrendered
-block of text and a renderer convenience function.
+If a section key returns a function, it will be called and passed both the
+unrendered block of text and a renderer convenience function.
 
 Given this JS:
 
@@ -110,8 +110,8 @@ We'll get this output:
 
     <b>Hi Tater.</b>
 
-As you can see, we're pre-processing the text in the block. This can be used to
-implement caching, filters (like syntax highlighting), etc.
+As you can see, we’re pre-processing the text in the block. This can be used
+to implement caching, filters (like syntax highlighting), etc.
 
 You can use `this.name` to access the attribute `name` from your view.
 
@@ -151,8 +151,8 @@ Here is the result:
 
 ### Inverted Sections
 
-An inverted section opens with `{{^section}}` instead of `{{#section}}` and uses a
-boolean negative to evaluate. Empty arrays are considered falsy.
+An inverted section opens with `{{^section}}` instead of `{{#section}}` and
+uses a boolean negative to evaluate. Empty arrays are considered falsy.
 
 View:
 
@@ -172,8 +172,8 @@ Result:
 
 ### View Partials
 
-mustache.js supports a quite powerful but yet simple view partial mechanism. Use the
-following syntax for partials: `{{>partial_name}}`
+mustache.js supports a quite powerful but yet simple view partial mechanism.
+Use the following syntax for partials: `{{>partial_name}}`
 
     var view = {
       name: "Joe",
@@ -194,24 +194,25 @@ following syntax for partials: `{{>partial_name}}`
     output will be:
     Welcome, Joe! You just won $1000 (which is $600 after tax)
 
-You invoke a partial with `{{>winnings}}`. Invoking the partial `winnings` will tell
-mustache.js to look for a object in the context's property `winnings`. It will then
-use that object as the context for the template found in `partials` for `winnings`.
+You invoke a partial with `{{>winnings}}`. Invoking the partial `winnings`
+will tell mustache.js to look for a object in the context's property
+`winnings`. It will then use that object as the context for the template found
+in `partials` for `winnings`.
 
 
 ## Escaping
 
-mustache.js does escape all values when using the standard double mustache syntax.
-Characters which will be escaped: `& \ " < >`. To disable escaping, simply use
-tripple mustaches like `{{{unescaped_variable}}}`.
+mustache.js does escape all values when using the standard double mustache
+syntax. Characters which will be escaped: `& \ " < >`. To disable escaping,
+simply use tripple mustaches like `{{{unescaped_variable}}}`.
 
 Example: Using `{{variable}}` inside a template for `5 > 2` will result in `5 &gt; 2`, where as the usage of `{{{variable}}}` will result in `5 > 2`.
 
 
 ## Streaming
 
-To stream template results out of mustache.js, you can pass an optional `send()`
-callback to the `to_html()` call:
+To stream template results out of mustache.js, you can pass an optional
+`send()` callback to the `to_html()` call:
 
     Mustache.to_html(template, view, partials, function(line) {
       print(line);
@@ -220,7 +221,8 @@ callback to the `to_html()` call:
 
 ## Pragmas
 
-Pragma tags let you alter the behaviour of mustache.js. They have the format of
+Pragma tags let you alter the behaviour of mustache.js. They have the format
+of
 
     {{%PRAGMANAME}}
 
@@ -231,9 +233,9 @@ and they accept options:
 
 ### IMPLICIT-ITERATOR
 
-When using a block to iterate over an enumerable (Array), mustache.js expects an
-objects as enumerable items. The implicit iterator pragma enables optional behaviour
-of allowing literals as enumerable items. Consider this view:
+When using a block to iterate over an enumerable (Array), mustache.js expects
+an objects as enumerable items. The implicit iterator pragma enables optional
+behaviour of allowing literals as enumerable items. Consider this view:
 
     var view = {
       foo: [1, 2, 3, 4, 5, "french"]
@@ -246,8 +248,8 @@ The following template can iterate over the member `foo`:
       {{.}}
     {{/foo}}
 
-If you don't like the dot in there, the pragma accepts an option to set your own
-iteration marker:
+If you don't like the dot in there, the pragma accepts an option to set your
+own iteration marker:
 
     {{%IMPLICIT-ITERATOR iterator=bob}}
     {{#foo}}
