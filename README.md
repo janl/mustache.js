@@ -254,6 +254,15 @@ iteration marker:
       {{bob}}
     {{/foo}}
 
+## FaQ
+
+### Why doesn’t Mustache allow dot notation like `{{variable.member}}`?
+
+The reason is given in the [mustache.rb
+bugtracker](http://github.com/defunkt/mustache/issues/issue/6).
+
+Mustache implementations strive to be template-compatible.
+
 
 ## More Examples and Documentation
 
