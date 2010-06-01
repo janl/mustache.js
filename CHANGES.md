@@ -2,6 +2,7 @@
 
 ## 0.3.0 (??-??-????)
 
+* Make IMPLICIT ITERATORS a first class feature.
 * Fix Rhino compat.
 * CommonJS packaging is no longer a special case.
 * DRY Rakefile.
