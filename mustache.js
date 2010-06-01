@@ -260,8 +260,11 @@ var Mustache = function() {
     create_context: function(_context) {
       if(this.is_object(_context)) {
         return _context;
-      } else if(this.pragmas["IMPLICIT-ITERATOR"]) {
-        var iterator = this.pragmas["IMPLICIT-ITERATOR"].iterator || ".";
+      } else {
+        var iterator = ".";
+        if(this.pragmas["IMPLICIT-ITERATOR"]) {
+          iterator = this.pragmas["IMPLICIT-ITERATOR"].iterator;
+        }
         var ctx = {};
         ctx[iterator] = _context;
         return ctx;

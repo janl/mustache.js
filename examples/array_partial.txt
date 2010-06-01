@@ -1,6 +1,4 @@
 Here's a non-sense array of values
-
-
 1
 2
 3
