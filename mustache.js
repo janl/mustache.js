@@ -85,7 +85,7 @@ var Mustache = function() {
     */
     render_partial: function(name, context, partials) {
       name = this.trim(name);
-      if(!partials || !partials[name]) {
+      if(!partials || partials[name] === undefined) {
         throw({message: "unknown_partial '" + name + "'"});
       }
       if(typeof(context[name]) != "object") {
