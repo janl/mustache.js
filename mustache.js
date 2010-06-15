@@ -211,7 +211,7 @@ var Mustache = function() {
     find: function(name, context) {
       name = this.trim(name);
 
-      // Checks whether a value is thruthy or false or 0
+      // Checks whether a value is truthy or false or 0
       function is_kinda_truthy(bool) {
         return bool === false || bool === 0 || bool;
       }
@@ -244,7 +244,7 @@ var Mustache = function() {
           }
         }
       }	  
-      // silently ignore unkown variables
+      // silently ignore unknown variables
       return "";
     },
 
