@@ -81,7 +81,7 @@ var Mustache = function() {
     },
 
     /*
-      Tries to find a partial in the curent scope and render it
+      Tries to find a partial in the current scope and render it
     */
     render_partial: function(name, context, partials) {
       name = this.trim(name);
