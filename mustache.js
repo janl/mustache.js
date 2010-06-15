@@ -10,6 +10,8 @@ var Mustache = function() {
   Renderer.prototype = {
     otag: "{{",
     ctag: "}}",
+	escaped_otag: "\{\{",
+	escaped_ctag: "\}\}",
     pragmas: {},
     buffer: [],
     pragmas_implemented: {
@@ -62,8 +64,8 @@ var Mustache = function() {
       }
 
       var that = this;
-      var regex = new RegExp(this.otag + "%([\\w-]+) ?([\\w]+=[\\w]+)?" +
-            this.ctag);
+      var regex = new RegExp(this.escaped_otag + "%([\\w-]+) ?([\\w]+=[\\w]+)?" +
+            this.escaped_ctag);
       return template.replace(regex, function(match, pragma, options) {
         if(!that.pragmas_implemented[pragma]) {
           throw({message: 
@@ -104,8 +106,8 @@ var Mustache = function() {
 
       var that = this;
       // CSW - Added "+?" so it finds the tighest bound, not the widest
-      var regex = new RegExp(this.otag + "(\\^|\\#)\\s*((.+?)(\\(.*\\))?)\\s*" + this.ctag +
-              "\n*([\\s\\S]+?)" + this.otag + "\\/\\s*\\3\\s*" + this.ctag +
+      var regex = new RegExp(this.escaped_otag + "(\\^|\\#)\\s*((.+?)(\\(.*\\))?)\\s*" + this.escaped_ctag +
+              "\n*([\\s\\S]+?)" + this.escaped_otag + "\\/\\s*\\3\\s*" + this.escaped_ctag +
               "\\s*", "mg");
 
       // for each {{#foo}}{{/foo}} section do...
@@ -150,8 +152,8 @@ var Mustache = function() {
       var that = this;
 
       var new_regex = function() {
-        return new RegExp(that.otag + "(=|!|>|\\{|%)?([^\\/#\\^]+?)\\1?" +
-          that.ctag + "+", "g");
+        return new RegExp(that.escaped_otag + "(=|!|>|\\{|%)?([^\\/#\\^]+?)\\1?" +
+          that.escaped_ctag + "+", "g");
       };
 
       var regex = new_regex();
@@ -186,8 +188,8 @@ var Mustache = function() {
 
     set_delimiters: function(delimiters) {
       var dels = delimiters.split(" ");
-      this.otag = this.escape_regex(dels[0]);
-      this.ctag = this.escape_regex(dels[1]);
+      this.escaped_otag = this.escape_regex(dels[0]);
+      this.escaped_ctag = this.escape_regex(dels[1]);
     },
 
     escape_regex: function(text) {
