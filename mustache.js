@@ -49,9 +49,7 @@ var Mustache = function() {
       Sends parsed lines
     */
     send: function(line) {
-      if(line != "") {
-        this.buffer.push(line);
-      }
+      this.buffer.push(line);
     },
 
     /*
@@ -175,9 +173,11 @@ var Mustache = function() {
         }
       };
       var lines = template.split("\n");
+      var oldContent;
       for(var i = 0; i < lines.length; i++) {
+        oldContent = lines[i];
         lines[i] = lines[i].replace(regex, tag_replace_callback, this);
-        if(!in_recursion) {
+        if(!in_recursion && (oldContent === "" || lines[i] !== "")) {
           this.send(lines[i]);
         }
       }
