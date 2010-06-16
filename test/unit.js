@@ -1,5 +1,5 @@
 test("Parser", function() {
-	expect(2);
+	expect(3);
 
 	// matches whitespace_partial.html
 	equals(
@@ -38,6 +38,16 @@ test("Parser", function() {
 		'Hello\n\n\nWorld\n',
 		'Preservation of white space'
 	);
+	
+	equals(
+		Mustache.to_html(
+			'{{=tag1}}',
+			{ tag1: 'Hello' },
+			{}
+		),
+		'{{=tag1}}',
+		'ignore equal sign'
+	);	
 });
 
 test("Basic Variables", function() {
@@ -248,7 +258,7 @@ test("'^' (Inverted Section)", function() {
 });
 
 test("'>' (Partials)", function() {
-	expect(4);
+	expect(5);
 	
 	// matches view_partial.html
 	equals(
@@ -327,6 +337,17 @@ test("'>' (Partials)", function() {
 		),
 		'1\n1.1\n1.1.1\n\n\n'
 	);
+	
+	try {
+		Mustache.to_html(
+			'{{>partial}}',
+			{},
+			{partal: ''}
+		);
+		ok(false);
+	} catch(e) {
+		equals(e.message, "unknown_partial 'partial'");
+	}
 });
 
 test("'=' (Set Delimiter)", function() {
