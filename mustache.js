@@ -10,8 +10,8 @@ var Mustache = function() {
   Renderer.prototype = {
     otag: "{{",
     ctag: "}}",
-	escaped_otag: "\{\{",
-	escaped_ctag: "\}\}",
+    escaped_otag: "\{\{",
+    escaped_ctag: "\}\}",
     pragmas: {},
     buffer: [],
     pragmas_implemented: {
@@ -37,6 +37,8 @@ var Mustache = function() {
       }
 
       template = this.render_pragmas(template);
+      template = this.render_delimiter(template, context, partials);
+
       var html = this.render_section(template, context, partials);
       if(in_recursion) {
         return this.render_tags(html, context, partials, in_recursion);
@@ -80,6 +82,28 @@ var Mustache = function() {
       });
     },
 
+    render_delimiter: function(template, context, partials) {
+      if(!this.includes("=", template)) {
+        return template;
+      }
+      
+      var that = this;
+      var regex = new RegExp(this.escaped_otag + "=(\\S+)\\s+(\\S+)=" + this.escaped_ctag + "\n?([\\s\\S]*)", "mg");
+      
+      return template.replace(regex, function(match, newOpen, newClose, content) {
+		var old_otag = that.otag;
+		var old_ctag = that.ctag;
+		
+        that.set_delimiters(newOpen, newClose);
+		
+        var html = that.render(content, context, partials, true);
+		
+		that.set_delimiters(old_otag, old_ctag);
+		
+		return html;
+      });
+    },
+    
     /*
       Tries to find a partial in the current scope and render it
     */
@@ -150,7 +174,7 @@ var Mustache = function() {
       var that = this;
 
       var new_regex = function() {
-        return new RegExp(that.escaped_otag + "(=|!|>|\\{|&|%)?([^\\/#\\^]+?)\\1?" +
+        return new RegExp(that.escaped_otag + "(!|>|\\{|&|%)?([^\\/#\\^]+?)\\1?" +
           that.escaped_ctag + "+", "g");
       };
 
@@ -158,10 +182,6 @@ var Mustache = function() {
       var tag_replace_callback = function(match, operator, name) {
         switch(operator) {
         case "!": // ignore comments
-          return "";
-        case "=": // set new delimiters, rebuild the replace regexp
-          that.set_delimiters(name);
-          regex = new_regex();
           return "";
         case ">": // render partial
           return that.render_partial(name, context, partials);
@@ -187,10 +207,12 @@ var Mustache = function() {
       }
     },
 
-    set_delimiters: function(delimiters) {
-      var dels = delimiters.split(" ");
-      this.escaped_otag = this.escape_regex(dels[0]);
-      this.escaped_ctag = this.escape_regex(dels[1]);
+    set_delimiters: function(open, close) {
+      this.otag = open;
+      this.ctag = close;
+      
+      this.escaped_otag = this.escape_regex(open);
+      this.escaped_ctag = this.escape_regex(close);
     },
 
     escape_regex: function(text) {
