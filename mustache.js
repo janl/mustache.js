@@ -152,7 +152,7 @@ var Mustache = function() {
       var that = this;
 
       var new_regex = function() {
-        return new RegExp(that.escaped_otag + "(=|!|>|\\{|%)?([^\\/#\\^]+?)\\1?" +
+        return new RegExp(that.escaped_otag + "(=|!|>|\\{|&|%)?([^\\/#\\^]+?)\\1?" +
           that.escaped_ctag + "+", "g");
       };
 
@@ -168,6 +168,7 @@ var Mustache = function() {
         case ">": // render partial
           return that.render_partial(name, context, partials);
         case "{": // the triple mustache is unescaped
+		case "&": // the ampersand is also unescaped
           return that.find(name, context);
         default: // escape the value
           return that.escape(that.find(name, context));
