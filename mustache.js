@@ -69,7 +69,6 @@ var Mustache = function() {
         return this.render_section(template, context, partials);
       }
       
-      var that = this;
       var regex = new RegExp("(" + this.escaped_otag + "=(?:\\S+)\\s+(?:\\S+)=" + this.escaped_ctag + "\\n*)", "mg");
       var fragments = template.split(regex);
       
@@ -87,7 +86,7 @@ var Mustache = function() {
           
           fragments[i] = this.render_delimiter(fragments.slice(i+1).join(""), context, partials);
           
-          that.set_delimiters(old_otag, old_ctag);
+          this.set_delimiters(old_otag, old_ctag);
           
           fragments = fragments.slice(0,i+1);
           
@@ -122,7 +121,6 @@ var Mustache = function() {
         return this.render_tags(template, context, partials);
       }
 
-      var that = this;
       var regex = new RegExp(
         "(" + this.escaped_otag + "(?:\\^|\\#)\\s*(.+?)(?:\\(.*\\))?\\s*" + this.escaped_ctag + 
         "\n*[\\s\\S]+?" + this.escaped_otag + "\\/\\s*\\2\\s*" + this.escaped_ctag + "\\s*)",
@@ -141,7 +139,7 @@ var Mustache = function() {
         
         if(fragments[i].indexOf(this.otag+"#")===0 || fragments[i].indexOf(this.otag+"^")===0) {
           lastWasSection = true;
-          fragments[i] = this.render_section2(fragments[i], context, partials);
+          fragments[i] = this.render_section_internal(fragments[i], context, partials);
         } else {
           fragments[i] = this.render_tags(fragments[i], context, partials);
         }
@@ -150,7 +148,7 @@ var Mustache = function() {
       return fragments.join("");
     },
     
-    render_section2: function(template, context, partials) {
+    render_section_internal: function(template, context, partials) {
       var that = this;
       // CSW - Added "+?" so it finds the tighest bound, not the widest
       var regex = new RegExp(this.escaped_otag + "(\\^|\\#)\\s*((.+?)(\\(.*\\))?)\\s*" + this.escaped_ctag +
