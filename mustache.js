@@ -13,45 +13,27 @@ var Mustache = function() {
     escaped_otag: "\{\{",
     escaped_ctag: "\}\}",
     pragmas: {},
-    buffer: [],
     pragmas_implemented: {
       "IMPLICIT-ITERATOR": true
     },
     context: {},
 
-    render: function(template, context, partials, in_recursion) {
-      // reset buffer & set context
-      if(!in_recursion) {
-        this.context = context;
-        this.buffer = []; // TODO: make this non-lazy
-      }
+    render: function(template, context, partials) {
+      // reset context
+      this.context = context;
 
       // fail fast
       if(!this.includes("", template)) {
-        if(in_recursion) {
-          return template;
-        } else {
-          this.send(template);
-          return;
-        }
+        return template;
       }
 
       template = this.render_pragmas(template);
-      template = this.render_delimiter(template, context, partials);
-
-      var html = this.render_section(template, context, partials);
-      if(in_recursion) {
-        return this.render_tags(html, context, partials, in_recursion);
-      }
-
-      this.render_tags(html, context, partials, in_recursion);
+      
+      return this.render_recursive(template, context, partials);
     },
-
-    /*
-      Sends parsed lines
-    */
-    send: function(line) {
-      this.buffer.push(line);
+    
+    render_recursive: function(template, context, partials) {
+      return this.render_delimiter(template, context, partials);
     },
 
     /*
@@ -84,24 +66,38 @@ var Mustache = function() {
 
     render_delimiter: function(template, context, partials) {
       if(!this.includes("=", template)) {
-        return template;
+        return this.render_section(template, context, partials);
       }
       
       var that = this;
-      var regex = new RegExp(this.escaped_otag + "=(\\S+)\\s+(\\S+)=" + this.escaped_ctag + "\n?([\\s\\S]*)", "mg");
+      var regex = new RegExp("(" + this.escaped_otag + "=(?:\\S+)\\s+(?:\\S+)=" + this.escaped_ctag + "\\n*)", "mg");
+      var fragments = template.split(regex);
       
-      return template.replace(regex, function(match, newOpen, newClose, content) {
-		var old_otag = that.otag;
-		var old_ctag = that.ctag;
-		
-        that.set_delimiters(newOpen, newClose);
-		
-        var html = that.render(content, context, partials, true);
-		
-		that.set_delimiters(old_otag, old_ctag);
-		
-		return html;
-      });
+      var i, n;
+      var r = new RegExp(this.escaped_otag + "=(\\S+)\\s+(\\S+)=" + this.escaped_ctag);
+      var matches;
+      
+      for (i=0, n=fragments.length; i<n; ++i) {
+        matches = fragments[i].match(r);
+        if(matches && matches.length===3) {
+          var old_otag = this.otag;
+          var old_ctag = this.ctag;
+          
+          this.set_delimiters(matches[1], matches[2]);
+          
+          fragments[i] = this.render_delimiter(fragments.slice(i+1).join(""), context, partials);
+          
+          that.set_delimiters(old_otag, old_ctag);
+          
+          fragments = fragments.slice(0,i+1);
+          
+          break;
+        } else {
+          fragments[i]=this.render_section(fragments[i], context, partials);
+        }
+      }
+      
+      return fragments.join("");
     },
     
     /*
@@ -113,9 +109,9 @@ var Mustache = function() {
         throw({message: "unknown_partial '" + name + "'"});
       }
       if(typeof(context[name]) != "object") {
-        return this.render(partials[name], context, partials, true);
+        return this.render_recursive(partials[name], context, partials);
       }
-      return this.render(partials[name], context[name], partials, true);
+      return this.render_recursive(partials[name], context[name], partials);
     },
 
     /*
@@ -123,9 +119,38 @@ var Mustache = function() {
     */
     render_section: function(template, context, partials) {
       if(!this.includes("#", template) && !this.includes("^", template)) {
-        return template;
+        return this.render_tags(template, context, partials);
       }
 
+      var that = this;
+      var regex = new RegExp(
+        "(" + this.escaped_otag + "(?:\\^|\\#)\\s*(.+?)(?:\\(.*\\))?\\s*" + this.escaped_ctag + 
+        "\n*[\\s\\S]+?" + this.escaped_otag + "\\/\\s*\\2\\s*" + this.escaped_ctag + "\\s*)",
+        "mg");
+
+      var i, n;
+      var lastWasSection = false;
+      var fragments = template.split(regex);
+      
+      for (i=0, n=fragments.length; i<n; ++i) {
+        if(lastWasSection) {
+          fragments[i] = "";
+          lastWasSection = false;
+          continue;
+        }
+        
+        if(fragments[i].indexOf(this.otag+"#")===0 || fragments[i].indexOf(this.otag+"^")===0) {
+          lastWasSection = true;
+          fragments[i] = this.render_section2(fragments[i], context, partials);
+        } else {
+          fragments[i] = this.render_tags(fragments[i], context, partials);
+        }
+      }
+      
+      return fragments.join("");
+    },
+    
+    render_section2: function(template, context, partials) {
       var that = this;
       // CSW - Added "+?" so it finds the tighest bound, not the widest
       var regex = new RegExp(this.escaped_otag + "(\\^|\\#)\\s*((.+?)(\\(.*\\))?)\\s*" + this.escaped_ctag +
@@ -133,43 +158,45 @@ var Mustache = function() {
               "\\s*", "mg");
 
       // for each {{#foo}}{{/foo}} section do...
-      return template.replace(regex, function(match, type, name, reserved1, reserved2, content) {
-	    // the reserved variables are not being used
+      var fragment = template.replace(regex, function(match, type, name, reserved1, reserved2, content) {
+        // the reserved variables are not being used
         var value = that.find(name, context);
         if(type == "^") { // inverted section
           if(!value || that.is_array(value) && value.length === 0) {
             // false or empty list, render it
-            return that.render(content, context, partials, true);
+            return that.render_recursive(content, context, partials);
           } else {
             return "";
           }
         } else if(type == "#") { // normal section
           if(that.is_array(value)) { // Enumerable, Let's loop!
             return that.map(value, function(row) {
-              return that.render(content, that.create_context(row),
+              return that.render_recursive(content, that.create_context(row),
                 partials, true);
             }).join("");
           } else if(that.is_object(value)) { // Object, Use it as subcontext!
-            return that.render(content, that.create_context(value),
+            return that.render_recursive(content, that.create_context(value),
               partials, true);
           } else if(typeof value === "function") {
             // higher order section
             return value.call(context, content, function(text) {
-              return that.render(text, context, partials, true);
+              return that.render_recursive(text, context, partials);
             });
           } else if(value) { // boolean section
-            return that.render(content, context, partials, true);
+            return that.render_recursive(content, context, partials);
           } else {
             return "";
           }
         }
       });
+      
+      return fragment;
     },
 
     /*
       Replace {{foo}} and friends with values from our view
     */
-    render_tags: function(template, context, partials, in_recursion) {
+    render_tags: function(template, context, partials) {
       // tit for tat
       var that = this;
 
@@ -186,7 +213,7 @@ var Mustache = function() {
         case ">": // render partial
           return that.render_partial(name, context, partials);
         case "{": // the triple mustache is unescaped
-		case "&": // the ampersand is also unescaped
+        case "&": // the ampersand is also unescaped
           return that.find(name, context);
         default: // escape the value
           return that.escape(that.find(name, context));
@@ -195,16 +222,10 @@ var Mustache = function() {
       var lines = template.split("\n");
       var oldContent;
       for(var i = 0; i < lines.length; i++) {
-        oldContent = lines[i];
         lines[i] = lines[i].replace(regex, tag_replace_callback, this);
-        if(!in_recursion && (oldContent === "" || lines[i] !== "")) {
-          this.send(lines[i]);
-        }
       }
 
-      if(in_recursion) {
-        return lines.join("\n");
-      }
+      return lines.join("\n");
     },
 
     set_delimiters: function(open, close) {
@@ -351,15 +372,9 @@ var Mustache = function() {
     /*
       Turns a template and view into HTML
     */
-    to_html: function(template, view, partials, send_fun) {
+    to_html: function(template, view, partials) {
       var renderer = new Renderer();
-      if(send_fun) {
-        renderer.send = send_fun;
-      }
-      renderer.render(template, view, partials);
-      if(!send_fun) {
-        return renderer.buffer.join("\n");
-      }
+      return renderer.render(template, view, partials);
     }
   });
 }();

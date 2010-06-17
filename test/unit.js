@@ -550,7 +550,7 @@ test("Regression Suite", function() {
 			{ enumerate: [ { text: 'A' }, { text: 'B' } ] },
 			{ partial: '{{=[[ ]]=}}\n{{text}}\n[[={{ }}=]]' }
 		),
-		'{{text}}\n{{text}}\n',
+		'{{text}}\n\n{{text}}\n\n',
 		'Issue 44'
 	);
 	
