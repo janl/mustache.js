@@ -389,7 +389,7 @@ test("'!' (Comments)", function() {
 });
 
 test("'%' (Pragmas)", function() {
-	expect(2);
+	expect(3);
 	
 	// matches array_of_strings_options.html
 	equals(
@@ -417,6 +417,15 @@ test("'%' (Pragmas)", function() {
 	} catch (e) {
 		equals(e.message, 'This implementation of mustache doesn\'t understand the \'I-HAVE-THE-GREATEST-MUSTACHE\' pragma');
 	}
+	
+	equals(
+		Mustache.to_html(
+			'{{%IMPLICIT-ITERATOR}}{{#dataSet}}{{.}}:{{/dataSet}}',
+			{ dataSet: [ 'Object 1', 'Object 2', 'Object 3' ] },
+			{}
+		),
+		"Object 1:Object 2:Object 3:"
+	);
 });
 
 test("Empty", function() {
