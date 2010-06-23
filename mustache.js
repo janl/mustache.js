@@ -159,16 +159,18 @@ var Mustache = function() {
           if (!subTemplate) {
             throw new Error("Unknown partial '" + item.tag + "'");
           }
-          this.render(subTemplate, context, partials);
-          // TODO: below matches @janl's mustache, but not mustache(5)
-          /*
+          
+		  // this is the mustache(5) way
+		  // this.render(subTemplate, context, partials);
+		  
+          // this is @janl's way
           var subContext = context[item.tag];
           if (typeof(subContext) == "object") {
             this.render(subTemplate, subContext, partials);
           } else {
             this.send(subTemplate);
           }
-          */
+		  
         } else if (item.operator && !item.noEscape) {
           // ignore other operators
         } else if (item.tag) {
