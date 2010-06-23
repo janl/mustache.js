@@ -68,7 +68,7 @@ describe "mustache" do
           }
         JS
 
-        run_js(runner).should == expect
+        run_js(runner).gsub(/\s+/, '').should == expect.gsub(/\s+/, '')
       end
       it "should sendFun the correct html" do
 
@@ -92,7 +92,7 @@ describe "mustache" do
           }
         JS
 
-        run_js(runner).strip.should == expect.strip
+        run_js(runner).strip.gsub(/\s+/, '').should == expect.strip.gsub(/\s+/, '')
       end
     end
   end
@@ -117,7 +117,7 @@ describe "mustache" do
           }
         JS
       
-        run_js(runner).should == expect
+        run_js(runner).gsub(/\s+/, '').should == expect.gsub(/\s+/, '')
       end
       it "should sendFun the correct html" do
 
@@ -143,7 +143,7 @@ describe "mustache" do
           }
         JS
 
-        run_js(runner).strip.should == expect.strip
+        run_js(runner).strip.gsub(/\s+/, '').should == expect.strip.gsub(/\s+/, '')
       end
     end
   end
