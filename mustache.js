@@ -79,7 +79,7 @@ var Mustache = function() {
           var pragmaInfo = token.tag.match(/([\w_-]+) ?([\w]+=[\w]+)?/);
           var pragma = pragmaInfo[1];
           if (!this.pragmas_implemented[pragma]) {
-            throw new Error("This mustache implementation doesn't understand the '" +
+            throw new Error("This implementation of mustache doesn't understand the '" +
                             pragma + "' pragma");
           }
           var options = {}
