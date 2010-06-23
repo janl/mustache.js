@@ -218,7 +218,7 @@ var Mustache = function() {
     valueIterator: function(name, context) {
       var value = this.lookupValue(name, context);
       var me = this;
-      if (value == null) {
+      if (!value) {
         return function(){};
       } else if (value instanceof Function && value.iterator) {
         return value;
