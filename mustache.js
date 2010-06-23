@@ -170,12 +170,11 @@ var Mustache = function() {
           } else {
             this.send(subTemplate);
           }
-		  
         } else if (item.operator && !item.noEscape) {
           // ignore other operators
         } else if (item.tag) {
           var rawValue = this.lookupValue(item.tag, context);
-          if (rawValue) {
+          if (rawValue != null) {
             var value = rawValue.toString();
             this.send((item.noEscape) ? value : this.escapeHTML(value));
           }
@@ -193,7 +192,7 @@ var Mustache = function() {
         value = value.apply(context);
       }
       // silently ignore unkown variables
-      if (!value) {
+      if (value == null) {
         value = "";
       }
       return value;
@@ -219,7 +218,7 @@ var Mustache = function() {
     valueIterator: function(name, context) {
       var value = this.lookupValue(name, context);
       var me = this;
-      if (!value) {
+      if (value == null) {
         return function(){};
       } else if (value instanceof Function && value.iterator) {
         return value;
