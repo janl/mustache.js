@@ -105,7 +105,7 @@ var Mustache = function() {
 					throw new ParserException("This implementation of mustache doesn't understand the '" + pragma + "' pragma");
 				}
 
-				return ""; // blank out all ragmas
+				return ""; // blank out all pragmas
 			});
 		},
 	
