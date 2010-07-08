@@ -11,9 +11,13 @@ var Mustache = function() {
 	
 	var Renderer = function(send_func) {
 		this.send_func = send_func;
+		
+		this.pragmas = {};
 	};
 	Renderer.prototype = {
 		render: function(template, context, partials) {
+			template = this.parse_pragmas(template, '{{', '}}');
+			
 			var tokens = this.tokenize(template, '{{', '}}');
 			
 			this.parse(this.createParserContext(tokens, partials, '{{', '}}'), [context]);
@@ -60,6 +64,50 @@ var Mustache = function() {
 			
 			return cleaned_tokens;
 		},
+		
+		/*
+			Looks for %PRAGMAS
+		*/
+		parse_pragmas: function(template, openTag, closeTag) {
+			/* includes tag */
+			function includes(needle, haystack) {
+				return haystack.indexOf(openTag + needle) !== -1;
+			}	
+			
+			// no pragmas, easy escape
+			if(!includes("%", template)) {
+				return template;
+			}
+
+			var that = this;
+			var regex = new RegExp(this.escape_regex(openTag) + "%([\\w-]+)(\\s*)(.*?(?=" + this.escape_regex(closeTag) + "))" + this.escape_regex(closeTag));
+			return template.replace(regex, function(match, pragma, space, suffix) {
+				var options = undefined;
+				
+				if (suffix.length>0) {
+					var optionPairs = suffix.split(',');
+					var scratch;
+					
+					options = {};
+					for (var i=0, n=optionPairs.length; i<n; ++i) {
+						scratch = optionPairs[i].split('=');
+						if (scratch.length !== 2) {
+							throw new ParserException('Malformed pragma options');
+						}
+						options[scratch[0]] = scratch[1];
+					}
+				}
+				
+				if (that.is_function(that.pragmaDirectives[pragma])) {
+					that.pragmaDirectives[pragma].call(that, options);
+				} else {
+					throw new ParserException("This implementation of mustache doesn't understand the '" + pragma + "' pragma");
+				}
+
+				return ""; // blank out all ragmas
+			});
+		},
+	
 		
 		parse: function(parserContext, contextStack) {
 			var state = 'text';
@@ -125,7 +173,7 @@ var Mustache = function() {
 					case '!':
 						return 'discard';
 					case '%':
-						throw new ParserException('Pragmas are currently unsupported.');
+						throw new ParserException('Pragmas are only supported as a preprocessing directive.');
 					case '/': // close mustache
 						throw new ParserException('Unexpected closing tag.');
 					case '}': // close triple mustache
@@ -360,6 +408,16 @@ var Mustache = function() {
 			}
 		},
 		
+		pragmaDirectives: {
+			'IMPLICIT-ITERATOR': function(options) {
+				this.pragmas['IMPLICIT-ITERATOR'] = {};
+				
+				if (options) {
+					this.pragmas['IMPLICIT-ITERATOR'].iterator = options['iterator'];
+				}
+			}
+		},
+		
 		/*
 		find `name` in current `context`. That is find me a value
 		from the view object
@@ -385,11 +443,12 @@ var Mustache = function() {
 		find_in_stack: function(name, contextStack) {
 			var value;
 			
-			for (var i=contextStack.length-1; i>=0; --i) {
-				value = this.find(name, contextStack[i]);
-				if (value) {
-					return value;
-				}
+			value = this.find(name, contextStack[contextStack.length-1]);
+			if (value) { return value; }
+			
+			if (contextStack.length>1) {
+				value = this.find(name, contextStack[0]);
+				if (value) { return value; }
 			}
 			
 			return undefined;
@@ -414,13 +473,13 @@ var Mustache = function() {
 					.replace(/>/g,'&gt;');
 			}
 
-			var result = this.find(key, contextStack[contextStack.length-1]);
+			var result = this.find_in_stack(key, contextStack);
 			if (result!==undefined) {
 				this.send_func(escapeHTML(result));
 			}
 		},
 		render_unescaped_variable: function(key, contextStack) {
-			var result = this.find(key, contextStack[contextStack.length-1]);
+			var result = this.find_in_stack(key, contextStack);
 			if (result!==undefined) {
 				this.send_func(result);
 			}
@@ -430,7 +489,7 @@ var Mustache = function() {
 				throw new ParserException('Unknown partial \'' + key + '\'');
 			}
 			
-			var res = this.find(key, contextStack[contextStack.length-1]);
+			var res = this.find_in_stack(key, contextStack);
 			if (this.is_object(res)) {
 				contextStack.push(res);
 			}
@@ -451,18 +510,18 @@ var Mustache = function() {
 					return _context;
 				} else {
 					var iterator = '.';
-					// NO IMPLICIT-ITERATOR implementation yet
-					//if(that.pragmas["IMPLICIT-ITERATOR"] &&
-					//	that.pragmas["IMPLICIT-ITERATOR"].iterator) {
-					//	iterator = that.pragmas["IMPLICIT-ITERATOR"].iterator;
-					//}
+					
+					if(that.pragmas["IMPLICIT-ITERATOR"] &&
+						that.pragmas["IMPLICIT-ITERATOR"].iterator) {
+						iterator = that.pragmas["IMPLICIT-ITERATOR"].iterator;
+					}
 					var ctx = {};
 					ctx[iterator] = _context;
 					return ctx;
 				}
 			}
 		
-			var value = this.find(key, contextStack[contextStack.length-1]);
+			var value = this.find_in_stack(key, contextStack);
 
 			var tokens;
 			if (sectionType==='invertedSection') {
