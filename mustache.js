@@ -414,13 +414,13 @@ var Mustache = function() {
 					.replace(/>/g,'&gt;');
 			}
 
-			var result = this.find(key, contextStack);
+			var result = this.find(key, contextStack[contextStack.length-1]);
 			if (result!==undefined) {
 				this.send_func(escapeHTML(result));
 			}
 		},
 		render_unescaped_variable: function(key, contextStack) {
-			var result = this.find(key, contextStack);
+			var result = this.find(key, contextStack[contextStack.length-1]);
 			if (result!==undefined) {
 				this.send_func(result);
 			}
