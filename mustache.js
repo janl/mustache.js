@@ -444,11 +444,11 @@ var Mustache = function() {
 			var value;
 			
 			value = this.find(name, contextStack[contextStack.length-1]);
-			if (value) { return value; }
+			if (value!==undefined) { return value; }
 			
 			if (contextStack.length>1) {
 				value = this.find(name, contextStack[0]);
-				if (value) { return value; }
+				if (value!==undefined) { return value; }
 			}
 			
 			return undefined;
