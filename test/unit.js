@@ -53,6 +53,19 @@ test("Parser", function() {
 	
 });
 
+test("Compiler", function() {
+	expect(3);
+	
+	var template = Mustache.compile('the grand poobah says: {{variable}}.', {});
+	equals(template({variable: 'hello'}), 'the grand poobah says: hello.');
+
+	template = Mustache.compile('the grand poobah says: {{>partial}}.', {partial: 'i love {{sugar}}'});
+	equals(template({sugar: 'chocolate'}), 'the grand poobah says: i love chocolate.');
+
+		template = Mustache.compile('the grand poobah says: {{#hos}}i love chocolate{{/hos}}.', {});
+		equals(template({hos:function() { return function(text, renderer) { return '<b>' + text + '</b>'; } }}), 'the grand poobah says: <b>i love chocolate</b>.');
+});
+
 test("Basic Variables", function() {
 	expect(3);
 	
