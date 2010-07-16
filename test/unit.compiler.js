@@ -1,3 +1,19 @@
+// the compiler tests are the exact same as the interpreter tests
+// so instead of writing all the tests twice, override the to_html
+// method
+module('Compiler', {
+	setup: function() {
+		this._oldToHtml = Mustache.to_html;
+		Mustache.to_html = function(template, view, partials) {
+			var compiler = Mustache.compile(template, partials);
+			return compiler(view);
+		}
+	},
+	teardown: function() {
+		Mustache.to_html = this._oldToHtml;
+	}
+});
+
 test("Parser", function() {
 	expect(3);
 
@@ -51,19 +67,6 @@ test("Parser", function() {
 		equals(e.message, 'Unexpected end of document.');
 	}
 	
-});
-
-test("Compiler", function() {
-	expect(3);
-	
-	var template = Mustache.compile('the grand poobah says: {{variable}}.', {});
-	equals(template({variable: 'hello'}), 'the grand poobah says: hello.');
-
-	template = Mustache.compile('the grand poobah says: {{>partial}}.', {partial: 'i love {{sugar}}'});
-	equals(template({sugar: 'chocolate'}), 'the grand poobah says: i love chocolate.');
-
-		template = Mustache.compile('the grand poobah says: {{#hos}}i love chocolate{{/hos}}.', {});
-		equals(template({hos:function() { return function(text, renderer) { return '<b>' + text + '</b>'; } }}), 'the grand poobah says: <b>i love chocolate</b>.');
 });
 
 test("Basic Variables", function() {
