@@ -727,18 +727,26 @@ var Mustache = function() {
 							contextStack.pop();
 						} else if (that.is_function(value)) {
 							// higher order section
-							// note that HOS triggers a full interpreter call on the result fragment
-							// this is slow in comparison to a compiled call
+							// note that HOS triggers a compilation on the resultFragment.
+							// this is slow (in relation to a fully compiled template) 
+							// since it invokes a call to the parser
 							var result = value.call(contextStack[contextStack.length-1], mustacheFragment, function(resultFragment) {
-								var o = [];
-								var s = function(output) { o.push(output); };
+								var cO = [];
+								var s = function(command) { cO.push(command); };
 			
-								var hos_renderer = new Renderer(s, 'interpreter');
+								var hos_renderer = new Renderer(s, 'compiler');
 
 								resultFragment = hos_renderer.parse_pragmas(resultFragment, openTag, closeTag);
 								var tokens = hos_renderer.tokenize(resultFragment, openTag, closeTag);
 								hos_renderer.parse(hos_renderer.createParserContext(tokens, partials, openTag, closeTag), contextStack);
 
+								var o = [];
+								var sT = function(output) { o.push(output); };
+				
+								for (var i=0,n=cO.length; i<n; ++i) {
+									commands[i](contextStack, sT);
+								}
+				
 								return o.join('');
 							});
 							
