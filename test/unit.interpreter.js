@@ -1,5 +1,14 @@
 module('Interpreter');
 
+test("Argument validation", function() {
+	expect(4);
+	
+	equals(Mustache.to_html(undefined), '', 'No parameters');
+	equals(Mustache.to_html('{{hi}}'), '', ' No View or Partials');
+	equals(Mustache.to_html('{{hi}}', {hi:'Hi.'}), 'Hi.', 'No Partials');
+	equals(Mustache.to_html('{{>hi}}', undefined, {hi:'{{p}}'}), '', 'Partial but no view');
+});
+
 test("Parser", function() {
 	expect(3);
 

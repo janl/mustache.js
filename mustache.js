@@ -770,6 +770,11 @@ var Mustache = function() {
 		Turns a template and view into HTML
 		*/
 		to_html: function(template, view, partials, send_func) {
+			if (!template) { return ''; }
+			
+			partials = partials || {};
+			view = view || {};
+			
 			var o = send_func ? undefined : [];
 			var s = send_func || function(output) { o.push(output); };
 			
@@ -780,11 +785,20 @@ var Mustache = function() {
 				return o.join('');
 			}
 		},
+		
+		/*
+		Compiles a template into an equivalent JS function for faster
+		repeated execution. 
+		*/
 		compile: function(template, partials) {
+			if (!template) { return function() { return '' }; }
+			
 			var p = {};
-			for (var key in partials) {
-				if (partials.hasOwnProperty(key)) {
-					p[key] = partials[key];
+			if (partials) {
+				for (var key in partials) {
+					if (partials.hasOwnProperty(key)) {
+						p[key] = partials[key];
+					}
 				}
 			}
 			
@@ -795,9 +809,10 @@ var Mustache = function() {
 			renderer.render(template, {}, p);
 
 			return function(view, send_func) {
-				var o = send_func ? undefined : [];
-				var s = send_func || function(output) { o.push(output); };
+				view = view || {};
 				
+				var o = send_func ? undefined : [];
+				var s = send_func || function(output) { o.push(output); };	
 			
 				for (var i=0,n=commands.length; i<n; ++i) {
 					commands[i]([view], s);
