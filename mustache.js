@@ -575,19 +575,22 @@ var Mustache = function() {
 						
 						var result = value.call(contextStack[contextStack.length-1], mustacheFragment, function(resultFragment) {
 							var tempStream = [];
-							var old_send_func = that.send_func;
-							that.send_func = function(text) { tempStream.push(text); };
+							var old_send_func = that.user_send_func;
+							that.user_send_func = function(text) { tempStream.push(text); };
 							
 							tokens = that.tokenize(resultFragment, openTag, closeTag);						
 							that.parse(that.createParserContext(tokens, partials, openTag, closeTag), contextStack);
 							
-							that.send_func = old_send_func;
+							that.user_send_func = old_send_func;
 							
 							return tempStream.join('');
 						});
 						
 						this.user_send_func(result);
-					}			
+					} else if (value) {
+						tokens = this.tokenize(mustacheFragment, openTag, closeTag);
+						this.parse(this.createParserContext(tokens, partials, openTag, closeTag), contextStack);
+					}
 				} else {
 					throw new ParserException('Unknown section type ' + sectionType);
 				}
@@ -632,30 +635,35 @@ var Mustache = function() {
 					throw new ParserException('Unknown partial \'' + key + '\'');
 				}
 				
-				var old_user_send_func = this.user_send_func;
-				var commands = [];
-				this.user_send_func = function(command) { commands.push(command); };
-				
-				var tokens = this.tokenize(partials[key], openTag, closeTag);
-				this.parse(this.createParserContext(tokens, partials, openTag, closeTag), reserved);
-			
-				this.user_send_func = old_user_send_func;
-				
-				var that = this;
-				this.user_send_func(function(contextStack, send_func) {
-					var res = that.find_in_stack(key, contextStack);
-					if (that.is_object(res)) {
-						contextStack.push(res);
-					}
-				
-					for (var i=0,n=commands.length; i<n; ++i) {
-						commands[i](contextStack, send_func);
-					}
+				if (!this.is_function(partials[key])) {
+					var old_user_send_func = this.user_send_func;
+					var commands = [];
+					this.user_send_func = function(command) { commands.push(command); };
 					
-					if (that.is_object(res)) {
-						contextStack.pop();
-					}
-				});
+					var tokens = this.tokenize(partials[key], openTag, closeTag);
+					partials[key] = function() {}; // blank out the paritals so that infinite recursion doesn't happen
+					this.parse(this.createParserContext(tokens, partials, openTag, closeTag), reserved);
+				
+					this.user_send_func = old_user_send_func;
+					
+					var that = this;
+					partials[key] = function(contextStack, send_func) {
+						var res = that.find_in_stack(key, contextStack);
+						if (that.is_object(res)) {
+							contextStack.push(res);
+						}
+					
+						for (var i=0,n=commands.length; i<n; ++i) {
+							commands[i](contextStack, send_func);
+						}
+						
+						if (that.is_object(res)) {
+							contextStack.pop();
+						}
+					};
+				}
+				
+				this.user_send_func(function(contextStack, send_func) { partials[key](contextStack, send_func); });
 			},
 			section: function(sectionType, mustacheFragment, key, reserved/*contextStack*/, partials, openTag, closeTag) {
 				// by @langalex, support for arrays of strings
@@ -735,6 +743,8 @@ var Mustache = function() {
 							});
 							
 							send_func(result);
+						} else if (value) {
+							section_command(contextStack, send_func);
 						}
 					});
 				} else {

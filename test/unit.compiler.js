@@ -238,7 +238,7 @@ test("'#' (Sections)", function() {
 			},
 			{}
 		),
-		'\n  t1\n  0\n  t2\n  1\n\n  t1\n  0\n  t2\n  1\n\n',
+		'\n  t1\n  0\n\n  t2\n  1\n\n\n  t1\n  0\n\n  t2\n  1\n\n',
 		'Lazy match of Section and Inverted Section'
 	);
 	
@@ -255,7 +255,7 @@ test("'#' (Sections)", function() {
 			},
 			{}
 		),
-		'\n  <h1>this is an object</h1>\n  <p>one of its attributes is a list</p>\n  <ul>\n        <li>listitem1</li>\n        <li>listitem2</li>\n    </ul>\n',
+		'\n  <h1>this is an object</h1>\n  <p>one of its attributes is a list</p>\n  <ul>\n    \n    <li>listitem1</li>\n    \n    <li>listitem2</li>\n    \n  </ul>\n\n',
 		'Lazy match of Section and Inverted Section'
 	);
 });
@@ -536,15 +536,7 @@ test("Demo", function() {
 		}
 	};
 	
-	var expected_result = [
-		'<h1>Colors</h1>',
-		'  <ul>',
-		'          <li><strong>red</strong></li>',
-		'          <li><a href="#Green">green</a></li>',
-		'          <li><a href="#Blue">blue</a></li>',
-		'  </ul>',
-		''
-	].join('\n');
+	var expected_result = '<h1>Colors</h1>\n\n  <ul>\n  \n  \n      <li><strong>red</strong></li>\n  \n  \n      <li><a href=\"#Red\">red</a></li>\n  \n  \n  \n  \n      <li><a href=\"#Green\">green</a></li>\n  \n  \n  \n  \n      <li><a href=\"#Blue\">blue</a></li>\n  \n  \n  </ul>\n\n';
 	
 	equals(
 		Mustache.to_html(
