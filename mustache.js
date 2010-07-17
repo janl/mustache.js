@@ -773,11 +773,18 @@ var Mustache = function() {
 			}
 		},
 		compile: function(template, partials) {
+			var p = {};
+			for (var key in partials) {
+				if (partials.hasOwnProperty(key)) {
+					p[key] = partials[key];
+				}
+			}
+			
 			var commands = [];
 			var s = function(command) { commands.push(command); };
 			
 			var renderer = new Renderer(s, 'compiler');
-			renderer.render(template, {}, partials);
+			renderer.render(template, {}, p);
 
 			return function(view, send_func) {
 				var o = send_func ? undefined : [];

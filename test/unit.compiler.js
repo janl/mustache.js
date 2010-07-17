@@ -15,7 +15,7 @@ module('Compiler', {
 });
 
 test("Parser", function() {
-	expect(3);
+	expect(4);
 
 	// matches whitespace_partial.html
 	equals(
@@ -67,6 +67,10 @@ test("Parser", function() {
 		equals(e.message, 'Unexpected end of document.');
 	}
 	
+	var partials = { 'partial' : '{{key}}' };
+	Mustache.compile('{{>partial}}', partials );
+	
+	equals(partials['partial'], '{{key}}', 'Partials compiler must be non-destructive');
 });
 
 test("Basic Variables", function() {
