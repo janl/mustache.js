@@ -549,6 +549,38 @@ test("Demo", function() {
 	);
 });
 
+test("Performance", function() {
+	expect(1);
+	
+	var start, end;
+	
+	var view = [];
+	for (var i=0;i<1000;++i) {
+		view.push({name:i});
+	}
+	
+	var template = '{{#count}}{{name}}\n{{/count}}';
+	
+	start = Date.now();
+	for (var j=0;j<1000;++j) {
+		this._oldToHtml(template, view, {});
+	}
+	end = Date.now();
+	
+	var interpreter_time = end - start;
+	
+	start = Date.now();
+	var compiler = Mustache.compile(template, {});
+	for (var k=0;k<1000;++k) {
+		compiler(view);
+	}
+	end = Date.now();
+	
+	var compiler_time = end - start;
+	
+	ok(compiler_time<interpreter_time, 'Compiler is faster.');
+});
+
 test("Regression Suite", function() {
 	expect(3);
 	
