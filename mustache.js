@@ -29,8 +29,104 @@ var Mustache = function() {
 		}
 		
 		this.pragmas = {};
+		
+		// Fix up the stupidness that is IE's split implementation
+		this._compliantExecNpcg = /()??/.exec("")[1] === undefined; // NPCG: nonparticipating capturing group
+		var hasCapturingSplit = '{{hi}}'.split(/(hi)/).length === 3;
+		if (!hasCapturingSplit) {
+			this.splitFunc = this.capturingSplit;
+		} else {
+			this.splitFunc = String.prototype.split;
+		}
 	};
 	Renderer.prototype = {
+		capturingSplit: function(separator) {
+			// fix up the stupidness that is IE's broken String.split implementation
+			// originally by Steven Levithan
+			/* Cross-Browser Split 1.0.1
+			(c) Steven Levithan <stevenlevithan.com>; MIT License
+			An ECMA-compliant, uniform cross-browser split method */
+			var str = this;
+			var limit = undefined;
+			
+			// if `separator` is not a regex, use the native `split`
+			if (Object.prototype.toString.call(separator) !== "[object RegExp]") {
+				return String.prototype.split.call(str, separator, limit);
+			}
+
+			var output = [],
+				lastLastIndex = 0,
+				flags = (separator.ignoreCase ? "i" : "") +
+						(separator.multiline  ? "m" : "") +
+						(separator.sticky     ? "y" : ""),
+				separator = RegExp(separator.source, flags + "g"), // make `global` and avoid `lastIndex` issues by working with a copy
+				separator2, match, lastIndex, lastLength;
+
+			str = str + ""; // type conversion
+			if (!this._compliantExecNpcg) {
+				separator2 = RegExp("^" + separator.source + "$(?!\\s)", flags); // doesn't need /g or /y, but they don't hurt
+			}
+
+			/* behavior for `limit`: if it's...
+			- `undefined`: no limit.
+			- `NaN` or zero: return an empty array.
+			- a positive number: use `Math.floor(limit)`.
+			- a negative number: no limit.
+			- other: type-convert, then use the above rules. */
+			if (limit === undefined || +limit < 0) {
+				limit = Infinity;
+			} else {
+				limit = Math.floor(+limit);
+				if (!limit) {
+					return [];
+				}
+			}
+
+			while (match = separator.exec(str)) {
+				lastIndex = match.index + match[0].length; // `separator.lastIndex` is not reliable cross-browser
+
+				if (lastIndex > lastLastIndex) {
+					output.push(str.slice(lastLastIndex, match.index));
+
+					// fix browsers whose `exec` methods don't consistently return `undefined` for nonparticipating capturing groups
+					if (!this._compliantExecNpcg && match.length > 1) {
+						match[0].replace(separator2, function () {
+							for (var i = 1; i < arguments.length - 2; i++) {
+								if (arguments[i] === undefined) {
+									match[i] = undefined;
+								}
+							}
+						});
+					}
+
+					if (match.length > 1 && match.index < str.length) {
+						Array.prototype.push.apply(output, match.slice(1));
+					}
+
+					lastLength = match[0].length;
+					lastLastIndex = lastIndex;
+
+					if (output.length >= limit) {
+						break;
+					}
+				}
+
+				if (separator.lastIndex === match.index) {
+					separator.lastIndex++; // avoid an infinite loop
+				}
+			}
+
+			if (lastLastIndex === str.length) {
+				if (lastLength || !separator.test("")) {
+					output.push("");
+				}
+			} else {
+				output.push(str.slice(lastLastIndex));
+			}
+
+			return output.length > limit ? output.slice(0, limit) : output;
+		},
+		
 		render: function(template, context, partials) {
 			template = this.parse_pragmas(template, '{{', '}}');
 			
@@ -71,7 +167,7 @@ var Mustache = function() {
 			
 			var regex = new RegExp('(' + delimiters.join('|') + ')');
 			
-			var tokens = template.split(regex);
+			var tokens = this.splitFunc.call(template, regex);
 			var cleaned_tokens = [];
 			for (var i = 0, n = tokens.length; i<n; ++i) {
 				if (tokens[i]!=='') {
@@ -124,8 +220,7 @@ var Mustache = function() {
 				return ""; // blank out all pragmas
 			});
 		},
-	
-		
+			
 		parse: function(parserContext, contextStack) {
 			var state = 'text';
 			

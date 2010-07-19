@@ -231,7 +231,7 @@ test("'#' (Sections)", function() {
 				description: 'desc',
 				terms: [
 					{name: 't1', index: 0},
-					{name: 't2', index: 1},
+					{name: 't2', index: 1}
 				]
 			},
 			{}
@@ -246,7 +246,7 @@ test("'#' (Sections)", function() {
 			{
 				terms: [
 					{name: 't1', index: 0},
-					{name: 't2', index: 1},
+					{name: 't2', index: 1}
 				]
 			},
 			{}
@@ -526,7 +526,7 @@ test("Demo", function() {
 		'{{/list}}',
 		'{{#empty}}',
 		'  <p>The list is empty.</p>',
-		'{{/empty}}',
+		'{{/empty}}'
 	].join('\n');
 	
 	var view = {
@@ -574,22 +574,22 @@ test("Performance", function() {
 	
 	var template = '{{#count}}{{name}}\n{{/count}}';
 	
-	start = Date.now();
+	start = new Date();
 	for (var j=0;j<1000;++j) {
 		this._oldToHtml(template, view, {});
 	}
-	end = Date.now();
+	end = new Date();
 	
-	var interpreter_time = end - start;
+	var interpreter_time = end.getTime() - start.getTime();
 	
-	start = Date.now();
+	start = new Date();
 	var compiler = Mustache.compile(template, {});
 	for (var k=0;k<1000;++k) {
 		compiler(view);
 	}
-	end = Date.now();
+	end = new Date();
 	
-	var compiler_time = end - start;
+	var compiler_time = end.getTime() - start.getTime();
 	
 	ok(compiler_time<interpreter_time, 'Compiler is faster.');
 });

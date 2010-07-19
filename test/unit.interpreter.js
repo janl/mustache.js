@@ -213,7 +213,7 @@ test("'#' (Sections)", function() {
 				description: 'desc',
 				terms: [
 					{name: 't1', index: 0},
-					{name: 't2', index: 1},
+					{name: 't2', index: 1}
 				]
 			},
 			{}
@@ -228,7 +228,7 @@ test("'#' (Sections)", function() {
 			{
 				terms: [
 					{name: 't1', index: 0},
-					{name: 't2', index: 1},
+					{name: 't2', index: 1}
 				]
 			},
 			{}
@@ -508,7 +508,7 @@ test("Demo", function() {
 		'{{/list}}',
 		'{{#empty}}',
 		'  <p>The list is empty.</p>',
-		'{{/empty}}',
+		'{{/empty}}'
 	].join('\n');
 	
 	var view = {
