@@ -9,8 +9,24 @@ var Mustache = function() {
 		this.message = message;
 	}
 	
-	var Renderer = function(send_func) {
-		this.send_func = send_func;
+	var Renderer = function(send_func, mode) {
+		this.user_send_func = send_func;
+		if (mode==='interpreter' || !mode) {
+			this.commandSet = this.interpreter;
+			
+			this.send_func = function(text) {
+				this.user_send_func(text);
+			}
+		} else if (mode==='compiler') {
+			this.commandSet = this.compiler;
+			
+			this.cached_output = [];
+			this.send_func = function(text) {
+				this.cached_output.push(text);
+			}
+		} else {
+			throw new ParserException('Unsupported mode.');
+		}
 		
 		this.pragmas = {};
 	};
@@ -120,6 +136,8 @@ var Mustache = function() {
 			// make sure the parser finished at an appropriate terminal state
 			if (state!=='text') {
 				this.stateMachine['endOfDoc'].call(this, parserContext, contextStack);
+			} else {
+				this.commandSet.text.call(this);
 			}
 		},
 		
@@ -142,6 +160,8 @@ var Mustache = function() {
 			text: function(parserContext, contextStack) {
 				switch (parserContext.token()) {
 					case parserContext.openTag:
+						this.commandSet.text.call(this);
+						
 						return 'openMustache';
 					default:
 						this.send_func(parserContext.token());
@@ -366,13 +386,13 @@ var Mustache = function() {
 					parserContext.stack.push({sectionType:command.tagType, key:key, content:[], depth:1});
 					return 'endSectionScan';
 				case 'variable':
-					this.render_variable(key, contextStack);
+					this.commandSet.variable.call(this, key, contextStack);
 					return 'text';
 				case 'unescapedVariable':
-					this.render_unescaped_variable(key, contextStack);
+					this.commandSet.unescaped_variable.call(this, key, contextStack);
 					return 'text';
 				case 'partial':
-					this.render_partial(key,
+					this.commandSet.partial.call(this, key,
 						contextStack,
 						parserContext.partials,
 						parserContext.openTag,
@@ -383,7 +403,7 @@ var Mustache = function() {
 					var section = parserContext.stack.pop();
 					if (--section.depth === 0) {
 						if (section.key === key) {
-							this.render_section(section.sectionType,
+							this.commandSet.section.call(this, section.sectionType,
 								section.content.join(''),
 								key,
 								contextStack,
@@ -465,109 +485,279 @@ var Mustache = function() {
 			return Object.prototype.toString.call(a) === '[object Array]';
 		},	
 		
-		render_variable: function(key, contextStack) {
-			function escapeHTML(str) {
-				return ('' + str).replace(/&/g,'&amp;')
-					.replace(/</g,'&lt;')
-					.replace(/>/g,'&gt;');
-			}
+		interpreter: {
+			text: function() {
+				// in this implementation, rendering text is meaningless
+				// since the send_func method simply forwards to user_send_func
+			},
+			variable: function(key, contextStack) {
+				function escapeHTML(str) {
+					return ('' + str).replace(/&/g,'&amp;')
+						.replace(/</g,'&lt;')
+						.replace(/>/g,'&gt;');
+				}
 
-			var result = this.find_in_stack(key, contextStack);
-			if (result!==undefined) {
-				this.send_func(escapeHTML(result));
-			}
-		},
-		render_unescaped_variable: function(key, contextStack) {
-			var result = this.find_in_stack(key, contextStack);
-			if (result!==undefined) {
-				this.send_func(result);
-			}
-		},
-		render_partial: function(key, contextStack, partials, openTag, closeTag) {
-			if (!partials || partials[key] === undefined) {
-				throw new ParserException('Unknown partial \'' + key + '\'');
-			}
-			
-			var res = this.find_in_stack(key, contextStack);
-			if (this.is_object(res)) {
-				contextStack.push(res);
-			}
-			
-			var tokens = this.tokenize(partials[key], openTag, closeTag);
+				var result = this.find_in_stack(key, contextStack);
+				if (result!==undefined) {
+					this.user_send_func(escapeHTML(result));
+				}			
+			},
+			unescaped_variable: function(key, contextStack) {
+				var result = this.find_in_stack(key, contextStack);
+				if (result!==undefined) {
+					this.user_send_func(result);
+				}			
+			},
+			partial: function(key, contextStack, partials, openTag, closeTag) {
+				if (!partials || partials[key] === undefined) {
+					throw new ParserException('Unknown partial \'' + key + '\'');
+				}
+				
+				var res = this.find_in_stack(key, contextStack);
+				if (this.is_object(res)) {
+					contextStack.push(res);
+				}
+				
+				var tokens = this.tokenize(partials[key], openTag, closeTag);
 
-			this.parse(this.createParserContext(tokens, partials, openTag, closeTag), contextStack);
-			
-			if (this.is_object(res)) {
-				contextStack.pop();
-			}
-		},
-		render_section: function(sectionType, mustacheFragment, key, contextStack, partials, openTag, closeTag) {
-			// by @langalex, support for arrays of strings
-			var that = this;
-			function create_context(_context) {
-				if(that.is_object(_context)) {
-					return _context;
-				} else {
-					var iterator = '.';
-					
-					if(that.pragmas["IMPLICIT-ITERATOR"] &&
-						that.pragmas["IMPLICIT-ITERATOR"].iterator) {
-						iterator = that.pragmas["IMPLICIT-ITERATOR"].iterator;
+				this.parse(this.createParserContext(tokens, partials, openTag, closeTag), contextStack);
+				
+				if (this.is_object(res)) {
+					contextStack.pop();
+				}			
+			},
+			section: function(sectionType, mustacheFragment, key, contextStack, partials, openTag, closeTag) {
+				// by @langalex, support for arrays of strings
+				var that = this;
+				function create_context(_context) {
+					if(that.is_object(_context)) {
+						return _context;
+					} else {
+						var iterator = '.';
+						
+						if(that.pragmas["IMPLICIT-ITERATOR"] &&
+							that.pragmas["IMPLICIT-ITERATOR"].iterator) {
+							iterator = that.pragmas["IMPLICIT-ITERATOR"].iterator;
+						}
+						var ctx = {};
+						ctx[iterator] = _context;
+						return ctx;
 					}
-					var ctx = {};
-					ctx[iterator] = _context;
-					return ctx;
 				}
-			}
-		
-			var value = this.find_in_stack(key, contextStack);
-
-			var tokens;
-			if (sectionType==='invertedSection') {
-				if (!value || this.is_array(value) && value.length === 0) {
-					// false or empty list, render it
-					tokens = this.tokenize(mustacheFragment, openTag, closeTag);
 			
-					this.parse(this.createParserContext(tokens, partials, openTag, closeTag), contextStack);
-				}
-			} else if (sectionType==='section') {
-				if (this.is_array(value)) { // Enumerable, Let's loop!
-					tokens = this.tokenize(mustacheFragment, openTag, closeTag);
-					
-					for (var i=0, n=value.length; i<n; ++i) {
-						contextStack.push(create_context(value[i]));
+				var value = this.find_in_stack(key, contextStack);
+
+				var tokens;
+				if (sectionType==='invertedSection') {
+					if (!value || this.is_array(value) && value.length === 0) {
+						// false or empty list, render it
+						tokens = this.tokenize(mustacheFragment, openTag, closeTag);
+				
+						this.parse(this.createParserContext(tokens, partials, openTag, closeTag), contextStack);
+					}
+				} else if (sectionType==='section') {
+					if (this.is_array(value)) { // Enumerable, Let's loop!
+						tokens = this.tokenize(mustacheFragment, openTag, closeTag);
+						
+						for (var i=0, n=value.length; i<n; ++i) {
+							contextStack.push(create_context(value[i]));
+							this.parse(this.createParserContext(tokens, partials, openTag, closeTag), contextStack);
+							contextStack.pop();
+						}
+					} else if (this.is_object(value)) { // Object, Use it as subcontext!
+						tokens = this.tokenize(mustacheFragment, openTag, closeTag);
+						contextStack.push(value);
 						this.parse(this.createParserContext(tokens, partials, openTag, closeTag), contextStack);
 						contextStack.pop();
+					} else if (this.is_function(value)) {
+						// higher order section
+						var that = this;
+						
+						var result = value.call(contextStack[contextStack.length-1], mustacheFragment, function(resultFragment) {
+							var tempStream = [];
+							var old_send_func = that.user_send_func;
+							that.user_send_func = function(text) { tempStream.push(text); };
+							
+							tokens = that.tokenize(resultFragment, openTag, closeTag);						
+							that.parse(that.createParserContext(tokens, partials, openTag, closeTag), contextStack);
+							
+							that.user_send_func = old_send_func;
+							
+							return tempStream.join('');
+						});
+						
+						this.user_send_func(result);
+					} else if (value) {
+						tokens = this.tokenize(mustacheFragment, openTag, closeTag);
+						this.parse(this.createParserContext(tokens, partials, openTag, closeTag), contextStack);
 					}
-				} else if (this.is_object(value)) { // Object, Use it as subcontext!
-					tokens = this.tokenize(mustacheFragment, openTag, closeTag);
-					contextStack.push(value);
-					this.parse(this.createParserContext(tokens, partials, openTag, closeTag), contextStack);
-					contextStack.pop();
-				} else if (this.is_function(value)) {
-					// higher order section
+				} else {
+					throw new ParserException('Unknown section type ' + sectionType);
+				}
+			}
+		},
+		
+		compiler: {
+			text: function() {
+				var outputText = this.cached_output.join('');
+				this.cached_output = [];
+				
+				this.user_send_func(function(contextStack, send_func) {
+					send_func(outputText);
+				});
+			},
+			variable: function(key/*, contextStack*/) {
+				function escapeHTML(str) {
+					return ('' + str).replace(/&/g,'&amp;')
+						.replace(/</g,'&lt;')
+						.replace(/>/g,'&gt;');
+				}
+
+				var that = this;
+				this.user_send_func(function(contextStack, send_func) {
+					var result = that.find_in_stack(key, contextStack);
+					if (result!==undefined) {
+						send_func(escapeHTML(result));
+					}
+				});
+			},
+			unescaped_variable: function(key/*, contextStack*/) {
+				var that = this;
+				this.user_send_func(function(contextStack, send_func) {
+					var result = that.find_in_stack(key, contextStack);
+					if (result!==undefined) {
+						send_func(result);
+					}
+				});
+			},
+			partial: function(key, reserved/*contextStack*/, partials, openTag, closeTag) {
+				if (!partials || partials[key] === undefined) {
+					throw new ParserException('Unknown partial \'' + key + '\'');
+				}
+				
+				if (!this.is_function(partials[key])) {
+					var old_user_send_func = this.user_send_func;
+					var commands = [];
+					this.user_send_func = function(command) { commands.push(command); };
+					
+					var tokens = this.tokenize(partials[key], openTag, closeTag);
+					partials[key] = function() {}; // blank out the paritals so that infinite recursion doesn't happen
+					this.parse(this.createParserContext(tokens, partials, openTag, closeTag), reserved);
+				
+					this.user_send_func = old_user_send_func;
+					
 					var that = this;
+					partials[key] = function(contextStack, send_func) {
+						var res = that.find_in_stack(key, contextStack);
+						if (that.is_object(res)) {
+							contextStack.push(res);
+						}
 					
-					var result = value.call(contextStack[contextStack.length-1], mustacheFragment, function(resultFragment) {
-						var tempStream = [];
-						var old_send_func = that.send_func;
-						that.send_func = function(text) { tempStream.push(text); };
+						for (var i=0,n=commands.length; i<n; ++i) {
+							commands[i](contextStack, send_func);
+						}
 						
-						tokens = that.tokenize(resultFragment, openTag, closeTag);						
-						that.parse(that.createParserContext(tokens, partials, openTag, closeTag), contextStack);
+						if (that.is_object(res)) {
+							contextStack.pop();
+						}
+					};
+				}
+				
+				this.user_send_func(function(contextStack, send_func) { partials[key](contextStack, send_func); });
+			},
+			section: function(sectionType, mustacheFragment, key, reserved/*contextStack*/, partials, openTag, closeTag) {
+				// by @langalex, support for arrays of strings
+				var that = this;
+				function create_context(_context) {
+					if(that.is_object(_context)) {
+						return _context;
+					} else {
+						var iterator = '.';
 						
-						that.send_func = old_send_func;
+						if(that.pragmas["IMPLICIT-ITERATOR"] &&
+							that.pragmas["IMPLICIT-ITERATOR"].iterator) {
+							iterator = that.pragmas["IMPLICIT-ITERATOR"].iterator;
+						}
+						var ctx = {};
+						ctx[iterator] = _context;
+						return ctx;
+					}
+				}
+				
+				var old_user_send_func = this.user_send_func;
+				var commands = [];
+				
+				this.user_send_func = function(command) { commands.push(command); };
+				
+				var tokens = this.tokenize(mustacheFragment, openTag, closeTag);
+				this.parse(this.createParserContext(tokens, partials, openTag, closeTag), reserved);
+				
+				this.user_send_func = old_user_send_func;
+				
+				var section_command = function(contextStack, send_func) {
+					for (var i=0, n=commands.length; i<n; ++i) {
+						commands[i](contextStack, send_func);
+					}
+				};
+				
+				var that = this;
+				
+				if (sectionType==='invertedSection') {
+					this.user_send_func(function(contextStack, send_func) {
+						var value = that.find_in_stack(key, contextStack);
 						
-						return tempStream.join('');
+						if (!value || that.is_array(value) && value.length === 0) {
+							// false or empty list, render it
+							section_command(contextStack, send_func);
+						}
 					});
-					
-					this.send_func(result);
-				} else if (value) { // boolean section
-					tokens = this.tokenize(mustacheFragment, openTag, closeTag);
-					this.parse(this.createParserContext(tokens, partials, openTag, closeTag), contextStack);
-				}			
-			} else {
-				throw new ParserException('Unknown section type ' + sectionType);
+				} else if (sectionType==='section') {
+					this.user_send_func(function(contextStack, send_func) {
+						var value = that.find_in_stack(key, contextStack);
+						
+						if (that.is_array(value)) { // Enumerable, Let's loop!
+							for (var i=0, n=value.length; i<n; ++i) {
+								contextStack.push(create_context(value[i]));
+								section_command(contextStack, send_func);
+								contextStack.pop();
+							}
+						} else if (that.is_object(value)) { // Object, Use it as subcontext!
+							contextStack.push(value);
+							section_command(contextStack, send_func);
+							contextStack.pop();
+						} else if (that.is_function(value)) {
+							// higher order section
+							// note that HOS triggers a compilation on the resultFragment.
+							// this is slow (in relation to a fully compiled template) 
+							// since it invokes a call to the parser
+							var result = value.call(contextStack[contextStack.length-1], mustacheFragment, function(resultFragment) {
+								var cO = [];
+								var s = function(command) { cO.push(command); };
+			
+								var hos_renderer = new Renderer(s, 'compiler');
+
+								resultFragment = hos_renderer.parse_pragmas(resultFragment, openTag, closeTag);
+								var tokens = hos_renderer.tokenize(resultFragment, openTag, closeTag);
+								hos_renderer.parse(hos_renderer.createParserContext(tokens, partials, openTag, closeTag), contextStack);
+
+								var o = [];
+								var sT = function(output) { o.push(output); };
+				
+								for (var i=0,n=cO.length; i<n; ++i) {
+									commands[i](contextStack, sT);
+								}
+				
+								return o.join('');
+							});
+							
+							send_func(result);
+						} else if (value) {
+							section_command(contextStack, send_func);
+						}
+					});
+				} else {
+					throw new ParserException('Unknown section type ' + sectionType);
+				}
 			}
 		}
 	}
@@ -580,15 +770,58 @@ var Mustache = function() {
 		Turns a template and view into HTML
 		*/
 		to_html: function(template, view, partials, send_func) {
-			var o = [];
+			if (!template) { return ''; }
+			
+			partials = partials || {};
+			view = view || {};
+			
+			var o = send_func ? undefined : [];
 			var s = send_func || function(output) { o.push(output); };
 			
-			var renderer = new Renderer(s);
+			var renderer = new Renderer(s, 'interpreter');
 			renderer.render(template, view, partials);
 			
 			if (!send_func) {
 				return o.join('');
 			}
+		},
+		
+		/*
+		Compiles a template into an equivalent JS function for faster
+		repeated execution. 
+		*/
+		compile: function(template, partials) {
+			if (!template) { return function() { return '' }; }
+			
+			var p = {};
+			if (partials) {
+				for (var key in partials) {
+					if (partials.hasOwnProperty(key)) {
+						p[key] = partials[key];
+					}
+				}
+			}
+			
+			var commands = [];
+			var s = function(command) { commands.push(command); };
+			
+			var renderer = new Renderer(s, 'compiler');
+			renderer.render(template, {}, p);
+
+			return function(view, send_func) {
+				view = view || {};
+				
+				var o = send_func ? undefined : [];
+				var s = send_func || function(output) { o.push(output); };	
+			
+				for (var i=0,n=commands.length; i<n; ++i) {
+					commands[i]([view], s);
+				}
+				
+				if (!send_func) {
+					return o.join('');
+				}
+			};
 		}
 	});
 }();
