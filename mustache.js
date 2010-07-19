@@ -5,9 +5,10 @@
 */
 
 var Mustache = function() {
-	var ParserException = function(message) { 
+	function ParserException(message) { 
 		this.message = message;
 	}
+	ParserException.prototype = {};
 	
 	var Renderer = function(send_func, mode) {
 		this.user_send_func = send_func;
@@ -144,7 +145,7 @@ var Mustache = function() {
 				partials: partials,
 				stack: [],
 				openTag: openTag,
-				closeTag: closeTag,
+				closeTag: closeTag
 			};
 		},
 		
