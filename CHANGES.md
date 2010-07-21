@@ -1,6 +1,6 @@
 # mustache.js Changes
 
-## 0.3.0 (??-??-????)
+## 0.3.0 (21-07-2010)
 
 * Improved whitespace handling.
 * Make IMPLICIT ITERATORS a first class feature.
