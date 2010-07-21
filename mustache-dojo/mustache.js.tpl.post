@@ -1,5 +1,4 @@
 
-  d.mustache = function(template, view, partials) {
-    return Mustache.to_html(template, view, partials);
-  };
-})(dojo);
+  dojox.mustache = dojo.hitch(Mustache, "to_html");
+
+})();
