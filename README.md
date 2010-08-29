@@ -256,7 +256,7 @@ own iteration marker:
       {{bob}}
     {{/foo}}
 
-## FaQ
+## F.A.Q.
 
 ### Why doesn’t Mustache allow dot notation like `{{variable.member}}`?
 
