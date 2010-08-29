@@ -58,7 +58,7 @@ Tags are always surrounded by mustaches like this `{{foobar}}`.
 
 Conditional sections begin with `{{#condition}}` and end with
 `{{/condition}}`. When `condition` evaluates to true, the section is rendered,
-otherwise the hole block will output nothing at all. `condition` may be a
+otherwise the whole block will output nothing at all. `condition` may be a
 function returning true/false or a simple boolean.
 
     var view = {condition: function() {
