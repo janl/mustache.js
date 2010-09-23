@@ -149,7 +149,7 @@ var Mustache = function() {
       var that = this;
 
       var new_regex = function() {
-        return new RegExp(that.otag + "(=|!|>|\\{|%)?([^\\/#\\^]+?)\\1?" +
+        return new RegExp(that.otag + "(=|!|>|&gt;|\\{|%)?([^\\/#\\^]+?)\\1?" +
           that.ctag + "+", "g");
       };
 
@@ -163,6 +163,7 @@ var Mustache = function() {
           regex = new_regex();
           return "";
         case ">": // render partial
+		case "&gt;":
           return that.render_partial(name, context, partials);
         case "{": // the triple mustache is unescaped
           return that.find(name, context);
