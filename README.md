@@ -284,3 +284,27 @@ Or just install it as a RubyGem:
 [m]: http://github.com/defunkt/mustache/#readme
 [node.js]: http://nodejs.org
 [couchdb]: http://couchdb.apache.org
+
+
+## Plugins for jQuery, Dojo, Yui, CommonJS
+
+This repository lets you build modules for [jQuery][], [Dojo][], [Yui][] and
+[CommonJS][] / [Node.js][] with the help of `rake`:
+
+Run `rake jquery` to get a jQuery compatible plugin file in the
+`mustache-jquery/` directory.
+
+Run `rake dojo` to get a Dojo compatible plugin file in the `mustache-dojo/`
+directory.
+
+Run `rake yui` to get a Yui compatible plugin file in the `mustache-yui/`
+directory.
+
+Run `rake commonjs` to get a CommonJS compatible plugin file in the
+`mustache-commonjs/` directory which you can also use with [Node.js][].
+
+[jQuery]: http://jquery.com/
+[Dojo]: http://www.dojotoolkit.org/
+[Yui]: http://developer.yahoo.com/yui/
+[CommonJS]: http://www.commonjs.org/
+[Node.js]: http://nodejs.org/
