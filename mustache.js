@@ -322,3 +322,10 @@ var Mustache = function() {
     }
   });
 }();
+
+/*
+  If using Node.js, export Mustache as a Node.js module.
+*/
+if (typeof(exports) != "undefined") {
+	module.exports = Mustache;
+}
