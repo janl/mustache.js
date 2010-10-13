@@ -459,10 +459,18 @@ var Mustache = function() {
 			},
 			
 			discard: function(parserContext, contextStack) {
-				if (parserContext.token()===parserContext.closeTag) {
-					return 'text';
+				if (parserContext.token()==='!') {
+					return 'closeComment';
 				} else {
 					return 'discard';
+				}
+			},
+			
+			closeComment: function(parserContext, contextStack) {
+				if (parserContext.token()!==parserContext.closeTag) {
+					return 'discard';
+				} else {
+					return 'text';
 				}
 			},
 			
