@@ -403,12 +403,27 @@ test("'=' (Set Delimiter)", function() {
 });
 
 test("'!' (Comments)", function() {
-	expect(1);
+	expect(4);
 	
+	equals(
+		Mustache.to_html('{{! this is a single line comment !}}'),
+		'',
+		'Single Line Comments');
+
+	equals(
+		Mustache.to_html('{{!this is a multiline comment\ni said this is a multiline comment!}}'),
+		'',
+		'Multiline Comments');
+			
+	equals(
+		Mustache.to_html('{{!this {{is}} {{#a}} {{/multiline}} comment\ni {{^said}} ! hello !! bye!}}'),
+		'',
+		'Correct tokenization');
+
 	// matches comments.html
 	equals(
 		Mustache.to_html(
-			'<h1>{{title}}{{! just something interesting... or not... }}</h1>\n',
+			'<h1>{{title}}{{! just something interesting... or not... !}}</h1>\n',
 			{
 				title: function() {
 					return "A Comedy of Errors";
