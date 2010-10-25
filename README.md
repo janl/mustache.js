@@ -204,7 +204,7 @@ in `partials` for `winnings`.
 
 mustache.js does escape all values when using the standard double mustache
 syntax. Characters which will be escaped: `& \ " < >`. To disable escaping,
-simply use tripple mustaches like `{{{unescaped_variable}}}`.
+simply use triple mustaches like `{{{unescaped_variable}}}`.
 
 Example: Using `{{variable}}` inside a template for `5 > 2` will result in `5 &gt; 2`, where as the usage of `{{{variable}}}` will result in `5 > 2`.
 
