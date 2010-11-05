@@ -352,7 +352,7 @@ var Mustache = function() {
 
   return({
     name: "mustache.js",
-    version: "0.3.1-dev",
+    version: "0.3.1-dev-twitter",
 
     /*
       Turns a template and view into HTML
