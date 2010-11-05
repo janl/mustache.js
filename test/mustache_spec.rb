@@ -24,12 +24,23 @@ end
 
 describe "mustache" do
   before(:all) do
-    @mustache = File.read(__DIR__ + "/../mustache.js")
+    mustache = File.read(__DIR__ + "/../mustache.js")
+    stubbed_gettext = <<-JS
+      // Stubbed gettext translation method for {{_i}}{{/i}} tags in Mustache.
+      function _(text) {
+        return text;
+      }
+    JS
+
+    @boilerplate = <<-JS
+      #{mustache}
+      #{stubbed_gettext}
+    JS
   end
 
   it "should return the same when invoked multiple times" do
     js = <<-JS
-      #{@mustache}
+      #{@boilerplate}
       Mustache.to_html("x")
       print(Mustache.to_html("x"));
     JS
@@ -39,7 +50,7 @@ describe "mustache" do
 
   it "should clear the context after each run" do
     js = <<-JS
-      #{@mustache}
+      #{@boilerplate}
       Mustache.to_html("{{#list}}{{x}}{{/list}}", {list: [{x: 1}]})
       try {
         print(Mustache.to_html("{{#list}}{{x}}{{/list}}", {list: [{}]}));
@@ -52,7 +63,7 @@ describe "mustache" do
 
   it "should not double-render" do
     js = <<-JS
-      #{@mustache}
+      #{@boilerplate}
       var template = "{{#foo}}{{bar}}{{/foo}}";
       var ctx = {
         foo: true,
@@ -66,6 +77,21 @@ describe "mustache" do
     run_js(js).strip.should == "{{win}}"
   end
 
+  it "should work with i18n" do
+    js = <<-JS
+      #{@boilerplate}
+
+      var template = "{{_i}}foo {{bar}}{{/i}}";
+      var ctx = {
+        bar: "BAR"
+      };
+
+      print(Mustache.to_html(template, ctx));
+    JS
+
+    run_js(js).strip.should == "foo BAR"
+  end
+
   non_partials.each do |testname|
     describe testname do
       it "should generate the correct html" do
@@ -74,7 +100,7 @@ describe "mustache" do
 
         runner = <<-JS
           try {
-            #{@mustache}
+            #{@boilerplate}
             #{view}
             var template = #{template};
             var result = Mustache.to_html(template, #{testname});
@@ -92,7 +118,7 @@ describe "mustache" do
 
         runner = <<-JS
           try {
-            #{@mustache}
+            #{@boilerplate}
             #{view}
             var chunks = [];
             var sendFun = function(chunk) {
@@ -122,7 +148,7 @@ describe "mustache" do
 
         runner = <<-JS
           try {
-            #{@mustache}
+            #{@boilerplate}
             #{view}
             var template = #{template};
             var partials = {"partial": #{partial}};
@@ -142,7 +168,7 @@ describe "mustache" do
 
         runner = <<-JS
           try {
-            #{@mustache}
+            #{@boilerplate}
             #{view};
             var template = #{template};
             var partials = {"partial": #{partial}};
