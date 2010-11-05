@@ -35,12 +35,28 @@ var Mustache = function() {
       }
 
       template = this.render_pragmas(template);
-      var html = this.render_section(template, context, partials);
-      if(in_recursion) {
-        return this.render_tags(html, context, partials, in_recursion);
-      }
 
-      this.render_tags(html, context, partials, in_recursion);
+      var html = this.render_section(template, context, partials);
+
+      var stillNeedsToRender = (html === template);
+
+      if (stillNeedsToRender) {
+        if (in_recursion) {
+          return this.render_tags(html, context, partials, true);
+        }
+
+        this.render_tags(html, context, partials, false);
+      } else {
+        if(in_recursion) {
+          return html;
+        } else {
+          var lines = html.split("\n");
+          for (var i = 0; i < lines.length; i++) {
+            this.send(lines[i]);
+          }
+          return;
+        }
+      }
     },
 
     /*
@@ -66,7 +82,7 @@ var Mustache = function() {
             this.ctag);
       return template.replace(regex, function(match, pragma, options) {
         if(!that.pragmas_implemented[pragma]) {
-          throw({message: 
+          throw({message:
             "This implementation of mustache doesn't understand the '" +
             pragma + "' pragma"});
         }
@@ -103,39 +119,40 @@ var Mustache = function() {
       }
 
       var that = this;
-      // CSW - Added "+?" so it finds the tighest bound, not the widest
-      var regex = new RegExp(this.otag + "(\\^|\\#)\\s*(.+)\\s*" + this.ctag +
-              "\n*([\\s\\S]+?)" + this.otag + "\\/\\s*\\2\\s*" + this.ctag +
-              "\\s*", "mg");
+      var regex = new RegExp("(?:^([\\s\\S]*?))?" + this.otag + "(\\^|\\#)\\s*(.+)\\s*" + this.ctag +
+                    "\n*([\\s\\S]+?)" + this.otag + "\\/\\s*\\3\\s*" + this.ctag + "\\s*" +
+                    "([\\s\\S]*?)(?=(?:" + this.otag + "(?:\\^|\\#)\\s*(?:.+)\\s*" + this.ctag + ")|$)", "mg");
 
       // for each {{#foo}}{{/foo}} section do...
-      return template.replace(regex, function(match, type, name, content) {
+      return template.replace(regex, function(match, before, type, name, content, after) {
+        var renderedBefore = before ? that.render_tags(before, context, partials, true) : "",
+            renderedAfter = after ? that.render_tags(after, context, partials, true) : "";
+
         var value = that.find(name, context);
         if(type == "^") { // inverted section
           if(!value || that.is_array(value) && value.length === 0) {
             // false or empty list, render it
-            return that.render(content, context, partials, true);
+            return renderedBefore + that.render(content, context, partials, true) + renderedAfter;
           } else {
-            return "";
+            return renderedBefore + "" + renderedAfter;
           }
         } else if(type == "#") { // normal section
           if(that.is_array(value)) { // Enumerable, Let's loop!
-            return that.map(value, function(row) {
-              return that.render(content, that.create_context(row),
-                partials, true);
-            }).join("");
+            return renderedBefore + that.map(value, function(row) {
+              return that.render(content, that.create_context(row), partials, true);
+            }).join("") + renderedAfter;
           } else if(that.is_object(value)) { // Object, Use it as subcontext!
-            return that.render(content, that.create_context(value),
-              partials, true);
+            return renderedBefore + that.render(content, that.create_context(value),
+              partials, true) + renderedAfter;
           } else if(typeof value === "function") {
             // higher order section
-            return value.call(context, content, function(text) {
+            return renderedBefore + value.call(context, content, function(text) {
               return that.render(text, context, partials, true);
-            });
+            }) + renderedAfter;
           } else if(value) { // boolean section
-            return that.render(content, context, partials, true);
+            return renderedBefore + that.render(content, context, partials, true) + renderedAfter;
           } else {
-            return "";
+            return renderedBefore + "" + renderedAfter;
           }
         }
       });

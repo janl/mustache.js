@@ -49,13 +49,29 @@ describe "mustache" do
     JS
     run_js(js).should == "\n"
   end
-  
+
+  it "should not double-render" do
+    js = <<-JS
+      #{@mustache}
+      var template = "{{#foo}}{{bar}}{{/foo}}";
+      var ctx = {
+        foo: true,
+        bar: "{{win}}",
+        win: "FAIL"
+      };
+
+      print(Mustache.to_html(template, ctx))
+    JS
+
+    run_js(js).strip.should == "{{win}}"
+  end
+
   non_partials.each do |testname|
-    describe testname do 
+    describe testname do
       it "should generate the correct html" do
 
         view, template, expect = load_test(__DIR__, testname)
-        
+
         runner = <<-JS
           try {
             #{@mustache}
@@ -101,7 +117,7 @@ describe "mustache" do
     describe testname do
       it "should generate the correct html" do
 
-        view, template, partial, expect = 
+        view, template, partial, expect =
               load_test(__DIR__, testname, true)
 
         runner = <<-JS
@@ -116,7 +132,7 @@ describe "mustache" do
             print('ERROR: ' + e.message);
           }
         JS
-      
+
         run_js(runner).should == expect
       end
       it "should sendFun the correct html" do
