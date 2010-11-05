@@ -13,7 +13,8 @@ var Mustache = function() {
     pragmas: {},
     buffer: [],
     pragmas_implemented: {
-      "IMPLICIT-ITERATOR": true
+      "IMPLICIT-ITERATOR": true,
+      "TRANSLATION-HINT": true
     },
     context: {},
 
@@ -34,7 +35,14 @@ var Mustache = function() {
         }
       }
 
+      // Branching or moving down the partial stack, save any translation mode info.
+      if (this.pragmas['TRANSLATION-HINT']) {
+        context['_mode'] = this.pragmas['TRANSLATION-HINT']['mode'];
+      }
+
       template = this.render_pragmas(template);
+
+      template = this.render_i18n(template, context, partials);
 
       var html = this.render_section(template, context, partials);
 
@@ -108,6 +116,27 @@ var Mustache = function() {
         return this.render(partials[name], context, partials, true);
       }
       return this.render(partials[name], context[name], partials, true);
+    },
+
+    render_i18n: function(html, context, partials) {
+      if (html.indexOf(this.otag + "_i") == -1) {
+        return html;
+      }
+      var that = this;
+      var regex = new RegExp(this.otag + "\\_i" + this.ctag +
+        "\\s*([\\s\\S]+?)" + this.otag + "\\/i" + this.ctag, "mg");
+
+      // for each {{_i}}{{/i}} section do...
+      return html.replace(regex, function(match, content) {
+        var translation_mode = undefined;
+        if (that.pragmas && that.pragmas["TRANSLATION-HINT"] && that.pragmas["TRANSLATION-HINT"]['mode']) {
+          translation_mode = { _mode: that.pragmas["TRANSLATION-HINT"]['mode'] };
+        } else if (context['_mode']) {
+          translation_mode = { _mode: context['_mode'] };
+        }
+
+        return that.render(_(content, translation_mode), context, partials, true);
+      });
     },
 
     /*
@@ -333,7 +362,7 @@ var Mustache = function() {
       if(send_fun) {
         renderer.send = send_fun;
       }
-      renderer.render(template, view, partials);
+      renderer.render(template, view || {}, partials);
       if(!send_fun) {
         return renderer.buffer.join("\n");
       }
