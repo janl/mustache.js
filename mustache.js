@@ -150,7 +150,7 @@ var Mustache = function() {
       var that = this;
       var regex = new RegExp("(?:^([\\s\\S]*?))?" + this.otag + "(\\^|\\#)\\s*(.+)\\s*" + this.ctag +
                     "\n*([\\s\\S]+?)" + this.otag + "\\/\\s*\\3\\s*" + this.ctag + "\\s*" +
-                    "([\\s\\S]*?)(?=(?:" + this.otag + "(?:\\^|\\#)\\s*(?:.+)\\s*" + this.ctag + ")|$)", "mg");
+                    "([\\s\\S]*?)(?=(?:" + this.otag + "(?:\\^|\\#)\\s*(?:.+)\\s*" + this.ctag + ")|$)", "g");
 
       // for each {{#foo}}{{/foo}} section do...
       return template.replace(regex, function(match, before, type, name, content, after) {
