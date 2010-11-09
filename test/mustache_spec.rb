@@ -92,6 +92,25 @@ describe "mustache" do
     run_js(js).strip.should == "foo BAR"
   end
 
+  it "should not suck" do
+    js = <<-JS
+    try{
+      #{@boilerplate}
+
+      print(Mustache.to_html("{{#foo}}\\
+{{/foo}}\\
+{{#bar}}\\
+{{/bar}}\\
+", {}));
+    } catch(e) {
+      print(e);
+    }
+    JS
+
+    run_js(js).should == "foanfs"
+  end
+
+
   non_partials.each do |testname|
     describe testname do
       it "should generate the correct html" do
