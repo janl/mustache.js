@@ -10,6 +10,8 @@ var Mustache = function() {
   Renderer.prototype = {
     otag: "{{",
     ctag: "}}",
+    context_parent: "__context_parent__",
+    context_touched: "__context_touched__",
     pragmas: {},
     buffer: [],
     pragmas_implemented: {
@@ -121,11 +123,11 @@ var Mustache = function() {
         } else if(type == "#") { // normal section
           if(that.is_array(value)) { // Enumerable, Let's loop!
             return that.map(value, function(row) {
-              return that.render(content, that.create_context(row),
+              return that.render(content, that.create_context(row, context),
                 partials, true);
             }).join("");
           } else if(that.is_object(value)) { // Object, Use it as subcontext!
-            return that.render(content, that.create_context(value),
+            return that.render(content, that.create_context(value, context),
               partials, true);
           } else if(typeof value === "function") {
             // higher order section
@@ -207,7 +209,7 @@ var Mustache = function() {
       find `name` in current `context`. That is find me a value
       from the view object
     */
-    find: function(name, context) {
+    find: function(name, context, original_context) {
       name = this.trim(name);
 
       // Checks whether a value is thruthy or false or 0
@@ -218,15 +220,36 @@ var Mustache = function() {
       var value;
       if(is_kinda_truthy(context[name])) {
         value = context[name];
-      } else if(is_kinda_truthy(this.context[name])) {
-        value = this.context[name];
       }
 
       if(typeof value === "function") {
-        return value.apply(context);
+        return value.apply(original_context || context);
       }
       if(value !== undefined) {
+        /*
+          Don't visit already touched contexts.
+        */
+        if (value[this.context_touched] === true) {
+          value[this.context_touched] = null;
+          return "";
+        }
+        if (this.is_array(value)) {
+          for (var i = 0; i < value.length; i++) {
+            if (value[i][this.context_touched] === true) {
+              value[i][this.context_touched] = null;
+              return "";
+            }
+          }
+        }
         return value;
+      }
+      if (context[this.context_parent]) {
+        /*
+          Mark this context as "touched" so we don't come back
+          down this way...
+        */
+        context[this.context_touched] = true;
+        return this.find(name, context[this.context_parent], context);
       }
       // silently ignore unkown variables
       return "";
@@ -258,8 +281,9 @@ var Mustache = function() {
     },
 
     // by @langalex, support for arrays of strings
-    create_context: function(_context) {
+    create_context: function(_context, parent) {
       if(this.is_object(_context)) {
+        _context[this.context_parent] = parent;
         return _context;
       } else {
         var iterator = ".";
