@@ -112,7 +112,7 @@ var Mustache = function() {
 
       // for each {{#foo}}{{/foo}} section do...
       return template.replace(regex, function(match, type, name, content) {
-        var value = that.find(name, context);
+        var res, value = that.find(name, context);
         if(type == "^") { // inverted section
           if(!value || that.is_array(value) && value.length === 0) {
             // false or empty list, render it
@@ -123,12 +123,14 @@ var Mustache = function() {
         } else if(type == "#") { // normal section
           if(that.is_array(value)) { // Enumerable, Let's loop!
             return that.map(value, function(row) {
-              return that.render(content, that.create_context(row, context),
-                partials, true);
+              res = that.render(content, that.create_context(row, context), partials, true);
+              that.clean_context(row);
+              return res;
             }).join("");
           } else if(that.is_object(value)) { // Object, Use it as subcontext!
-            return that.render(content, that.create_context(value, context),
-              partials, true);
+            res = that.render(content, that.create_context(value, context), partials, true);
+            that.clean_context(value);
+            return res;
           } else if(typeof value === "function") {
             // higher order section
             return value.call(context, content, function(text) {
@@ -217,7 +219,7 @@ var Mustache = function() {
         return bool === false || bool === 0 || bool;
       }
 
-      var value;
+      var value, touched, res;
       if(is_kinda_truthy(context[name])) {
         value = context[name];
       }
@@ -225,22 +227,22 @@ var Mustache = function() {
       if(typeof value === "function") {
         return value.apply(original_context || context);
       }
-      if(value !== undefined) {
-        /*
-          Don't visit already touched contexts.
-        */
-        if (value[this.context_touched] === true) {
-          value[this.context_touched] = null;
-          return "";
-        }
-        if (this.is_array(value)) {
-          for (var i = 0; i < value.length; i++) {
-            if (value[i][this.context_touched] === true) {
-              value[i][this.context_touched] = null;
-              return "";
-            }
+
+      /*
+        Don't visit already touched contexts.
+      */
+      if (this.is_array(value)) {
+        for (var i = 0; i < value.length; i++) {
+          if (value[i][this.context_touched] === true) {
+            touched = true;
+            break;
           }
         }
+      } else if (value && value[this.context_touched] === true) {
+        touched = true;
+      }
+
+      if (value !== undefined && !touched) {
         return value;
       }
       if (context[this.context_parent]) {
@@ -249,7 +251,9 @@ var Mustache = function() {
           down this way...
         */
         context[this.context_touched] = true;
-        return this.find(name, context[this.context_parent], context);
+        res = this.find(name, context[this.context_parent], context);
+        delete context[this.context_touched];
+        return res;
       }
       // silently ignore unkown variables
       return "";
@@ -278,6 +282,12 @@ var Mustache = function() {
         default: return s;
         }
       });
+    },
+
+    clean_context: function(_context) {
+      if (_context[this.context_parent]) {
+        delete _context[this.context_parent];
+      }
     },
 
     // by @langalex, support for arrays of strings
