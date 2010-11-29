@@ -92,22 +92,18 @@ describe "mustache" do
     run_js(js).strip.should == "foo BAR"
   end
 
-  it "should not suck" do
+  it "should work with empty sections" do
     js = <<-JS
     try{
       #{@boilerplate}
 
-      print(Mustache.to_html("{{#foo}}\\
-{{/foo}}\\
-{{#bar}}\\
-{{/bar}}\\
-", {}));
+      print(Mustache.to_html("{{#foo}}{{/foo}}foo{{#bar}}{{/bar}}", {}));
     } catch(e) {
       print(e);
     }
     JS
 
-    run_js(js).should == "foanfs"
+    run_js(js).strip.should == "foo"
   end
 
 
