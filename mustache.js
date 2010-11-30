@@ -148,14 +148,32 @@ var Mustache = function() {
       }
 
       var that = this;
-      var regex = new RegExp("(?:^([\\s\\S]*?))?" + this.otag + "(\\^|\\#)\\s*(.+)\\s*" + this.ctag +
-                    "\n*([\\s\\S]*?)" + this.otag + "\\/\\s*\\3\\s*" + this.ctag + "\\s*" +
-                    "([\\s\\S]*?)(?=(?:" + this.otag + "(?:\\^|\\#)\\s*(?:.+)\\s*" + this.ctag + ")|$)", "g");
+
+      // This regex matches _the first_ section ({{#foo}}{{/foo}}), and captures the remainder
+      var regex = new RegExp(
+        "^([\\s\\S]*?)" +         // all the crap at the beginning that is not {{*}} ($1)
+
+        this.otag +               // {{
+        "(\\^|\\#)\\s*(.+)\\s*" + //  #foo (# == $2, foo == $3)
+        this.ctag +               // }}
+
+        "\n*([\\s\\S]*?)" +       // between the tag ($2). leading newlines are dropped
+
+        this.otag +               // {{
+        "\\/\\s*\\3\\s*" +        //  /foo (backreference to the opening tag).
+        this.ctag +               // }}
+
+        "\\s*([\\s\\S]*)$",       // everything else in the string ($4). leading whitespace is dropped.
+
+      "g");
 
       // for each {{#foo}}{{/foo}} section do...
       return template.replace(regex, function(match, before, type, name, content, after) {
+        // before contains only tags, no sections
         var renderedBefore = before ? that.render_tags(before, context, partials, true) : "",
-            renderedAfter = after ? that.render_tags(after, context, partials, true) : "";
+
+        // after may contain both sections and tags, so use full rendering function
+            renderedAfter = after ? that.render(after, context, partials, true) : "";
 
         var value = that.find(name, context);
         if(type == "^") { // inverted section
