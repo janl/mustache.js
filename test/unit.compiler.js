@@ -582,23 +582,36 @@ test("Performance", function() {
 	
 	var start, end;
 	
-	var view = [];
-	for (var i=0;i<1000;++i) {
-		view.push({name:i});
+	// This performance test is copied form skymustache 
+	// (https://github.com/schuyler1d/handlebars.js/blob/sky_test/test/perf.js)
+	// set up the templates
+	var template = "This is the story of guys who work on a project\n" +
+		"called {{project}}. Their names were {{#people}}{{firstName}} and {{/people}}\n" +
+		"they both enjoyed working on {{project}}.\n\n" +
+		"{{#people}}\n" +
+		"{{>personPet}}\n" +
+		"{{/people}}";
+	var partials = {
+	  personPet: "{{firstName}} {{lastName}} {{#pet}} owned a {{species}}. Its name was {{name}}.{{/pet}}{{^pet}}didn't own a pet.{{/pet}}"
+	};
+	var view = {
+	  project: "Handlebars",
+	  people: [
+		{ firstName: "Yehuda", lastName: "Katz" },
+		{ firstName: "Alan", lastName: "Johnson", pet: { species: "cat", name: "Luke" } }
+	  ]
 	}
-	
-	var template = '{{#count}}{{name}}\n{{/count}}';
 	
 	start = new Date();
 	for (var j=0;j<1000;++j) {
-		this._oldToHtml(template, view, {});
+		this._oldToHtml(template, view, partials);
 	}
 	end = new Date();
 	
 	var interpreter_time = end.getTime() - start.getTime();
 	
 	start = new Date();
-	var compiler = Mustache.compile(template, {});
+	var compiler = Mustache.compile(template, partials);
 	for (var k=0;k<1000;++k) {
 		compiler(view);
 	}
@@ -606,7 +619,7 @@ test("Performance", function() {
 	
 	var compiler_time = end.getTime() - start.getTime();
 	
-	ok(compiler_time<interpreter_time, 'Compiler is faster.');
+	ok(compiler_time<interpreter_time, 'Compiler is faster (' + compiler_time + ' vs ' + interpreter_time + ').');
 });
 
 test("Regression Suite", function() {
