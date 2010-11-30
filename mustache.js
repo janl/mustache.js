@@ -313,7 +313,8 @@ var Mustache = function() {
         case "&": return "&amp;";
         case "\\": return "\\\\";
         case '"': return '&quot;';
-        case "'": return '&#39;';
+        // leaving this out temporarily, will need to fix twitter to work with this (good) change
+        // case "'": return '&#39;';
         case "<": return "&lt;";
         case ">": return "&gt;";
         default: return s;
