@@ -11,6 +11,8 @@ var Mustache = function() {
 	ParserException.prototype = {};
 	
 	var Renderer = function(send_func, mode) {
+		this._escapeCompiledRegex = null;
+		
 		this.user_send_func = send_func;
 		if (mode==='interpreter' || !mode) {
 			this.commandSet = this.interpreter;
@@ -239,13 +241,15 @@ var Mustache = function() {
 		
 		escape_regex: function(text) {
 			// thank you Simon Willison
-			var specials = [
-				'/', '.', '*', '+', '?', '|',
-				'(', ')', '[', ']', '{', '}', '\\'
-			];
-			var compiled_regex = new RegExp('(\\' + specials.join('|\\') + ')', 'g');
+			if (!this._escapeCompiledRegex) {
+				var specials = [
+					'/', '.', '*', '+', '?', '|',
+					'(', ')', '[', ']', '{', '}', '\\'
+				];
+				this._escapeCompiledRegex = new RegExp('(\\' + specials.join('|\\') + ')', 'g');
+			}
 			
-			return text.replace(compiled_regex, '\\$1');
+			return text.replace(this._escapeCompiledRegex, '\\$1');
 		},
 	
 		isWhitespace: function(token) {
