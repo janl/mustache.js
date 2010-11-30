@@ -1,4 +1,1 @@
-var two_sections = {
-  foo: true,
-  bar: false
-};
+var two_sections = {};
