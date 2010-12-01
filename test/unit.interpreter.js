@@ -65,7 +65,7 @@ test("Parser", function() {
 });
 
 test("Basic Variables", function() {
-	expect(3);
+	expect(4);
 	
 	// matches escaped.html
 	equals(
@@ -81,6 +81,17 @@ test("Basic Variables", function() {
 		),
 		'<h1>Bear &gt; Shark</h1>\nBut not &amp;quot;.\n',
 		'HTML Escaping'
+	);
+	
+	// matches apostrophe.html (except in this implementation, apostrophes are not escaped.
+	equals(
+		Mustache.to_html(
+			'{{apos}}{{control}}',
+			{ apos: '\'', control: 'X' },
+			{}
+		),
+		'\'X',
+		'Apostrophe escaping'
 	);
 	
 	// matches null_string.html
@@ -151,7 +162,7 @@ test("'{' or '&' (Unescaped Variable)", function() {
 });
 
 test("'#' (Sections)", function() {
-	expect(7);
+	expect(8);
 	
 	// matches array_of_partials_implicit_partial.html
 	equals(
@@ -252,6 +263,23 @@ test("'#' (Sections)", function() {
 		),
 		'\n  <h1>this is an object</h1>\n  <p>one of its attributes is a list</p>\n  <ul>\n    \n    <li>listitem1</li>\n    \n    <li>listitem2</li>\n    \n  </ul>\n\n',
 		'Lazy match of Section and Inverted Section'
+	);
+	
+	// matches nesting.html
+	equals(
+		Mustache.to_html(
+			'{{#foo}}\n  {{#a}}\n    {{b}}\n  {{/a}}\n{{/foo}}',
+			{
+				foo: [
+					{a: {b: 1}},
+					{a: {b: 2}},
+					{a: {b: 3}}
+				]
+			},
+			{}
+		),
+		'\n  \n    1\n  \n\n  \n    2\n  \n\n  \n    3\n  \n',
+		'Context Nesting'
 	);
 });
 
