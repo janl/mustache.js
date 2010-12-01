@@ -451,13 +451,13 @@ var Mustache = function() {
 					case '#':
 					case '^':
 						parserContext.stack[parserContext.stack.length-1].depth++;
-						parserContext.stack[parserContext.stack.length-1].content.push(parserContext.openTag + parserContext.token());						
+						parserContext.stack[parserContext.stack.length-1].content.push(parserContext.openTag, parserContext.token());
 						return 'endSectionScan';
 					case '/':
 						parserContext.stack.push({tagType:'endSection'});
 						return 'simpleKeyName';
 					default:
-						parserContext.stack[parserContext.stack.length-1].content.push(parserContext.openTag + parserContext.token());
+						parserContext.stack[parserContext.stack.length-1].content.push(parserContext.openTag, parserContext.token());
 						return 'endSectionScan';
 				}
 			},
@@ -512,7 +512,7 @@ var Mustache = function() {
 					if (--section.depth === 0) {
 						if (section.key === key) {
 							this.commandSet.section.call(this, section.sectionType,
-								section.content.join(''),
+								section.content,
 								key,
 								contextStack,
 								parserContext.partials,
@@ -524,7 +524,7 @@ var Mustache = function() {
 							throw new ParserException('Unbalanced open/close section tags');
 						}
 					} else {
-						section.content.push('{{/' + key + '}}');
+						section.content.push('{{', '/', key, '}}');
 						
 						parserContext.stack.push(section);
 						
@@ -634,7 +634,7 @@ var Mustache = function() {
 					contextStack.pop();
 				}			
 			},
-			section: function(sectionType, mustacheFragment, key, contextStack, partials, openTag, closeTag) {
+			section: function(sectionType, fragmentTokens, key, contextStack, partials, openTag, closeTag) {
 				// by @langalex, support for arrays of strings
 				var that = this;
 				function create_context(_context) {
@@ -659,29 +659,24 @@ var Mustache = function() {
 				if (sectionType==='invertedSection') {
 					if (!value || this.is_array(value) && value.length === 0) {
 						// false or empty list, render it
-						tokens = this.tokenize(mustacheFragment, openTag, closeTag);
-				
-						this.parse(this.createParserContext(tokens, partials, openTag, closeTag), contextStack);
+						this.parse(this.createParserContext(fragmentTokens, partials, openTag, closeTag), contextStack);
 					}
 				} else if (sectionType==='section') {
 					if (this.is_array(value)) { // Enumerable, Let's loop!
-						tokens = this.tokenize(mustacheFragment, openTag, closeTag);
-						
 						for (var i=0, n=value.length; i<n; ++i) {
 							contextStack.push(create_context(value[i]));
-							this.parse(this.createParserContext(tokens, partials, openTag, closeTag), contextStack);
+							this.parse(this.createParserContext(fragmentTokens, partials, openTag, closeTag), contextStack);
 							contextStack.pop();
 						}
 					} else if (this.is_object(value)) { // Object, Use it as subcontext!
-						tokens = this.tokenize(mustacheFragment, openTag, closeTag);
 						contextStack.push(value);
-						this.parse(this.createParserContext(tokens, partials, openTag, closeTag), contextStack);
+						this.parse(this.createParserContext(fragmentTokens, partials, openTag, closeTag), contextStack);
 						contextStack.pop();
 					} else if (this.is_function(value)) {
 						// higher order section
 						var that = this;
 						
-						var result = value.call(contextStack[contextStack.length-1], mustacheFragment, function(resultFragment) {
+						var result = value.call(contextStack[contextStack.length-1], fragmentTokens.join(''), function(resultFragment) {
 							var tempStream = [];
 							var old_send_func = that.user_send_func;
 							that.user_send_func = function(text) { tempStream.push(text); };
@@ -696,8 +691,7 @@ var Mustache = function() {
 						
 						this.user_send_func(result);
 					} else if (value) {
-						tokens = this.tokenize(mustacheFragment, openTag, closeTag);
-						this.parse(this.createParserContext(tokens, partials, openTag, closeTag), contextStack);
+						this.parse(this.createParserContext(fragmentTokens, partials, openTag, closeTag), contextStack);
 					}
 				} else {
 					throw new ParserException('Unknown section type ' + sectionType);
@@ -773,7 +767,7 @@ var Mustache = function() {
 				
 				this.user_send_func(function(contextStack, send_func) { partials[key](contextStack, send_func); });
 			},
-			section: function(sectionType, mustacheFragment, key, reserved/*contextStack*/, partials, openTag, closeTag) {
+			section: function(sectionType, fragmentTokens, key, reserved/*contextStack*/, partials, openTag, closeTag) {
 				// by @langalex, support for arrays of strings
 				var that = this;
 				function create_context(_context) {
@@ -797,8 +791,7 @@ var Mustache = function() {
 				
 				this.user_send_func = function(command) { commands.push(command); };
 				
-				var tokens = this.tokenize(mustacheFragment, openTag, closeTag);
-				this.parse(this.createParserContext(tokens, partials, openTag, closeTag), reserved);
+				this.parse(this.createParserContext(fragmentTokens, partials, openTag, closeTag), reserved);
 				
 				this.user_send_func = old_user_send_func;
 				
@@ -838,7 +831,7 @@ var Mustache = function() {
 							// note that HOS triggers a compilation on the resultFragment.
 							// this is slow (in relation to a fully compiled template) 
 							// since it invokes a call to the parser
-							var result = value.call(contextStack[contextStack.length-1], mustacheFragment, function(resultFragment) {
+							var result = value.call(contextStack[contextStack.length-1], fragmentTokens.join(''), function(resultFragment) {
 								var cO = [];
 								var s = function(command) { cO.push(command); };
 			
