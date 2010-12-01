@@ -46,9 +46,7 @@ var Mustache = function() {
 
       var html = this.render_section(template, context, partials);
 
-      var stillNeedsToRender = (html === template);
-
-      if (stillNeedsToRender) {
+      if (html === template) {
         if (in_recursion) {
           return this.render_tags(html, context, partials, true);
         }
@@ -173,7 +171,7 @@ var Mustache = function() {
         var renderedBefore = before ? that.render_tags(before, context, partials, true) : "",
 
         // after may contain both sections and tags, so use full rendering function
-            renderedAfter = after ? that.render(after, context, partials, true) : "";
+            renderedAfter = after ? that.render_section(after, context, partials, true) : "";
 
         var value = that.find(name, context);
         if(type == "^") { // inverted section
