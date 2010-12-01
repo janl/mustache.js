@@ -58,7 +58,7 @@ Tags are always surrounded by mustaches like this `{{foobar}}`.
 
 Conditional sections begin with `{{#condition}}` and end with
 `{{/condition}}`. When `condition` evaluates to true, the section is rendered,
-otherwise the hole block will output nothing at all. `condition` may be a
+otherwise the whole block will output nothing at all. `condition` may be a
 function returning true/false or a simple boolean.
 
     var view = {condition: function() {
@@ -204,7 +204,7 @@ in `partials` for `winnings`.
 
 mustache.js does escape all values when using the standard double mustache
 syntax. Characters which will be escaped: `& \ " < >`. To disable escaping,
-simply use tripple mustaches like `{{{unescaped_variable}}}`.
+simply use triple mustaches like `{{{unescaped_variable}}}`.
 
 Example: Using `{{variable}}` inside a template for `5 > 2` will result in `5 &gt; 2`, where as the usage of `{{{variable}}}` will result in `5 > 2`.
 
@@ -256,7 +256,7 @@ own iteration marker:
       {{bob}}
     {{/foo}}
 
-## FaQ
+## F.A.Q.
 
 ### Why doesn’t Mustache allow dot notation like `{{variable.member}}`?
 
@@ -284,3 +284,27 @@ Or just install it as a RubyGem:
 [m]: http://github.com/defunkt/mustache/#readme
 [node.js]: http://nodejs.org
 [couchdb]: http://couchdb.apache.org
+
+
+## Plugins for jQuery, Dojo, Yui, CommonJS
+
+This repository lets you build modules for [jQuery][], [Dojo][], [Yui][] and
+[CommonJS][] / [Node.js][] with the help of `rake`:
+
+Run `rake jquery` to get a jQuery compatible plugin file in the
+`mustache-jquery/` directory.
+
+Run `rake dojo` to get a Dojo compatible plugin file in the `mustache-dojo/`
+directory.
+
+Run `rake yui` to get a Yui compatible plugin file in the `mustache-yui/`
+directory.
+
+Run `rake commonjs` to get a CommonJS compatible plugin file in the
+`mustache-commonjs/` directory which you can also use with [Node.js][].
+
+[jQuery]: http://jquery.com/
+[Dojo]: http://www.dojotoolkit.org/
+[Yui]: http://developer.yahoo.com/yui/
+[CommonJS]: http://www.commonjs.org/
+[Node.js]: http://nodejs.org/

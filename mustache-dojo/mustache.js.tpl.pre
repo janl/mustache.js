@@ -5,5 +5,5 @@ Shameless port of a shameless port
 See http://github.com/defunkt/mustache for more info.
 */
 
-dojo.provide("dojox.string.mustache");
-;(function(d) {
+dojo.provide("dojox.mustache._base");
+(function(){
