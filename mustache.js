@@ -12,6 +12,9 @@ var Mustache = function() {
 	
 	var Renderer = function(send_func, mode) {
 		this._escapeCompiledRegex = null;
+		if (!Renderer.TokenizerRegex) {
+			Renderer.TokenizerRegex = this._createTokenizerRegex('{{', '}}');
+		}
 		
 		this.user_send_func = send_func;
 		if (mode==='interpreter' || !mode) {
@@ -42,6 +45,8 @@ var Mustache = function() {
 			this.splitFunc = String.prototype.split;
 		}
 	};
+	Renderer.TokenizerRegex = null;
+	
 	Renderer.prototype = {
 		capturingSplit: function(separator) {
 			// fix up the stupidness that is IE's broken String.split implementation
@@ -151,7 +156,7 @@ var Mustache = function() {
 			};
 		},
 		
-		tokenize: function(template, openTag, closeTag) {
+		_createTokenizerRegex: function(openTag, closeTag) {
 			var delimiters = [
 				'\\{',
 				'&',
@@ -168,7 +173,17 @@ var Mustache = function() {
 			delimiters.unshift(this.escape_regex(openTag));
 			delimiters.unshift(this.escape_regex(closeTag));
 			
-			var regex = new RegExp('(' + delimiters.join('|') + ')');
+			return new RegExp('(' + delimiters.join('|') + ')');
+		},
+		
+		tokenize: function(template, openTag, closeTag) {
+			var regex;			
+			if (openTag==='{{' && closeTag==='}}') {
+				// the common case, use the stored compiled regex
+				regex = Renderer.TokenizerRegex;
+			} else {
+				regex = this._createTokenizerRegex(openTag, closeTag);
+			}
 			
 			var tokens = this.splitFunc.call(template, regex);
 			var cleaned_tokens = [];
