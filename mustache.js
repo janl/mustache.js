@@ -40,28 +40,24 @@ var Mustache = function() {
         context['_mode'] = this.pragmas['TRANSLATION-HINT']['mode'];
       }
 
+      // get the pragmas together
       template = this.render_pragmas(template);
 
+      // handle all translations
       template = this.render_i18n(template, context, partials);
 
+      // render the template
       var html = this.render_section(template, context, partials);
 
-      if (html === template) {
-        if (in_recursion) {
-          return this.render_tags(html, context, partials, true);
-        }
+      // render_section did not find any sections, we still need to render the tags
+      if (html === false) {
+        html = this.render_tags(template, context, partials, in_recursion);
+      }
 
-        this.render_tags(html, context, partials, false);
+      if (in_recursion) {
+        return html;
       } else {
-        if(in_recursion) {
-          return html;
-        } else {
-          var lines = html.split("\n");
-          for (var i = 0; i < lines.length; i++) {
-            this.send(lines[i]);
-          }
-          return;
-        }
+        this.sendLines(html);
       }
     },
 
@@ -71,6 +67,15 @@ var Mustache = function() {
     send: function(line) {
       if(line != "") {
         this.buffer.push(line);
+      }
+    },
+
+    sendLines: function(text) {
+      if (text) {
+        var lines = text.split("\n");
+        for (var i = 0; i < lines.length; i++) {
+          this.send(lines[i]);
+        }
       }
     },
 
@@ -142,7 +147,8 @@ var Mustache = function() {
     */
     render_section: function(template, context, partials) {
       if(!this.includes("#", template) && !this.includes("^", template)) {
-        return template;
+        // did not render anything, there were no sections
+        return false;
       }
 
       var that = this;
