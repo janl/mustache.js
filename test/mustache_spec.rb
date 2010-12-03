@@ -64,51 +64,6 @@ describe "mustache" do
       run_js(@run_js, js).should == "\n"
     end
 
-    it "should not double-render" do
-      js = <<-JS
-        #{@boilerplate}
-        var template = "{{#foo}}{{bar}}{{/foo}}";
-        var ctx = {
-          foo: true,
-          bar: "{{win}}",
-          win: "FAIL"
-        };
-
-        print(Mustache.to_html(template, ctx))
-      JS
-
-      run_js(@run_js, js).strip.should == "{{win}}"
-    end
-
-    it "should work with i18n" do
-      js = <<-JS
-        #{@boilerplate}
-
-        var template = "{{_i}}foo {{bar}}{{/i}}";
-        var ctx = {
-          bar: "BAR"
-        };
-
-        print(Mustache.to_html(template, ctx));
-      JS
-
-      run_js(@run_js, js).strip.should == "foo BAR"
-    end
-
-    it "should work with empty sections" do
-      js = <<-JS
-      try{
-        #{@boilerplate}
-
-        print(Mustache.to_html("{{#foo}}{{/foo}}foo{{#bar}}{{/bar}}", {}));
-      } catch(e) {
-        print(e);
-      }
-      JS
-
-      run_js(@run_js, js).strip.should == "foo"
-    end
-
     non_partials.each do |testname|
       describe testname do
         it "should generate the correct html" do
