@@ -1,5 +1,11 @@
 # mustache.js Changes
 
+## 0.3.1-twitter (12/3/2010)
+
+* Added i18n {{_i}}{{/i}} support
+* fixed double-rendering bug
+* added Rhino test-runner alongside JavaScriptCore
+
 ## 0.3.1 (??-??-????)
 
 ## 0.3.0 (21-07-2010)

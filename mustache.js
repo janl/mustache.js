@@ -126,7 +126,7 @@ var Mustache = function() {
 
       // for each {{_i}}{{/i}} section do...
       return html.replace(regex, function(match, content) {
-        var translation_mode = undefined;
+        var translation_mode;
         if (that.pragmas && that.pragmas["TRANSLATION-HINT"] && that.pragmas["TRANSLATION-HINT"]['mode']) {
           translation_mode = { _mode: that.pragmas["TRANSLATION-HINT"]['mode'] };
         } else if (context['_mode']) {

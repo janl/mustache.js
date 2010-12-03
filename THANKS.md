@@ -18,3 +18,5 @@ Mustache.js wouldn't kick ass if it weren't for these fine souls:
  * Jason Smith / jhs
  * Aaron Gibralter / agibralter
  * Ross Boucher / boucher
+ * Matt Sanford / mzsanford
+ * Ben Cherry / bcherry
