@@ -180,10 +180,6 @@ describe "mustache" do
 
   def run_js(runner, js)
     send(runner, js)
-    # run_js_rhino(js)
-    # js_jsc = run_js_jsc(js)
-    # js_rhino = run_js_rhino(js)
-    # return js_jsc unless js_jsc != js_rhino
   end
 
   def run_js_jsc(js)
