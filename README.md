@@ -344,8 +344,32 @@ directory.
 Run `rake commonjs` to get a CommonJS compatible plugin file in the
 `mustache-commonjs/` directory which you can also use with [Node.js][].
 
+## Testing
+
+To run the mustache.js test suite, run `rake spec`.  All specs will be run first with JavaScriptCore (using `jsc`)
+and again with Rhino, using `java org.mozilla.javascript.tools.shell.Main`.  To install Rhino on OSX, follow [these instructions](Rhino Install).
+
+### Adding Tests
+
+Tests are located in the `examples/` directory.  Adding a new test requires three files.  Here's an example to add a test named "foo":
+
+`examples/foo.html` (the template):
+
+    foo {{bar}}
+
+`examples/foo.js` (the view context):
+
+    var foo = {
+      bar: "baz"
+    };
+
+`examples/foo.txt` (the expected output):
+
+    foo baz
+
 [jQuery]: http://jquery.com/
 [Dojo]: http://www.dojotoolkit.org/
 [Yui]: http://developer.yahoo.com/yui/
 [CommonJS]: http://www.commonjs.org/
 [Node.js]: http://nodejs.org/
+[Rhino Install]: http://michaux.ca/articles/installing-rhino-on-os-x
