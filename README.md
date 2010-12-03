@@ -199,11 +199,34 @@ will tell mustache.js to look for a object in the context's property
 `winnings`. It will then use that object as the context for the template found
 in `partials` for `winnings`.
 
+## Internationalization
+
+mustache.js supports i18n using the `{{_i}}{{/i}}` tags.  When mustache.js encounters
+an internationalized section, it will call out to the standard global gettext function `_()` with the tag contents for a
+translation _before_ any rendering is done.  For example:
+
+    var template = "{{_i}}{{name}} is using mustache.js!{{/i}}"
+
+    var view = {
+      name: "Matt"
+    };
+
+    var translationTable = {
+      // Welsh, according to Google Translate
+      "{{name}} is using mustache.js!": "Mae {{name}} yn defnyddio mustache.js!"
+    };
+
+    function _(text) {
+      return translationTable[text] || text;
+    }
+
+    alert(Mustache.to_html(template, view));
+    // alerts "Mae Matt yn defnyddio mustache.js!"
 
 ## Escaping
 
 mustache.js does escape all values when using the standard double mustache
-syntax. Characters which will be escaped: `& \ " < >`. To disable escaping,
+syntax. Characters which will be escaped: `& \ " ' < >`. To disable escaping,
 simply use triple mustaches like `{{{unescaped_variable}}}`.
 
 Example: Using `{{variable}}` inside a template for `5 > 2` will result in `5 &gt; 2`, where as the usage of `{{{variable}}}` will result in `5 > 2`.
