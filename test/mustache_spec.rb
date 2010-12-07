@@ -30,8 +30,12 @@ describe "mustache" do
       mustache = File.read(__DIR__ + "/../mustache.js")
       stubbed_gettext = <<-JS
         // Stubbed gettext translation method for {{_i}}{{/i}} tags in Mustache.
-        function _(text) {
-          return text;
+        function _(params) {
+          if (typeof params === "string") {
+            return params
+          }
+
+          return params.text;
         }
       JS
 
