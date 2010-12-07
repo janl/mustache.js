@@ -138,7 +138,7 @@ var Mustache = function() {
           translation_mode = { _mode: context['_mode'] };
         }
 
-        return that.render(_(content, translation_mode), context, partials, true);
+        return _(content, translation_mode);
       });
     },
 
