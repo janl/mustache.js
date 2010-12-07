@@ -37,7 +37,7 @@ var Mustache = function() {
 
       // Branching or moving down the partial stack, save any translation mode info.
       if (this.pragmas['TRANSLATION-HINT']) {
-        context['_mode'] = this.pragmas['TRANSLATION-HINT']['mode'];
+        context['_TRANSLATION-HINT_mode'] = this.pragmas['TRANSLATION-HINT'].mode;
       }
 
       // get the pragmas together
