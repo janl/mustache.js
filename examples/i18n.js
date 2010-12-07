@@ -1,3 +1,4 @@
 var i18n = {
-  bar: "BAR"
+  bar: "don't double render me... {{baz}}",
+  baz: "FAIL"
 };

@@ -1,1 +1,1 @@
-foo BAR
+foo don&#39;t double render me... {{baz}}
