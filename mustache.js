@@ -187,35 +187,41 @@ var Mustache = function() {
         var renderedBefore = before ? that.render_tags(before, context, partials, true) : "",
 
         // after may contain both sections and tags, so use full rendering function
-            renderedAfter = after ? that.render(after, context, partials, true) : "";
+            renderedAfter = after ? that.render(after, context, partials, true) : "",
 
-        var value = that.find(name, context);
-        if(type == "^") { // inverted section
-          if(!value || that.is_array(value) && value.length === 0) {
+        // will be computed below
+            renderedContent,
+
+            value = that.find(name, context);
+
+        if (type === "^") { // inverted section
+          if (!value || that.is_array(value) && value.length === 0) {
             // false or empty list, render it
-            return renderedBefore + that.render(content, context, partials, true) + renderedAfter;
+            renderedContent = that.render(content, context, partials, true);
           } else {
-            return renderedBefore + "" + renderedAfter;
+            renderedContent = "";
           }
-        } else if(type == "#") { // normal section
-          if(that.is_array(value)) { // Enumerable, Let's loop!
-            return renderedBefore + that.map(value, function(row) {
+        } else if (type === "#") { // normal section
+          if (that.is_array(value)) { // Enumerable, Let's loop!
+            renderedContent = that.map(value, function(row) {
               return that.render(content, that.create_context(row), partials, true);
-            }).join("") + renderedAfter;
-          } else if(that.is_object(value)) { // Object, Use it as subcontext!
-            return renderedBefore + that.render(content, that.create_context(value),
-              partials, true) + renderedAfter;
-          } else if(typeof value === "function") {
+            }).join("");
+          } else if (that.is_object(value)) { // Object, Use it as subcontext!
+            renderedContent = that.render(content, that.create_context(value),
+              partials, true);
+          } else if (typeof value === "function") {
             // higher order section
-            return renderedBefore + value.call(context, content, function(text) {
+            renderedContent = value.call(context, content, function(text) {
               return that.render(text, context, partials, true);
-            }) + renderedAfter;
-          } else if(value) { // boolean section
-            return renderedBefore + that.render(content, context, partials, true) + renderedAfter;
+            });
+          } else if (value) { // boolean section
+            renderedContent = that.render(content, context, partials, true);
           } else {
-            return renderedBefore + "" + renderedAfter;
+            renderedContent = "";
           }
         }
+
+        return renderedBefore + renderedContent + renderedAfter;
       });
     },
 
