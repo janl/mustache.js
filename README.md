@@ -235,7 +235,7 @@ By adding a pragma, we can provide the right context for a given template:
 
     <div class="tweet-button">{{_i}}Tweet{{/i}}</div>
 
-This will lookup every translation in that template with the mode, e.g. `_('Tweet', {_mode: "tweet_button"})`, which your gettext implementation can handle as appropriate.
+This will lookup every translation in that template with the mode, e.g. `_('Tweet', {mode: "tweet_button"})`, which your gettext implementation can handle as appropriate.
 
 ## Escaping
 
