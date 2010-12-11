@@ -327,7 +327,7 @@
       inverse_block:function(ctx, state) {
         var value = this.find(ctx.name, state.contexts[0]);
         if (!value || this.is_array(value) && value.length === 0) {
-          return ctx.compiled.render(state.contexts[0], state.contexts[0]);
+          return ctx.compiled.render(state.contexts[0], this.context);
         } else
           return ""
       },
