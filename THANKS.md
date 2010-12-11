@@ -18,3 +18,4 @@ Mustache.js wouldn't kick ass if it weren't for these fine souls:
  * Jason Smith / jhs
  * Aaron Gibralter / agibralter
  * Ross Boucher / boucher
+ * Schuyler Duveen / schuyler1d
