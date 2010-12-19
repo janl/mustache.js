@@ -1,0 +1,5 @@
+
+    Object.implement('mustache', function(view, partials){
+        return Mustache.to_html(view, this, partials);
+    });
+})();
