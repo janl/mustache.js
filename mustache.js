@@ -921,13 +921,13 @@ var Mustache = function() {
 			renderer.render(template, {}, p);
 
 			return function(view, send_func) {
-				view = view || {};
+				view = [view || {}];
 				
 				var o = send_func ? undefined : [];
 				var s = send_func || function(output) { o.push(output); };	
 			
 				for (var i=0,n=commands.length; i<n; ++i) {
-					commands[i]([view], s);
+					commands[i](view, s);
 				}
 				
 				if (!send_func) {
