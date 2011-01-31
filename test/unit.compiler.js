@@ -651,7 +651,7 @@ test("Performance", function() {
 });
 
 test("Regression Suite", function() {
-	expect(3);
+	expect(4);
 	
 	// matches bug_11_eating_whitespace.html
 	equals(
