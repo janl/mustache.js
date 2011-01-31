@@ -146,7 +146,7 @@ var Mustache = function() {
 		createParserContext: function(tokens, partials, openTag, closeTag) {
 			return {
 				tokens: tokens,
-				token: function() { return this.tokens[this.index]; },
+				token: tokens[0],
 				index: 0,
 				length: tokens.length,
 				partials: partials,
@@ -185,15 +185,7 @@ var Mustache = function() {
 				regex = this._createTokenizerRegex(openTag, closeTag);
 			}
 			
-			var tokens = this.splitFunc.call(template, regex);
-			var cleaned_tokens = [];
-			for (var i = 0, n = tokens.length; i<n; ++i) {
-				if (tokens[i]!=='') {
-					cleaned_tokens.push(tokens[i]);
-				}
-			}
-			
-			return cleaned_tokens;
+			return this.splitFunc.call(template, regex);
 		},
 		
 		/*
@@ -243,6 +235,10 @@ var Mustache = function() {
 			var state = 'text';
 			
 			for (; parserContext.index<parserContext.length; ++parserContext.index) {
+				parserContext.token = parserContext.tokens[parserContext.index];
+				
+				if (parserContext.token === '') continue;
+				
 				state = this.stateMachine[state].call(this, parserContext, contextStack);
 			}
 			
@@ -273,19 +269,19 @@ var Mustache = function() {
 		
 		stateMachine: {
 			text: function(parserContext, contextStack) {
-				switch (parserContext.token()) {
+				switch (parserContext.token) {
 					case parserContext.openTag:
 						this.commandSet.text.call(this);
 						
 						return 'openMustache';
 					default:
-						this.send_func(parserContext.token());
+						this.send_func(parserContext.token);
 						
 						return 'text';
 				}
 			},
 			openMustache: function(parserContext, contextStack) {
-				switch (parserContext.token()) {
+				switch (parserContext.token) {
 					case '{':
 						parserContext.stack.push({tagType:'unescapedVariable', subtype: 'tripleMustache'});
 						return 'keyName';
@@ -321,24 +317,24 @@ var Mustache = function() {
 				}
 			},
 			closeMustache: function(parserContext, contextStack) {
-				if (this.isWhitespace(parserContext.token())) {
+				if (this.isWhitespace(parserContext.token)) {
 					return 'closeMustache';
-				} else if (parserContext.token()===parserContext.closeTag) {
+				} else if (parserContext.token===parserContext.closeTag) {
 					return this.dispatchCommand(parserContext, contextStack);
 				}
 			},
 			expectClosingMustache: function(parserContext, contextStack) {
 				if (parserContext.closeTag==='}}' && 
-					parserContext.token()==='}}') {
+					parserContext.token==='}}') {
 					return 'expectClosingParenthesis';
-				} else if (parserContext.token()==='}') {
+				} else if (parserContext.token==='}') {
 					return 'closeMustache';
 				} else {
 					throw new ParserException('Unexpected token encountered.');
 				}
 			},
 			expectClosingParenthesis: function(parserContext, contextStack) {
-				if (parserContext.token()==='}') {
+				if (parserContext.token==='}') {
 					return this.dispatchCommand(parserContext, contextStack);
 				} else {
 					throw new ParserException('Unexpected token encountered.');
@@ -369,59 +365,59 @@ var Mustache = function() {
 				}
 			},
 			simpleKeyName: function(parserContext, contextStack) {
-				if (this.isWhitespace(parserContext.token())) {
+				if (this.isWhitespace(parserContext.token)) {
 					return 'simpleKeyName';
 				} else {
-					parserContext.stack.push(parserContext.token());
+					parserContext.stack.push(parserContext.token);
 					
 					return 'closeMustache';
 				}
 			},
 			
 			setDelimiterStart: function(parserContext, contextStack) {
-				if (this.isWhitespace(parserContext.token()) ||
-					parserContext.token()==='=') {
+				if (this.isWhitespace(parserContext.token) ||
+					parserContext.token==='=') {
 					throw new ParserException('Syntax error in Set Delimiter tag');
 				} else {
-					parserContext.stack.push(parserContext.token());
+					parserContext.stack.push(parserContext.token);
 					return 'setDelimiterStartOrWhitespace';
 				}				
 			},
 			setDelimiterStartOrWhitespace: function(parserContext, contextStack) {
-				if (this.isWhitespace(parserContext.token())) {
+				if (this.isWhitespace(parserContext.token)) {
 					return 'setDelimiterEnd';
-				} else if (parserContext.token()==='='){
+				} else if (parserContext.token==='='){
 					throw new ParserException('Syntax error in Set Delimiter tag');
 				} else {
-					parserContext.stack.push(parserContext.stack.pop() + parserContext.token());
+					parserContext.stack.push(parserContext.stack.pop() + parserContext.token);
 					
 					return 'setDelimiterStartOrWhitespace';
 				}
 			},
 			setDelimiterEnd: function(parserContext, contextStack) {
-				if (this.isWhitespace(parserContext.token())) {
+				if (this.isWhitespace(parserContext.token)) {
 					return 'setDelimiterEnd';
-				} else if (parserContext.token()==='=') {
+				} else if (parserContext.token==='=') {
 					throw new ParserException('Syntax error in Set Delimiter tag');
 				} else {
-					parserContext.stack.push(parserContext.token());
+					parserContext.stack.push(parserContext.token);
 				
 					return 'setDelimiterEndOrEqualSign';
 				}
 			},
 			setDelimiterEndOrEqualSign: function(parserContext, contextStack) {
-				if (parserContext.token()==='=') {
+				if (parserContext.token==='=') {
 					return 'setDelimiterExpectClosingTag';
-				} else if (this.isWhitespace(parserContext.token())) {
+				} else if (this.isWhitespace(parserContext.token)) {
 					throw new ParserException('Syntax error in Set Delimiter tag');
 				} else {
-					parserContext.stack.push(parserContext.stack.pop() + parserContext.token());
+					parserContext.stack.push(parserContext.stack.pop() + parserContext.token);
 					
 					return 'setDelimiterEndOrEqualSign';
 				}
 			},
 			setDelimiterExpectClosingTag: function(parserContext, contextStack) {
-				if (parserContext.token()===parserContext.closeTag) {
+				if (parserContext.token===parserContext.closeTag) {
 					var newCloseTag = parserContext.stack.pop();
 					var newOpenTag = parserContext.stack.pop();
 					var command = parserContext.stack.pop();
@@ -453,32 +449,32 @@ var Mustache = function() {
 			},
 			
 			endSectionScan: function(parserContext, contextStack) {
-				switch (parserContext.token()) {
+				switch (parserContext.token) {
 					case parserContext.openTag:
 						return 'expectSectionOrEndSection';
 					default:
-						parserContext.stack[parserContext.stack.length-1].content.push(parserContext.token());
+						parserContext.stack[parserContext.stack.length-1].content.push(parserContext.token);
 						return 'endSectionScan';
 				}
 			},
 			expectSectionOrEndSection: function(parserContext, contextStack) {
-				switch (parserContext.token()) {
+				switch (parserContext.token) {
 					case '#':
 					case '^':
 						parserContext.stack[parserContext.stack.length-1].depth++;
-						parserContext.stack[parserContext.stack.length-1].content.push(parserContext.openTag, parserContext.token());
+						parserContext.stack[parserContext.stack.length-1].content.push(parserContext.openTag, parserContext.token);
 						return 'endSectionScan';
 					case '/':
 						parserContext.stack.push({tagType:'endSection'});
 						return 'simpleKeyName';
 					default:
-						parserContext.stack[parserContext.stack.length-1].content.push(parserContext.openTag, parserContext.token());
+						parserContext.stack[parserContext.stack.length-1].content.push(parserContext.openTag, parserContext.token);
 						return 'endSectionScan';
 				}
 			},
 			
 			discard: function(parserContext, contextStack) {
-				if (parserContext.token()==='!') {
+				if (parserContext.token==='!') {
 					return 'closeComment';
 				} else {
 					return 'discard';
@@ -486,7 +482,7 @@ var Mustache = function() {
 			},
 			
 			closeComment: function(parserContext, contextStack) {
-				if (parserContext.token()!==parserContext.closeTag) {
+				if (parserContext.token!==parserContext.closeTag) {
 					return 'discard';
 				} else {
 					return 'text';
