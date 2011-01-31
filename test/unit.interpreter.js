@@ -588,7 +588,7 @@ test("Demo", function() {
 });
 
 test("Regression Suite", function() {
-	expect(3);
+	expect(4);
 	
 	// matches bug_11_eating_whitespace.html
 	equals(
@@ -621,5 +621,23 @@ test("Regression Suite", function() {
 		),
 		'mustache is awesome!',
 		'Issue 46'
+	);
+	
+	// matches Issue #79
+	equals(
+		Mustache.to_html(
+			'{{#inner}}{{f}}{{#inner}}{{b}}{{/inner}}{{/inner}}'
+			, {
+				inner: [{
+					f: 'foo'
+					, inner: [{
+						b: 'bar'
+					}]
+				}]
+			}
+			, {}
+		)
+		, 'foobar'
+		, 'Nested Sections with the same name'
 	);
 });
