@@ -515,9 +515,10 @@ var Mustache = function() {
 						
 					return 'text';
 				case 'endSection':
-					var section = parserContext.stack.pop();
+					var section = parserContext.stack[parserContext.stack.length-1];
 					if (--section.depth === 0) {
 						if (section.key === key) {
+							parserContext.stack.pop();
 							this.commandSet.section.call(this, section.sectionType,
 								section.content,
 								key,
@@ -532,8 +533,6 @@ var Mustache = function() {
 						}
 					} else {
 						section.content.push('{{', '/', key, '}}');
-						
-						parserContext.stack.push(section);
 						
 						return 'endSectionScan';
 					}
