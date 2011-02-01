@@ -685,8 +685,6 @@ var Mustache = function() {
 						contextStack.pop();
 					} else if (this.is_function(value)) {
 						// higher order section
-						var that = this;
-						
 						var result = value.call(contextStack[contextStack.length-1], fragmentTokens.join(''), function(resultFragment) {
 							var tempStream = [];
 							var old_send_func = that.user_send_func;
@@ -811,8 +809,6 @@ var Mustache = function() {
 						commands[i](contextStack, send_func);
 					}
 				};
-				
-				var that = this;
 				
 				if (sectionType==='invertedSection') {
 					this.user_send_func(function(contextStack, send_func) {
