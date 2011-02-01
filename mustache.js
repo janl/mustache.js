@@ -755,8 +755,10 @@ var Mustache = function() {
 					
 					var that = this;
 					partials[key] = function(contextStack, send_func) {
-						var res = that.find_in_stack(key, contextStack);
-						if (that.is_object(res)) {
+						var res = that.find_in_stack(key, contextStack),
+							isObj = that.is_object(res);
+						
+						if (isObj) {
 							contextStack.push(res);
 						}
 					
@@ -764,7 +766,7 @@ var Mustache = function() {
 							commands[i](contextStack, send_func);
 						}
 						
-						if (that.is_object(res)) {
+						if (isObj) {
 							contextStack.pop();
 						}
 					};
