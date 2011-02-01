@@ -344,18 +344,14 @@ var Mustache = function() {
 				var result = this.stateMachine.simpleKeyName.call(this, parserContext, contextStack);
 				
 				if (result==='closeMustache') {
-					var tagKey = parserContext.stack.pop();
-					var tag = parserContext.stack.pop();
+					var tagKey = parserContext.stack[parserContext.stack.length-1],
+						tag = parserContext.stack[parserContext.stack.length-2];
 					
 					if (tag.tagType==='unescapedVariable' && tag.subtype==='tripleMustache') {
-						parserContext.stack.push({tagType:'unescapedVariable'});
-						parserContext.stack.push(tagKey);
+						parserContext.stack[parserContext.stack.length-2] = {tagType:'unescapedVariable'};
 						
 						return 'expectClosingMustache';
 					} else {
-						parserContext.stack.push(tag);
-						parserContext.stack.push(tagKey);
-						
 						return 'closeMustache';
 					}
 				} else if (result==='simpleKeyName') {
@@ -389,7 +385,7 @@ var Mustache = function() {
 				} else if (parserContext.token==='='){
 					throw new ParserException('Syntax error in Set Delimiter tag');
 				} else {
-					parserContext.stack.push(parserContext.stack.pop() + parserContext.token);
+					parserContext.stack[parserContext.stack.length-1] += parserContext.token;
 					
 					return 'setDelimiterStartOrWhitespace';
 				}
@@ -411,7 +407,7 @@ var Mustache = function() {
 				} else if (this.isWhitespace(parserContext.token)) {
 					throw new ParserException('Syntax error in Set Delimiter tag');
 				} else {
-					parserContext.stack.push(parserContext.stack.pop() + parserContext.token);
+					parserContext.stack[parserContext.stack.length-1] += parserContext.token;
 					
 					return 'setDelimiterEndOrEqualSign';
 				}
