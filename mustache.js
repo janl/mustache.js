@@ -13,8 +13,7 @@ var Mustache = function() {
     pragmas: {},
     buffer: [],
     pragmas_implemented: {
-      "IMPLICIT-ITERATOR": true,
-      "TRANSLATION-HINT": true
+      "IMPLICIT-ITERATOR": true
     },
     context: {},
 
@@ -35,16 +34,8 @@ var Mustache = function() {
         }
       }
 
-      // Branching or moving down the partial stack, save any translation mode info.
-      if (this.pragmas['TRANSLATION-HINT']) {
-        context['_TRANSLATION-HINT_mode'] = this.pragmas['TRANSLATION-HINT'].mode;
-      }
-
       // get the pragmas together
       template = this.render_pragmas(template);
-
-      // handle all translations
-      template = this.render_i18n(template, context, partials);
 
       // render the template
       var html = this.render_section(template, context, partials);
@@ -119,37 +110,6 @@ var Mustache = function() {
         return this.render(partials[name], context, partials, true);
       }
       return this.render(partials[name], context[name], partials, true);
-    },
-
-    render_i18n: function(html, context, partials) {
-      if (html.indexOf(this.otag + "_i") == -1) {
-        return html;
-      }
-      var that = this;
-      var regex = new RegExp(this.otag + "\\_i" + this.ctag +
-        "\\s*([\\s\\S]+?)" + this.otag + "\\/i" + this.ctag, "mg");
-
-      // for each {{_i}}{{/i}} section do...
-      return html.replace(regex, function(match, content) {
-        var translationMode;
-
-        if (that.pragmas && that.pragmas["TRANSLATION-HINT"] && that.pragmas["TRANSLATION-HINT"].mode) {
-          translationMode = that.pragmas["TRANSLATION-HINT"].mode;
-        } else if (context['_TRANSLATION-HINT_mode']) {
-          translationMode = context['_TRANSLATION-HINT_mode'];
-        }
-
-        var params = content;
-
-        if (translationMode) {
-          params = {
-            text: content,
-            mode: translationMode
-          };
-        }
-
-        return _(params);
-      });
     },
 
     /*

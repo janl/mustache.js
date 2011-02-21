@@ -199,44 +199,6 @@ will tell mustache.js to look for a object in the context's property
 `winnings`. It will then use that object as the context for the template found
 in `partials` for `winnings`.
 
-## Internationalization
-
-mustache.js supports i18n using the `{{_i}}{{/i}}` tags.  When mustache.js encounters
-an internationalized section, it will call out to the standard global gettext function `_()` with the tag contents for a
-translation _before_ any rendering is done.  For example:
-
-    var template = "{{_i}}{{name}} is using mustache.js!{{/i}}"
-
-    var view = {
-      name: "Matt"
-    };
-
-    var translationTable = {
-      // Welsh, according to Google Translate
-      "{{name}} is using mustache.js!": "Mae {{name}} yn defnyddio mustache.js!"
-    };
-
-    function _(text) {
-      return translationTable[text] || text;
-    }
-
-    alert(Mustache.to_html(template, view));
-    // alerts "Mae Matt yn defnyddio mustache.js!"
-
-### The TRANSLATION-HINT Pragma
-
-Some single words in English have different translations based on usage context.  Mustache.js supports this with the TRANSLATION-HINT pragma.  For example, the word "Tweet" can be used as a noun, or a verb.  The following template is ambiguous:
-
-    <div class="tweet-button">{{_i}}Tweet{{/i}}</div>
-
-By adding a pragma, we can provide the right context for a given template:
-
-    {{%TRANSLATION-HINT mode=tweet_button}}
-
-    <div class="tweet-button">{{_i}}Tweet{{/i}}</div>
-
-This will lookup every translation in that template with the mode, e.g. `_('Tweet', {mode: "tweet_button"})`, which your gettext implementation can handle as appropriate.
-
 ## Escaping
 
 mustache.js does escape all values when using the standard double mustache
@@ -292,10 +254,6 @@ own iteration marker:
     {{#foo}}
       {{bob}}
     {{/foo}}
-
-### TRANSLATION-HINT
-
-See the "Internationalization" section above for info on this pragma.
 
 ## F.A.Q.
 
