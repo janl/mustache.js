@@ -305,7 +305,13 @@ Run `rake commonjs` to get a CommonJS compatible plugin file in the
 ## Testing
 
 To run the mustache.js test suite, run `rake spec`.  All specs will be run first with JavaScriptCore (using `jsc`)
-and again with Rhino, using `java org.mozilla.javascript.tools.shell.Main`.  To install Rhino on OSX, follow [these instructions](Rhino Install).
+and again with Rhino, using `java org.mozilla.javascript.tools.shell.Main`.
+
+JavaScriptCore is used from the OSX default location:
+
+    /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc
+
+To install Rhino on OSX, follow [these instructions](Rhino Install).
 
 ### Adding Tests
 

@@ -188,7 +188,7 @@ describe "mustache" do
 
   def run_js_jsc(js)
     File.open("runner.js", 'w') {|f| f << js}
-    `jsc runner.js`
+    `/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc runner.js`
   end
 
   def run_js_rhino(js)
