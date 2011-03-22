@@ -10,28 +10,18 @@ var Mustache = function() {
 	}
 	ParserException.prototype = {};
 	
-	var Renderer = function(send_func, mode) {
+	var Renderer = function(send_func) {
 		this._escapeCompiledRegex = null;
 		if (!Renderer.TokenizerRegex) {
 			Renderer.TokenizerRegex = this._createTokenizerRegex('{{', '}}');
 		}
 		
 		this.user_send_func = send_func;
-		if (mode==='interpreter' || !mode) {
-			this.commandSet = this.interpreter;
-			
-			this.send_func = function(text) {
-				this.user_send_func(text);
-			}
-		} else if (mode==='compiler') {
-			this.commandSet = this.compiler;
-			
-			this.cached_output = [];
-			this.send_func = function(text) {
-				this.cached_output.push(text);
-			}
-		} else {
-			throw new ParserException('Unsupported mode.');
+		this.commandSet = this.compiler;
+		
+		this.cached_output = [];
+		this.send_func = function(text) {
+			this.cached_output.push(text);
 		}
 		
 		this.pragmas = {};
@@ -599,110 +589,6 @@ var Mustache = function() {
 			return Object.prototype.toString.call(a) === '[object Array]';
 		},	
 		
-		interpreter: {
-			text: function() {
-				// in this implementation, rendering text is meaningless
-				// since the send_func method simply forwards to user_send_func
-			},
-			variable: function(key, contextStack) {
-				function escapeHTML(str) {
-					return ('' + str).replace(/&/g,'&amp;')
-						.replace(/</g,'&lt;')
-						.replace(/>/g,'&gt;');
-				}
-
-				var result = this.find_in_stack(key, contextStack);
-				if (result!==undefined) {
-					this.user_send_func(escapeHTML(result));
-				}			
-			},
-			unescaped_variable: function(key, contextStack) {
-				var result = this.find_in_stack(key, contextStack);
-				if (result!==undefined) {
-					this.user_send_func(result);
-				}			
-			},
-			partial: function(key, contextStack, partials, openTag, closeTag) {
-				if (!partials || partials[key] === undefined) {
-					throw new ParserException('Unknown partial \'' + key + '\'');
-				}
-				
-				var res = this.find_in_stack(key, contextStack);
-				if (this.is_object(res)) {
-					contextStack.push(res);
-				}
-				
-				var tokens = this.tokenize(partials[key], openTag, closeTag);
-
-				this.parse(this.createParserContext(tokens, partials, openTag, closeTag), contextStack);
-				
-				if (this.is_object(res)) {
-					contextStack.pop();
-				}			
-			},
-			section: function(sectionType, fragmentTokens, key, contextStack, partials, openTag, closeTag) {
-				// by @langalex, support for arrays of strings
-				var that = this;
-				function create_context(_context) {
-					if(that.is_object(_context)) {
-						return _context;
-					} else {
-						var iterator = '.';
-						
-						if(that.pragmas["IMPLICIT-ITERATOR"] &&
-							that.pragmas["IMPLICIT-ITERATOR"].iterator) {
-							iterator = that.pragmas["IMPLICIT-ITERATOR"].iterator;
-						}
-						var ctx = {};
-						ctx[iterator] = _context;
-						return ctx;
-					}
-				}
-			
-				var value = this.find_in_stack(key, contextStack);
-
-				var tokens;
-				if (sectionType==='invertedSection') {
-					if (!value || this.is_array(value) && value.length === 0) {
-						// false or empty list, render it
-						this.parse(this.createParserContext(fragmentTokens, partials, openTag, closeTag), contextStack);
-					}
-				} else if (sectionType==='section') {
-					if (this.is_array(value)) { // Enumerable, Let's loop!
-						for (var i=0, n=value.length; i<n; ++i) {
-							contextStack.push(create_context(value[i]));
-							this.parse(this.createParserContext(fragmentTokens, partials, openTag, closeTag), contextStack);
-							contextStack.pop();
-						}
-					} else if (this.is_object(value)) { // Object, Use it as subcontext!
-						contextStack.push(value);
-						this.parse(this.createParserContext(fragmentTokens, partials, openTag, closeTag), contextStack);
-						contextStack.pop();
-					} else if (this.is_function(value)) {
-						// higher order section
-						var result = value.call(contextStack[contextStack.length-1], fragmentTokens.join(''), function(resultFragment) {
-							var tempStream = [];
-							var old_send_func = that.user_send_func;
-							that.user_send_func = function(text) { tempStream.push(text); };
-							
-							tokens = that.tokenize(resultFragment, openTag, closeTag);						
-							that.parse(that.createParserContext(tokens, partials, openTag, closeTag), contextStack);
-							
-							that.user_send_func = old_send_func;
-							
-							return tempStream.join('');
-						});
-						
-						this.user_send_func(result);
-					} else if (value) {
-						this.parse(this.createParserContext(fragmentTokens, partials, openTag, closeTag), contextStack);
-					}
-				} else {
-					throw new ParserException('Unknown section type ' + sectionType);
-				}
-			}
-		},
-		
 		compiler: {
 			text: function() {
 				var outputText = this.cached_output.join('');
@@ -875,20 +761,7 @@ var Mustache = function() {
 		Turns a template and view into HTML
 		*/
 		to_html: function(template, view, partials, send_func) {
-			if (!template) { return ''; }
-			
-			partials = partials || {};
-			view = view || {};
-			
-			var o = send_func ? undefined : [];
-			var s = send_func || function(output) { o.push(output); };
-			
-			var renderer = new Renderer(s, 'interpreter');
-			renderer.render(template, view, partials);
-			
-			if (!send_func) {
-				return o.join('');
-			}
+			return (Mustache.compile(template, partials))(view, send_func);
 		},
 		
 		/*
@@ -910,8 +783,7 @@ var Mustache = function() {
 			var commands = [];
 			var s = function(command) { commands.push(command); };
 			
-			var renderer = new Renderer(s, 'compiler');
-			renderer.render(template, {}, p);
+			(new Renderer(s)).render(template, {}, p);
 
 			return function(view, send_func) {
 				view = [view || {}];
