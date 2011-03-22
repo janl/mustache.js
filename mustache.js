@@ -723,7 +723,7 @@ var Mustache = function() {
 								var cO = [];
 								var s = function(command) { cO.push(command); };
 			
-								var hos_renderer = new Renderer(s, 'compiler');
+								var hos_renderer = new Renderer(s);
 
 								resultFragment = hos_renderer.parse_pragmas(resultFragment, openTag, closeTag);
 								var tokens = hos_renderer.tokenize(resultFragment, openTag, closeTag);
