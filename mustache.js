@@ -125,12 +125,12 @@ var Mustache = function() {
 			return output.length > limit ? output.slice(0, limit) : output;
 		},
 		
-		render: function(template, context, partials) {
+		render: function(template, partials) {
 			template = this.parse_pragmas(template, '{{', '}}');
 			
 			var tokens = this.tokenize(template, '{{', '}}');
 			
-			this.parse(this.createParserContext(tokens, partials, '{{', '}}'), [context]);
+			this.parse(this.createParserContext(tokens, partials, '{{', '}}'));
 		},
 		
 		createParserContext: function(tokens, partials, openTag, closeTag) {
@@ -221,7 +221,7 @@ var Mustache = function() {
 			});
 		},
 			
-		parse: function(parserContext, contextStack) {
+		parse: function(parserContext) {
 			var state = 'text';
 			
 			for (; parserContext.index<parserContext.length; ++parserContext.index) {
@@ -229,12 +229,12 @@ var Mustache = function() {
 				
 				if (parserContext.token === '') continue;
 				
-				state = this.stateMachine[state].call(this, parserContext, contextStack);
+				state = this.stateMachine[state].call(this, parserContext);
 			}
 			
 			// make sure the parser finished at an appropriate terminal state
 			if (state!=='text') {
-				this.stateMachine['endOfDoc'].call(this, parserContext, contextStack);
+				this.stateMachine['endOfDoc'].call(this, parserContext);
 			} else {
 				this.commandSet.text.call(this);
 			}
@@ -258,7 +258,7 @@ var Mustache = function() {
 		},
 		
 		stateMachine: {
-			text: function(parserContext, contextStack) {
+			text: function(parserContext) {
 				switch (parserContext.token) {
 					case parserContext.openTag:
 						this.commandSet.text.call(this);
@@ -270,7 +270,7 @@ var Mustache = function() {
 						return 'text';
 				}
 			},
-			openMustache: function(parserContext, contextStack) {
+			openMustache: function(parserContext) {
 				switch (parserContext.token) {
 					case '{':
 						parserContext.stack.push({tagType:'unescapedVariable', subtype: 'tripleMustache'});
@@ -303,17 +303,17 @@ var Mustache = function() {
 					default:					
 						parserContext.stack.push({tagType:'variable'});
 
-						return this.stateMachine.keyName.call(this, parserContext, contextStack);
+						return this.stateMachine.keyName.call(this, parserContext);
 				}
 			},
-			closeMustache: function(parserContext, contextStack) {
+			closeMustache: function(parserContext) {
 				if (this.isWhitespace(parserContext.token)) {
 					return 'closeMustache';
 				} else if (parserContext.token===parserContext.closeTag) {
-					return this.dispatchCommand(parserContext, contextStack);
+					return this.dispatchCommand(parserContext);
 				}
 			},
-			expectClosingMustache: function(parserContext, contextStack) {
+			expectClosingMustache: function(parserContext) {
 				if (parserContext.closeTag==='}}' && 
 					parserContext.token==='}}') {
 					return 'expectClosingParenthesis';
@@ -323,15 +323,15 @@ var Mustache = function() {
 					throw new ParserException('Unexpected token encountered.');
 				}
 			},
-			expectClosingParenthesis: function(parserContext, contextStack) {
+			expectClosingParenthesis: function(parserContext) {
 				if (parserContext.token==='}') {
-					return this.dispatchCommand(parserContext, contextStack);
+					return this.dispatchCommand(parserContext);
 				} else {
 					throw new ParserException('Unexpected token encountered.');
 				}
 			},
-			keyName: function(parserContext, contextStack) {
-				var result = this.stateMachine.simpleKeyName.call(this, parserContext, contextStack);
+			keyName: function(parserContext) {
+				var result = this.stateMachine.simpleKeyName.call(this, parserContext);
 				
 				if (result==='closeMustache') {
 					var tagKey = parserContext.stack[parserContext.stack.length-1],
@@ -350,7 +350,7 @@ var Mustache = function() {
 					throw new ParserException('Unexpected branch in tag name: ' + result);
 				}
 			},
-			simpleKeyName: function(parserContext, contextStack) {
+			simpleKeyName: function(parserContext) {
 				if (this.isWhitespace(parserContext.token)) {
 					return 'simpleKeyName';
 				} else {
@@ -360,7 +360,7 @@ var Mustache = function() {
 				}
 			},
 			
-			setDelimiterStart: function(parserContext, contextStack) {
+			setDelimiterStart: function(parserContext) {
 				if (this.isWhitespace(parserContext.token) ||
 					parserContext.token==='=') {
 					throw new ParserException('Syntax error in Set Delimiter tag');
@@ -369,7 +369,7 @@ var Mustache = function() {
 					return 'setDelimiterStartOrWhitespace';
 				}				
 			},
-			setDelimiterStartOrWhitespace: function(parserContext, contextStack) {
+			setDelimiterStartOrWhitespace: function(parserContext) {
 				if (this.isWhitespace(parserContext.token)) {
 					return 'setDelimiterEnd';
 				} else if (parserContext.token==='='){
@@ -380,7 +380,7 @@ var Mustache = function() {
 					return 'setDelimiterStartOrWhitespace';
 				}
 			},
-			setDelimiterEnd: function(parserContext, contextStack) {
+			setDelimiterEnd: function(parserContext) {
 				if (this.isWhitespace(parserContext.token)) {
 					return 'setDelimiterEnd';
 				} else if (parserContext.token==='=') {
@@ -391,7 +391,7 @@ var Mustache = function() {
 					return 'setDelimiterEndOrEqualSign';
 				}
 			},
-			setDelimiterEndOrEqualSign: function(parserContext, contextStack) {
+			setDelimiterEndOrEqualSign: function(parserContext) {
 				if (parserContext.token==='=') {
 					return 'setDelimiterExpectClosingTag';
 				} else if (this.isWhitespace(parserContext.token)) {
@@ -402,7 +402,7 @@ var Mustache = function() {
 					return 'setDelimiterEndOrEqualSign';
 				}
 			},
-			setDelimiterExpectClosingTag: function(parserContext, contextStack) {
+			setDelimiterExpectClosingTag: function(parserContext) {
 				if (parserContext.token===parserContext.closeTag) {
 					var newCloseTag = parserContext.stack.pop();
 					var newOpenTag = parserContext.stack.pop();
@@ -434,7 +434,7 @@ var Mustache = function() {
 				}
 			},
 			
-			endSectionScan: function(parserContext, contextStack) {
+			endSectionScan: function(parserContext) {
 				switch (parserContext.token) {
 					case parserContext.openTag:
 						return 'expectSectionOrEndSection';
@@ -443,7 +443,7 @@ var Mustache = function() {
 						return 'endSectionScan';
 				}
 			},
-			expectSectionOrEndSection: function(parserContext, contextStack) {
+			expectSectionOrEndSection: function(parserContext) {
 				switch (parserContext.token) {
 					case '#':
 					case '^':
@@ -459,7 +459,7 @@ var Mustache = function() {
 				}
 			},
 			
-			discard: function(parserContext, contextStack) {
+			discard: function(parserContext) {
 				if (parserContext.token==='!') {
 					return 'closeComment';
 				} else {
@@ -467,7 +467,7 @@ var Mustache = function() {
 				}
 			},
 			
-			closeComment: function(parserContext, contextStack) {
+			closeComment: function(parserContext) {
 				if (parserContext.token!==parserContext.closeTag) {
 					return 'discard';
 				} else {
@@ -475,13 +475,13 @@ var Mustache = function() {
 				}
 			},
 			
-			endOfDoc: function(parserContext, contextStack) {
+			endOfDoc: function(parserContext) {
 				// eventually we may want to give better error messages
 				throw new ParserException('Unexpected end of document.');
 			}
 		},
 
-		dispatchCommand: function(parserContext, contextStack) {			
+		dispatchCommand: function(parserContext) {			
 			var key = parserContext.stack.pop();
 			var command = parserContext.stack.pop();
 			
@@ -491,14 +491,13 @@ var Mustache = function() {
 					parserContext.stack.push({sectionType:command.tagType, key:key, content:[], depth:1});
 					return 'endSectionScan';
 				case 'variable':
-					this.commandSet.variable.call(this, key, contextStack);
+					this.commandSet.variable.call(this, key);
 					return 'text';
 				case 'unescapedVariable':
-					this.commandSet.unescaped_variable.call(this, key, contextStack);
+					this.commandSet.unescaped_variable.call(this, key);
 					return 'text';
 				case 'partial':
 					this.commandSet.partial.call(this, key,
-						contextStack,
 						parserContext.partials,
 						parserContext.openTag,
 						parserContext.closeTag);
@@ -512,7 +511,6 @@ var Mustache = function() {
 							this.commandSet.section.call(this, section.sectionType,
 								section.content,
 								key,
-								contextStack,
 								parserContext.partials,
 								parserContext.openTag,
 								parserContext.closeTag);
@@ -598,7 +596,7 @@ var Mustache = function() {
 					send_func(outputText);
 				});
 			},
-			variable: function(key/*, contextStack*/) {
+			variable: function(key) {
 				function escapeHTML(str) {
 					return ('' + str).replace(/&/g,'&amp;')
 						.replace(/</g,'&lt;')
@@ -613,7 +611,7 @@ var Mustache = function() {
 					}
 				});
 			},
-			unescaped_variable: function(key/*, contextStack*/) {
+			unescaped_variable: function(key) {
 				var that = this;
 				this.user_send_func(function(contextStack, send_func) {
 					var result = that.find_in_stack(key, contextStack);
@@ -622,7 +620,7 @@ var Mustache = function() {
 					}
 				});
 			},
-			partial: function(key, reserved/*contextStack*/, partials, openTag, closeTag) {
+			partial: function(key, partials, openTag, closeTag) {
 				if (!partials || partials[key] === undefined) {
 					throw new ParserException('Unknown partial \'' + key + '\'');
 				}
@@ -634,7 +632,7 @@ var Mustache = function() {
 					
 					var tokens = this.tokenize(partials[key], openTag, closeTag);
 					partials[key] = function() {}; // blank out the paritals so that infinite recursion doesn't happen
-					this.parse(this.createParserContext(tokens, partials, openTag, closeTag), reserved);
+					this.parse(this.createParserContext(tokens, partials, openTag, closeTag));
 				
 					this.user_send_func = old_user_send_func;
 					
@@ -659,7 +657,7 @@ var Mustache = function() {
 				
 				this.user_send_func(function(contextStack, send_func) { partials[key](contextStack, send_func); });
 			},
-			section: function(sectionType, fragmentTokens, key, reserved/*contextStack*/, partials, openTag, closeTag) {
+			section: function(sectionType, fragmentTokens, key, partials, openTag, closeTag) {
 				// by @langalex, support for arrays of strings
 				var that = this;
 				function create_context(_context) {
@@ -683,7 +681,7 @@ var Mustache = function() {
 				
 				this.user_send_func = function(command) { commands.push(command); };
 				
-				this.parse(this.createParserContext(fragmentTokens, partials, openTag, closeTag), reserved);
+				this.parse(this.createParserContext(fragmentTokens, partials, openTag, closeTag));
 				
 				this.user_send_func = old_user_send_func;
 				
@@ -729,7 +727,7 @@ var Mustache = function() {
 
 								resultFragment = hos_renderer.parse_pragmas(resultFragment, openTag, closeTag);
 								var tokens = hos_renderer.tokenize(resultFragment, openTag, closeTag);
-								hos_renderer.parse(hos_renderer.createParserContext(tokens, partials, openTag, closeTag), contextStack);
+								hos_renderer.parse(hos_renderer.createParserContext(tokens, partials, openTag, closeTag));
 
 								var o = [];
 								var sT = function(output) { o.push(output); };
@@ -783,7 +781,7 @@ var Mustache = function() {
 			var commands = [];
 			var s = function(command) { commands.push(command); };
 			
-			(new Renderer(s)).render(template, {}, p);
+			(new Renderer(s)).render(template, p);
 
 			return function(view, send_func) {
 				view = [view || {}];
