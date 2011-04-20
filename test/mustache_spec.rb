@@ -17,8 +17,15 @@ def load_test(dir, name, partial=false)
   if not partial
     [view, template, expect]
   else
-    partial = File.read(dir + "/../examples/#{name}.2.html").to_json
-    [view, template, partial, expect]
+    fdir = dir + "/../examples/#{name}"
+    if File.directory?(fdir)
+      partial = File.read(fdir + "/#{name}.html").to_json
+      partial_name = "#{name}/#{name}"
+    else
+      partial = File.read(dir + "/../examples/#{name}.2.html").to_json
+      partial_name = 'partial'
+    end
+    [view, template, partial, partial_name, expect]
   end
 end
 
@@ -101,7 +108,7 @@ describe "mustache" do
     describe testname do
       it "should generate the correct html" do
 
-        view, template, partial, expect = 
+        view, template, partial, partial_name, expect = 
               load_test(__DIR__, testname, true)
 
         runner = <<-JS
@@ -109,7 +116,7 @@ describe "mustache" do
             #{@mustache}
             #{view}
             var template = #{template};
-            var partials = {"partial": #{partial}};
+            var partials = {"#{partial_name}": #{partial}};
             var result = Mustache.to_html(template, partial_context, partials);
             print(result);
           } catch(e) {
@@ -121,7 +128,7 @@ describe "mustache" do
       end
       it "should sendFun the correct html" do
 
-        view, template, partial, expect =
+        view, template, partial, partial_name, expect =
               load_test(__DIR__, testname, true)
 
         runner = <<-JS
@@ -129,7 +136,7 @@ describe "mustache" do
             #{@mustache}
             #{view};
             var template = #{template};
-            var partials = {"partial": #{partial}};
+            var partials = {"#{partial_name}": #{partial}};
             var chunks = [];
             var sendFun = function(chunk) {
               if (chunk != "") {
