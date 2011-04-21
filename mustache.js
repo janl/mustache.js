@@ -215,11 +215,17 @@ var Mustache = function() {
         return bool === false || bool === 0 || bool;
       }
 
-      var value;
-      if(is_kinda_truthy(context[name])) {
-        value = context[name];
-      } else if(is_kinda_truthy(this.context[name])) {
-        value = this.context[name];
+      var value = context;
+      var path = (name === '.') ? ['.'] : name.split(/\./);
+      for(var i = 0; i < path.length; i++) {
+        name = path[i];
+        if(value && is_kinda_truthy(value[name])) {
+          value = value[name];
+        } else if(i == 0 && is_kinda_truthy(this.context[name])) {
+          value = this.context[name];
+        } else {
+          value = undefined;
+        }
       }
 
       if(typeof value === "function") {
