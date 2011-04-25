@@ -2,6 +2,9 @@
   mustache.js — Logic-less templates in JavaScript
 
   See http://mustache.github.com/ for more info.
+  
+  This implementation adds a template compiler for faster processing and fixes bugs.
+  See http://www.saliences.com/projects/mustache/mustache.html for details.
 */
 
 var Mustache = function() {

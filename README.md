@@ -256,6 +256,17 @@ own iteration marker:
       {{bob}}
     {{/foo}}
 
+## Template Compiler
+
+This implementation of Mustache compiles all templates into JavaScript before
+execution. This speeds up the conversion of templates into markup when the
+template contains lots of sections or deeply nested constructs. Furthermore,
+if you are running the same template multiple times, you can retrieve a handle
+to the compiled Javascript function using the following code block:
+
+	var template = Mustache.compile('<b>{{>foo}}{{#bar}} had a bar.{{/bar}}</b>', { foo: 'Snow White' });
+	var html = template({bar:true});
+	
 ## F.A.Q.
 
 ### Why doesn’t Mustache allow dot notation like `{{variable.member}}`?
@@ -264,11 +275,6 @@ The reason is given in the [mustache.rb
 bugtracker](http://github.com/defunkt/mustache/issues/issue/6).
 
 Mustache implementations strive to be template-compatible.
-
-
-## More Examples and Documentation
-
-See `examples/` for more goodies and read the [original mustache docs][m]
 
 ## Command Line
 
