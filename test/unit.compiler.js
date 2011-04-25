@@ -1,19 +1,3 @@
-// the compiler tests are the exact same as the interpreter tests
-// so instead of writing all the tests twice, override the to_html
-// method
-module('Compiler', {
-	setup: function() {
-		this._oldToHtml = Mustache.to_html;
-		Mustache.to_html = function(template, view, partials) {
-			var compiler = Mustache.compile(template, partials);
-			return compiler(view);
-		}
-	},
-	teardown: function() {
-		Mustache.to_html = this._oldToHtml;
-	}
-});
-
 test("Argument validation", function() {
 	expect(4);
 	
@@ -603,51 +587,6 @@ test("Demo", function() {
 		expected_result,
 		'A complex template'
 	);
-});
-
-test("Performance", function() {
-	expect(1);
-	
-	var start, end;
-	
-	// This performance test is copied form skymustache 
-	// (https://github.com/schuyler1d/handlebars.js/blob/sky_test/test/perf.js)
-	// set up the templates
-	var template = "This is the story of guys who work on a project\n" +
-		"called {{project}}. Their names were {{#people}}{{firstName}} and {{/people}}\n" +
-		"they both enjoyed working on {{project}}.\n\n" +
-		"{{#people}}\n" +
-		"{{>personPet}}\n" +
-		"{{/people}}";
-	var partials = {
-	  personPet: "{{firstName}} {{lastName}} {{#pet}} owned a {{species}}. Its name was {{name}}.{{/pet}}{{^pet}}didn't own a pet.{{/pet}}"
-	};
-	var view = {
-	  project: "Handlebars",
-	  people: [
-		{ firstName: "Yehuda", lastName: "Katz" },
-		{ firstName: "Alan", lastName: "Johnson", pet: { species: "cat", name: "Luke" } }
-	  ]
-	}
-	
-	start = new Date();
-	for (var j=0;j<1000;++j) {
-		this._oldToHtml(template, view, partials);
-	}
-	end = new Date();
-	
-	var interpreter_time = end.getTime() - start.getTime();
-	
-	start = new Date();
-	var compiler = Mustache.compile(template, partials);
-	for (var k=0;k<1000;++k) {
-		compiler(view);
-	}
-	end = new Date();
-	
-	var compiler_time = end.getTime() - start.getTime();
-	
-	ok(compiler_time<interpreter_time, 'Compiler is faster (' + compiler_time + ' vs ' + interpreter_time + ').');
 });
 
 test("Regression Suite", function() {
