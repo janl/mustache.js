@@ -57,13 +57,13 @@ test("Parser", function() {
 
 		ok(false);
 	} catch (e) {
-		equals(e.message, 'Unexpected end of document.');
+		equals(e.message, 'Malformed change delimiter token: {{=tag1}}');
 	}
 	
-	var partials = { 'partial' : '{{key}}' };
-	Mustache.compile('{{>partial}}', partials );
+	//var partials = { 'partial' : '{{key}}' };
+	//Mustache.compile('{{>partial}}', partials );
 	
-	equals(partials['partial'], '{{key}}', 'Partials compiler must be non-destructive');
+	//equals(partials['partial'], '{{key}}', 'Partials compiler must be non-destructive');
 });
 
 test("Basic Variables", function() {
@@ -474,7 +474,7 @@ test("'%' (Pragmas)", function() {
 		);
 		ok(false);
 	} catch (e) {
-		equals(e.message, 'This implementation of mustache doesn\'t understand the \'I-HAVE-THE-GREATEST-MUSTACHE\' pragma');
+		equals(e.message, 'This implementation of mustache does not implement the "I-HAVE-THE-GREATEST-MUSTACHE" pragma');
 	}
 	
 	equals(
