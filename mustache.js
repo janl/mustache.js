@@ -124,14 +124,20 @@ var Mustache = (function(undefined) {
 		return token.match(/\r?\n/)!==null;
 	}
 
+	var default_tokenizer = /(\r?\n)|({{![\s\S]*?}})|({{[#\^\/&{>=]?\s*\S*?\s*}?}})|({{=\S*?\s*\S*?=}})/;
 	function create_parser_context(template, partials, view, send_func, openTag, closeTag) {
 		openTag = openTag || '{{';
 		closeTag = closeTag || '}}';
-		
-		var rOTag = escape_regex(openTag),
-			rETag = escape_regex(closeTag);
-			
-		var tokenizer = new RegExp('(\\r?\\n)|(' + rOTag + '![\\s\\S]*?' + rETag + ')|(' + rOTag + '[#\^\/&{>=]?\\s*\\S*?\\s*}?' + rETag + ')|(' + rOTag + '=\\S*\\s*\\S*=' + rETag + ')');
+
+		var tokenizier;		
+		if (openTag === '{{' && closeTag === '}}') {
+			tokenizer = default_tokenizer;
+		} else {
+			var rOTag = escape_regex(openTag),
+				rETag = escape_regex(closeTag);
+
+			tokenizer = new RegExp('(\\r?\\n)|(' + rOTag + '![\\s\\S]*?' + rETag + ')|(' + rOTag + '[#\^\/&{>=]?\\s*\\S*?\\s*}?' + rETag + ')|(' + rOTag + '=\\S*?\\s*\\S*?=' + rETag + ')');
+		}
 	
 		var context =  {
 			template: template || ''
@@ -202,18 +208,17 @@ var Mustache = (function(undefined) {
 		return undefined;
 	}
 
-	function get_variable_name(parserContext, token, prefixes, postfixes) {
-		var matches = token.match(new RegExp(escape_regex(parserContext.openTag) + 
-			'[' + escape_regex((prefixes || []).join('')) + 
-			']?\\s*(\\S*?)\\s*[' + 
-			escape_regex((postfixes || []).join('')) + 
-			']?' + 
-			escape_regex(parserContext.closeTag)));
+	function get_variable_name(parserContext, token, prefix, postfix) {
+		var fragment = token
+			.substring(
+				parserContext.openTag.length + (prefix ? 1 : 0)
+				, token.length - parserContext.closeTag.length - (postfix ? 1 : 0)
+			);
 			
-		if ((matches || []).length!==2) {
-			throw new Error('Malformed mustache tag: ' + token);
+		if (String.prototype.trim) {
+			return fragment.trim();
 		} else {
-			return matches[1];
+			return fragment.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 		}
 	}
 	
@@ -224,12 +229,11 @@ var Mustache = (function(undefined) {
 				.replace(/>/g,'&gt;');
 		}
 		
-		var prefix = [], postfix = [];		
+		var prefix, postfix;
 		if (escape==='{') {
-			prefix = ['{'];
-			postfix = ['}'];
+			prefix = postfix = true;
 		} else if (escape==='&') {
-			prefix = ['&'];
+			prefix = true;
 		}
 		
 		var res = find_in_stack(get_variable_name(parserContext, token, prefix, postfix), parserContext.contextStack);
@@ -243,7 +247,7 @@ var Mustache = (function(undefined) {
 	}
 	
 	function partial(parserContext, token) {
-		var variable = get_variable_name(parserContext, token, ['>']);
+		var variable = get_variable_name(parserContext, token, true);
 		
 		var value = find_in_stack(variable, parserContext.contextStack);
 
@@ -418,7 +422,7 @@ var Mustache = (function(undefined) {
 	}
 	
 	function begin_section(parserContext, token, inverted) {
-		var variable = get_variable_name(parserContext, token, ['#', '^']);
+		var variable = get_variable_name(parserContext, token, true);
 		if (parserContext.state==='normal') {
 			parserContext.state = 'scan_section';
 			parserContext.section = {
@@ -434,7 +438,7 @@ var Mustache = (function(undefined) {
 	}
 	
 	function end_section(parserContext, token) {
-		var variable = get_variable_name(parserContext, token, ['/']);
+		var variable = get_variable_name(parserContext, token, true);
 		
 		if (parserContext.section.child_sections.length > 0 && 
 			parserContext.section.child_sections[parserContext.section.child_sections.length-1] === variable) {
