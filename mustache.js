@@ -369,7 +369,6 @@ var Mustache = (function(undefined) {
 		}
 
 		parserContext.template = parserContext.template.replace(/{{%([\w-]+)(\s*)(.*?(?=}}))}}/, function(match, pragma, space, suffix) {
-			console.log(match, suffix);
 			var options = undefined;
 			
 			if (suffix.length>0) {
