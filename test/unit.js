@@ -52,9 +52,9 @@ test("Parser", function() {
 				{}
 			);
 		}, function(e) {
-			return e.message === 'Unexpected end of document.';
+			return e.message === 'Malformed change delimiter token: {{=tag1}}';
 		},
-		'Malformed change delimiter token: {{=tag1}}'
+		'Malformed tags should be handled correctly.'
 	);
 	
 	//var partials = { 'partial' : '{{key}}' };
