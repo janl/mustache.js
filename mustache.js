@@ -485,7 +485,6 @@ var Mustache = (function(undefined) {
 					case '/': // end section
 						// in normal flow, this operation is absolutely meaningless
 						throw new Error('Unbalanced End Section tag: ' + token);
-						break;
 					case '&': // unescaped variable						
 					case '{': // unescaped variable
 						interpolate(parserContext, token, token.charAt(parserContext.openTag.length));
