@@ -95,7 +95,7 @@ var Mustache = (function(undefined) {
 			return output.length > limit ? output.slice(0, limit) : output;
 		}
 		
-		if ('lal'.split(/(a)/).length !== 3) {
+		if ('lol'.split(/(o)/).length !== 3) {
 			return capturingSplit;
 		} else {
 			return String.prototype.split;
@@ -128,7 +128,10 @@ var Mustache = (function(undefined) {
 		openTag = openTag || '{{';
 		closeTag = closeTag || '}}';
 		
-		var tokenizer = new RegExp('(\\r?\\n)|(' + escape_regex(openTag) + '[!#\^\/&{>=]?\\s*\\S*?\\s*}?' + escape_regex(closeTag) + ')|(' + escape_regex(openTag) + '=\\S*\\s*\\S*=' + escape_regex(closeTag) + ')');
+		var rOTag = escape_regex(openTag),
+			rETag = escape_regex(closeTag);
+			
+		var tokenizer = new RegExp('(\\r?\\n)|(' + rOTag + '![\\s\\S]*?' + rETag + ')|(' + rOTag + '[#\^\/&{>=]?\\s*\\S*?\\s*}?' + rETag + ')|(' + rOTag + '=\\S*\\s*\\S*=' + rETag + ')');
 	
 		var context =  {
 			template: template || ''
@@ -243,9 +246,13 @@ var Mustache = (function(undefined) {
 		var variable = get_variable_name(parserContext, token, ['>']);
 		
 		var value = find_in_stack(variable, parserContext.contextStack);
+
+		if (!parserContext.partials[variable]) {
+			throw new Error('Unknown partial \'' + variable + '\'');
+		}
 		
 		var new_parser_context = create_parser_context(
-			parserContext.partials[variable] || ''
+			parserContext.partials[variable]
 			, parserContext.partials
 			, null
 			, parserContext.user_send_func);
@@ -338,7 +345,7 @@ var Mustache = (function(undefined) {
 		
 		var directives = {
 			'IMPLICIT-ITERATOR': function(options) {
-				parserContext.pragmas['IMPLICIT-ITERATOR'] = {};
+				parserContext.pragmas['IMPLICIT-ITERATOR'] = {iterator: '.'};
 				
 				if (options) {
 					parserContext.pragmas['IMPLICIT-ITERATOR'].iterator = options['iterator'];
@@ -351,8 +358,8 @@ var Mustache = (function(undefined) {
 			return parserContext.template;
 		}
 
-		var regex = /{{%([\\w-]+)(\\s*)(.*?(?=}}))}}/;
-		return parserContext.template.replace(regex, function(match, pragma, space, suffix) {
+		parserContext.template = parserContext.template.replace(/{{%([\w-]+)(\s*)(.*?(?=}}))}}/, function(match, pragma, space, suffix) {
+			console.log(match, suffix);
 			var options = undefined;
 			
 			if (suffix.length>0) {
