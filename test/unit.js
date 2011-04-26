@@ -1,6 +1,4 @@
 test("Argument validation", function() {
-	expect(4);
-	
 	equals(Mustache.to_html(undefined), '', 'No parameters');
 	equals(Mustache.to_html('{{hi}}'), '', ' No View or Partials');
 	equals(Mustache.to_html('{{hi}}', {hi:'Hi.'}), 'Hi.', 'No Partials');
@@ -8,8 +6,6 @@ test("Argument validation", function() {
 });
 
 test("Parser", function() {
-	expect(4);
-
 	// matches whitespace_partial.html
 	equals(
 		Mustache.to_html(
@@ -67,8 +63,6 @@ test("Parser", function() {
 });
 
 test("Basic Variables", function() {
-	expect(4);
-	
 	// matches escaped.html
 	equals(
 		Mustache.to_html(
@@ -131,8 +125,6 @@ test("Basic Variables", function() {
 });
 
 test("'{' or '&' (Unescaped Variable)", function() {
-	expect(2);
-	
 	// matches unescaped.html
 	equals(
 		Mustache.to_html(
@@ -164,8 +156,6 @@ test("'{' or '&' (Unescaped Variable)", function() {
 });
 
 test("'#' (Sections)", function() {
-	expect(8);
-	
 	// matches array_of_partials_implicit_partial.html
 	equals(
 		Mustache.to_html(
@@ -286,8 +276,6 @@ test("'#' (Sections)", function() {
 });
 
 test("'^' (Inverted Section)", function() {
-	expect(1);
-	
 	// matches inverted_section.html
 	equals(
 		Mustache.to_html(
@@ -302,8 +290,6 @@ test("'^' (Inverted Section)", function() {
 });
 
 test("'>' (Partials)", function() {
-	expect(5);
-	
 	// matches view_partial.html
 	equals(
 		Mustache.to_html(
@@ -395,8 +381,6 @@ test("'>' (Partials)", function() {
 });
 
 test("'=' (Set Delimiter)", function() {
-	expect(1);
-	
 	// matches delimiter.html
 	equals(
 		Mustache.to_html(
@@ -415,8 +399,6 @@ test("'=' (Set Delimiter)", function() {
 });
 
 test("'!' (Comments)", function() {
-	expect(4);
-	
 	equals(
 		Mustache.to_html('{{! this is a single line comment !}}'),
 		'',
@@ -448,8 +430,6 @@ test("'!' (Comments)", function() {
 });
 
 test("'%' (Pragmas)", function() {
-	expect(3);
-	
 	// matches array_of_strings_options.html
 	equals(
 		Mustache.to_html(
@@ -488,8 +468,6 @@ test("'%' (Pragmas)", function() {
 });
 
 test("Empty", function() {
-	expect(2);
-	
 	// matches empty_template.html
 	equals(
 		Mustache.to_html(
@@ -516,8 +494,6 @@ test("Empty", function() {
 });
 
 test("Demo", function() {
-	expect(2);
-	
 	// matches simple.html
 	equals(
 		Mustache.to_html(
@@ -590,8 +566,6 @@ test("Demo", function() {
 });
 
 test("Regression Suite", function() {
-	expect(4);
-	
 	// matches bug_11_eating_whitespace.html
 	equals(
 		Mustache.to_html(
