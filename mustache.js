@@ -275,8 +275,8 @@ var Mustache = (function(undefined) {
 	}
 	
 	function section(parserContext) {
-		function create_section_context(s) {
-			var context = create_parser_context(s.template_buffer.join(''), 
+		function create_section_context(template) {
+			var context = create_parser_context(template, 
 				parserContext.partials, 
 				null, 
 				parserContext.user_send_func,
@@ -309,12 +309,12 @@ var Mustache = (function(undefined) {
 		
 		if (s.inverted) {
 			if (!value || is_array(value) && value.length === 0) { // false or empty list, render it
-				new_parser_context = create_section_context(s);
+				new_parser_context = create_section_context(s.template_buffer.join(''));
 				parse(new_parser_context);
 			}
 		} else {
 			if (is_array(value)) { // Enumerable, Let's loop!
-				new_parser_context = create_section_context(s);
+				new_parser_context = create_section_context(s.template_buffer.join(''));
 				
 				for (i=0, n=value.length; i<n; ++i) {
 					new_parser_context.cursor = 0;
@@ -323,15 +323,25 @@ var Mustache = (function(undefined) {
 					new_parser_context.contextStack.pop();
 				}
 			} else if (is_object(value)) { // Object, Use it as subcontext!
-				new_parser_context = create_section_context(s);
+				new_parser_context = create_section_context(s.template_buffer.join(''));
 				
 				new_parser_context.contextStack.push(value);
 				parse(new_parser_context);
 				new_parser_context.contextStack.pop();
 			} else if (is_function(value)) { // higher order section
-				// TODO: Implement
+				parserContext.user_send_func(value.call(parserContext.contextStack[parserContext.contextStack.length-1], s.template_buffer.join(''), function(templateFragment) {
+					var o = [];
+					new_parser_context = create_section_context(templateFragment);
+					new_parser_context.user_send_func = function(r) {
+						o.push(r);						
+					}
+					
+					parse(new_parser_context);
+					
+					return o.join('');
+				}));
 			} else if (value) { // truthy
-				new_parser_context = create_section_context(s);
+				new_parser_context = create_section_context(s.template_buffer.join(''));
 				parse(new_parser_context);
 			}
 		}
