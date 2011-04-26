@@ -43,18 +43,19 @@ test("Parser", function() {
 		'Hello\n\n\nWorld\n',
 		'Preservation of white space'
 	);
-	
-	try {
-		Mustache.to_html(
-			'{{=tag1}}',
-			{ tag1: 'Hello' },
-			{}
-		);
 
-		ok(false);
-	} catch (e) {
-		equals(e.message, 'Unexpected end of document.');
-	}
+	raises(
+		function() {
+			Mustache.to_html(
+				'{{=tag1}}',
+				{ tag1: 'Hello' },
+				{}
+			);
+		}, function(e) {
+			return e.message === 'Unexpected end of document.';
+		},
+		'Malformed tags should be handled correctly.'
+	);
 	
 	var partials = { 'partial' : '{{key}}' };
 	Mustache.compile('{{>partial}}', partials );
@@ -368,16 +369,18 @@ test("'>' (Partials)", function() {
 		'1\n\n1.1\n\n1.1.1\n\n\n'
 	);
 	
-	try {
-		Mustache.to_html(
-			'{{>partial}}',
-			{},
-			{partal: ''}
-		);
-		ok(false);
-	} catch(e) {
-		equals(e.message, "Unknown partial 'partial'");
-	}
+	raises(
+		function() {
+			Mustache.to_html(
+				'{{>partial}}',
+				{},
+				{partal: ''}
+			);
+		}, function(e) {
+			return e.message === "Unknown partial 'partial'";
+		},
+		'Missing partials should be handled correctly.'
+	);
 });
 
 test("'=' (Set Delimiter)", function() {
@@ -442,20 +445,20 @@ test("'%' (Pragmas)", function() {
 	);
 	
 	// matches unknown_pragma.txt
-	try {
-		equals(
+	
+	raises(
+		function() {
 			Mustache.to_html(
 				'{{%I-HAVE-THE-GREATEST-MUSTACHE}}\n',
 				{},
 				{}
-			),
-			'hello world ',
-			'IMPLICIT-ITERATOR pragma'
-		);
-		ok(false);
-	} catch (e) {
-		equals(e.message, 'This implementation of mustache doesn\'t understand the \'I-HAVE-THE-GREATEST-MUSTACHE\' pragma');
-	}
+			);
+		},
+		function(e) {
+			return e.message === 'This implementation of mustache doesn\'t understand the \'I-HAVE-THE-GREATEST-MUSTACHE\' pragma';
+		},
+		'Notification of unimplemented pragmas'
+	);
 	
 	equals(
 		Mustache.to_html(
