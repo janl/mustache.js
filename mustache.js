@@ -291,7 +291,6 @@ var Mustache = function() {
       return s.replace(/&(?!\w+;)|["'<>\\]/g, function(s) {
         switch(s) {
         case "&": return "&amp;";
-        case "\\": return "\\\\";
         case '"': return '&quot;';
         case "'": return '&#39;';
         case "<": return "&lt;";
