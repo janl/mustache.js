@@ -412,13 +412,10 @@ test("'!' (Comments)", function() {
 		'',
 		'Multiline Comments');
 			
-	/*
-	 * According to mustache-spec, comments cannot contain the }} character, so this test is useless
 	equals(
 		Mustache.to_html('{{!this {{is}} {{#a}} {{/multiline}} comment\ni {{^said}} ! hello !! bye!}}'),
 		'',
 		'Correct tokenization');
-	*/
 
 	// matches comments.html
 	equals(
