@@ -212,11 +212,11 @@ var Mustache = (function(undefined) {
 		return undefined;
 	}
 
-	function get_variable_name(parserContext, token, prefix, postfix) {
+	function get_variable_name(state, token, prefix, postfix) {
 		var fragment = token
 			.substring(
-				parserContext.openTag.length + (prefix ? 1 : 0)
-				, token.length - parserContext.closeTag.length - (postfix ? 1 : 0)
+				state.openTag.length + (prefix ? 1 : 0)
+				, token.length - state.closeTag.length - (postfix ? 1 : 0)
 			);
 			
 		if (String.prototype.trim) {
@@ -226,7 +226,7 @@ var Mustache = (function(undefined) {
 		}
 	}
 	
-	function interpolate(parserContext, token, escape) {
+	function interpolate(state, token, escape) {
 		function escapeHTML(str) {
 			return str.replace(/&/g,'&amp;')
 				.replace(/</g,'&lt;')
@@ -240,8 +240,8 @@ var Mustache = (function(undefined) {
 			prefix = true;
 		}
 		
-		var variable = get_variable_name(parserContext, token, prefix, postfix);
-		parserContext.send_code_func((function(variable, escape) { return function(context, send_func) {
+		var variable = get_variable_name(state, token, prefix, postfix);
+		state.send_code_func((function(variable, escape) { return function(context, send_func) {
 			var res = find_in_stack(variable, context);
 			if (res!==undefined) {
 				if (!escape) {
@@ -253,26 +253,26 @@ var Mustache = (function(undefined) {
 		};})(variable, escape));
 	}
 	
-	function partial(parserContext, token) {
-		var variable = get_variable_name(parserContext, token, true),
+	function partial(state, token) {
+		var variable = get_variable_name(state, token, true),
 			template, program;
 		
-		if (!parserContext.partials[variable]) {
+		if (!state.partials[variable]) {
 			throw new Error('Unknown partial \'' + variable + '\'');
 		}
 		
-		if (!is_function(parserContext.partials[variable])) {
+		if (!is_function(state.partials[variable])) {
 			// if the partial has not been compiled yet, do so now
 			
-			template = parserContext.partials[variable]; // remember what the partial was
-			parserContext.partials[variable] = noop; // avoid infinite recursion
+			template = state.partials[variable]; // remember what the partial was
+			state.partials[variable] = noop; // avoid infinite recursion
 			
 			program = parse(create_parser_state(
 				template
-				, parserContext.partials
+				, state.partials
 			));
 			
-			parserContext.partials[variable] = function(context, send_func) {
+			state.partials[variable] = function(context, send_func) {
 				var value = find_in_stack(variable, context);
 
 				if (value) {
@@ -291,17 +291,15 @@ var Mustache = (function(undefined) {
 			};
 		}
 		
-		parserContext.send_code_func(function(context, send_func) { parserContext.partials[variable](context, send_func); });
+		state.send_code_func(function(context, send_func) { state.partials[variable](context, send_func); });
 	}
 	
-	function section(parserContext) {
-		function create_section_context(template) {
-			var context = create_parser_state(template, 
-				parserContext.partials, 
-				parserContext.openTag,
-				parserContext.closeTag);
-			
-			return context;
+	function section(state) {
+		function create_section_state(template) {
+			return create_parser_state(template, 
+				state.partials, 
+				state.openTag,
+				state.closeTag);
 		}
 		
 		// by @langalex, support for arrays of strings
@@ -310,7 +308,7 @@ var Mustache = (function(undefined) {
 				return _context;
 			} else {
 				var ctx = {}, 
-					iterator = (parserContext.pragmas['IMPLICIT-ITERATOR'] || {iterator: '.'}).iterator;
+					iterator = (state.pragmas['IMPLICIT-ITERATOR'] || {iterator: '.'}).iterator;
 				
 				ctx[iterator] = _context;
 				
@@ -318,18 +316,18 @@ var Mustache = (function(undefined) {
 			}
 		}		
 		
-		var s = parserContext.section, template = s.template_buffer.join('')
-			program = parse(create_section_context(template));
+		var s = state.section, template = s.template_buffer.join('')
+			program = parse(create_section_state(template));
 		
 		if (s.inverted) {
-			parserContext.send_code_func((function(program, variable){ return function(context, send_func) {
+			state.send_code_func((function(program, variable){ return function(context, send_func) {
 				var value = find_in_stack(variable, context);
 				if (!value || is_array(value) && value.length === 0) { // false or empty list, render it
 					program(context, send_func);
 				}
 			};})(program, s.variable));
 		} else {
-			parserContext.send_code_func((function(program, variable, template, partials){ return function(context, send_func) {
+			state.send_code_func((function(program, variable, template, partials){ return function(context, send_func) {
 				var value = find_in_stack(variable, context);			
 				if (is_array(value)) { // Enumerable, Let's loop!
 					for (var i=0, n=value.length; i<n; ++i) {
@@ -356,11 +354,11 @@ var Mustache = (function(undefined) {
 				} else if (value) { // truthy
 					program(context, send_func);
 				}
-			};})(program, s.variable, template, parserContext.partials));
+			};})(program, s.variable, template, state.partials));
 		}
 	}
 	
-	function pragmas(parserContext) {
+	function pragmas(state) {
 		/* includes tag */
 		function includes(needle, haystack) {
 			return haystack.indexOf('{{' + needle) !== -1;
@@ -368,20 +366,20 @@ var Mustache = (function(undefined) {
 		
 		var directives = {
 			'IMPLICIT-ITERATOR': function(options) {
-				parserContext.pragmas['IMPLICIT-ITERATOR'] = {iterator: '.'};
+				state.pragmas['IMPLICIT-ITERATOR'] = {iterator: '.'};
 				
 				if (options) {
-					parserContext.pragmas['IMPLICIT-ITERATOR'].iterator = options['iterator'];
+					state.pragmas['IMPLICIT-ITERATOR'].iterator = options['iterator'];
 				}
 			}
 		};
 		
 		// no pragmas, easy escape
-		if(!includes("%", parserContext.template)) {
-			return parserContext.template;
+		if(!includes("%", state.template)) {
+			return state.template;
 		}
 
-		parserContext.template = parserContext.template.replace(/{{%([\w-]+)(\s*)(.*?(?=}}))}}/, function(match, pragma, space, suffix) {
+		state.template = state.template.replace(/{{%([\w-]+)(\s*)(.*?(?=}}))}}/, function(match, pragma, space, suffix) {
 			var options = undefined,
 				optionPairs, scratch,
 				i, n;
@@ -410,74 +408,74 @@ var Mustache = (function(undefined) {
 		});
 	}
 	
-	function change_delimiter(parserContext, token) {
-		var matches = token.match(new RegExp(escape_regex(parserContext.openTag) + '=(\\S*?)\\s*(\\S*?)=' + escape_regex(parserContext.closeTag)));
+	function change_delimiter(state, token) {
+		var matches = token.match(new RegExp(escape_regex(state.openTag) + '=(\\S*?)\\s*(\\S*?)=' + escape_regex(state.closeTag)));
 
 		if ((matches || []).length!==3) {
 			throw new Error('Malformed change delimiter token: ' + token);
 		}
 		
 		var context = create_parser_state(
-			parserContext.tokens.slice(parserContext.cursor+1).join('')
-			, parserContext.partials
+			state.tokens.slice(state.cursor+1).join('')
+			, state.partials
 			, matches[1]
 			, matches[2]);
-		context.code = parserContext.code;
-		context.send_code_func = parserContext.send_code_func;
+		context.code = state.code;
+		context.send_code_func = state.send_code_func;
 			
-		parserContext.cursor = parserContext.tokens.length; // finish off this level
+		state.cursor = state.tokens.length; // finish off this level
 		
 		parse(context, true);
 	}
 	
-	function begin_section(parserContext, token, inverted) {
-		var variable = get_variable_name(parserContext, token, true);
+	function begin_section(state, token, inverted) {
+		var variable = get_variable_name(state, token, true);
 		
-		if (parserContext.state==='normal') {
-			parserContext.state = 'scan_section';
-			parserContext.section = {
+		if (state.state==='normal') {
+			state.state = 'scan_section';
+			state.section = {
 				variable: variable
 				, template_buffer: []
 				, inverted: inverted
 				, child_sections: []
 			};
 		} else {
-			parserContext.section.child_sections.push(variable);
-			parserContext.section.template_buffer.push(token);
+			state.section.child_sections.push(variable);
+			state.section.template_buffer.push(token);
 		}
 	}
 	
-	function end_section(parserContext, token) {
-		var variable = get_variable_name(parserContext, token, true);
+	function end_section(state, token) {
+		var variable = get_variable_name(state, token, true);
 		
-		if (parserContext.section.child_sections.length > 0 && 
-			parserContext.section.child_sections[parserContext.section.child_sections.length-1] === variable) {
+		if (state.section.child_sections.length > 0 && 
+			state.section.child_sections[state.section.child_sections.length-1] === variable) {
 			
-			parserContext.section.child_sections.pop();			
-			parserContext.section.template_buffer.push(token);			
-		} else if (parserContext.section.variable===variable) {
-			section(parserContext);
-			delete parserContext.section;
-			parserContext.state = 'normal';
+			state.section.child_sections.pop();			
+			state.section.template_buffer.push(token);			
+		} else if (state.section.variable===variable) {
+			section(state);
+			delete state.section;
+			state.state = 'normal';
 		} else {
-			throw new Error('Unexpected section end tag. Expected: ' + parserContext.section.variable);
+			throw new Error('Unexpected section end tag. Expected: ' + state.section.variable);
 		}
 	}
 	
-	function parse(parserContext, noReturn) {
+	function parse(state, noReturn) {
 		var n, token;
 		
-		for (n = parserContext.tokens.length;parserContext.cursor<n;++parserContext.cursor) {
-			token = parserContext.tokens[parserContext.cursor];
+		for (n = state.tokens.length;state.cursor<n;++state.cursor) {
+			token = state.tokens[state.cursor];
 			if (token==='' || token===undefined) {
 				continue;
 			}
 			
-			stateMachine[parserContext.state](parserContext, token);
+			stateMachine[state.state](state, token);
 		}
 		
 		if (!noReturn) {
-			var codeList = parserContext.code;
+			var codeList = state.code;
 			if (codeList.length === 0) {
 				return noop;
 			} else if (codeList.length === 1) {
@@ -493,66 +491,66 @@ var Mustache = (function(undefined) {
 	}
 	
 	var stateMachine = {
-		'normal': function(parserContext, token) {
-			if (token.indexOf(parserContext.openTag)===0) {
+		'normal': function(state, token) {
+			if (token.indexOf(state.openTag)===0) {
 				// the token has the makings of a Mustache tag
 				// perform the appropriate action based on the state machine
-				switch (token.charAt(parserContext.openTag.length)) {
+				switch (token.charAt(state.openTag.length)) {
 					case '!': // comment
 						// comments are just discarded, nothing to do
 						break;
 					case '#': // section
-						begin_section(parserContext, token, false);
+						begin_section(state, token, false);
 						break;
 					case '^': // inverted section
-						begin_section(parserContext, token, true);
+						begin_section(state, token, true);
 						break;
 					case '/': // end section
 						// in normal flow, this operation is absolutely meaningless
 						throw new Error('Unbalanced End Section tag: ' + token);
 					case '&': // unescaped variable						
 					case '{': // unescaped variable
-						interpolate(parserContext, token, token.charAt(parserContext.openTag.length));
+						interpolate(state, token, token.charAt(state.openTag.length));
 						break;
 					case '>': // partial
-						partial(parserContext, token);
+						partial(state, token);
 						break;
 					case '=': // set delimiter change
-						change_delimiter(parserContext, token);
+						change_delimiter(state, token);
 						break;
 					default: // escaped variable
-						interpolate(parserContext, token);
+						interpolate(state, token);
 						break;
 				}				
 			} else {
 				// plain jane text
-				parserContext.send_code_func(function(view, send_func) { send_func(token); });
+				state.send_code_func(function(view, send_func) { send_func(token); });
 			}		
 		}
-		, 'scan_section': function(parserContext, token) {
-			if (token.indexOf(parserContext.openTag)===0) {		
-				switch (token.charAt(parserContext.openTag.length)) {
+		, 'scan_section': function(state, token) {
+			if (token.indexOf(state.openTag)===0) {		
+				switch (token.charAt(state.openTag.length)) {
 					case '!': // comments
 						// comments are just discarded, nothing to do
 						break;
 					case '#': // section
-						begin_section(parserContext, token, false);
+						begin_section(state, token, false);
 						break;
 					case '^': // inverted section
-						begin_section(parserContext, token, true);
+						begin_section(state, token, true);
 						break;						
 					case '/': // end section
-						end_section(parserContext, token);
+						end_section(state, token);
 						break;
 					case '=': // set delimiter change
-						change_delimiter(parserContext, token);
+						change_delimiter(state, token);
 						break;
 					default: // all others
-						parserContext.section.template_buffer.push(token);
+						state.section.template_buffer.push(token);
 						break;
 				}
 			} else {
-				parserContext.section.template_buffer.push(token);
+				state.section.template_buffer.push(token);
 			}
 		}
 	}
