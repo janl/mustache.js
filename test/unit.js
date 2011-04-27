@@ -154,6 +154,16 @@ test("'{' or '&' (Unescaped Variable)", function() {
 		'<h1>Bear > Shark</h1>',
 		'& character'
 	);
+	
+	equals(
+		Mustache.to_html(
+			'<h1>{{title}}}</h1>',
+			{ title: 'Bear > Shark' }
+			, {}
+		),
+		'<h1>Bear &gt; Shark}</h1>'
+		, 'Potential false positive'
+	);
 });
 
 test("'#' (Sections)", function() {

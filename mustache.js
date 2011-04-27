@@ -171,7 +171,7 @@ var Mustache = (function(undefined) {
 		}
 	}
 	
-	var default_tokenizer = /(\r?\n)|({{![\s\S]*?!}})|({{[#\^\/&{>=]?\s*\S*?\s*}?}})|({{=\S*?\s*\S*?=}})/;
+	var default_tokenizer = /(\r?\n)|({{![\s\S]*?!}})|({{[#\^\/&>]?\s*[^!{=]\S*?\s*}})|({{{\s*\S*?\s*}}})|({{=\S*?\s*\S*?=}})/;
 	function create_compiler_state(template, partials, openTag, closeTag) {
 		openTag = openTag || '{{';
 		closeTag = closeTag || '}}';
@@ -183,8 +183,16 @@ var Mustache = (function(undefined) {
 			var rOTag = escape_regex(openTag),
 				rETag = escape_regex(closeTag);
 
-			tokenizer = new RegExp('(\\r?\\n)|(' + rOTag + '![\\s\\S]*?!' + rETag + ')|(' + rOTag + '[#\^\/&{>=]?\\s*\\S*?\\s*}?' + rETag + ')|(' + rOTag + '=\\S*?\\s*\\S*?=' + rETag + ')');
+			var parts = [
+				'(\\r?\\n)' // new lines
+				, '(' + rOTag + '![\\s\\S]*?!' + rETag + ')' // comments
+				, '(' + rOTag + '[#\^\/&>]?\\s*[^!{=]\\S*?\\s*' + rETag + ')' // all other tags
+				, '(' + rOTag + '{\\s*\\S*?\\s*}' + rETag + ')' // { unescape token
+				, '(' + rOTag + '=\\S*?\\s*\\S*?=' + rETag + ')' // set delimiter change
+			];
+			tokenizer = new RegExp(parts.join('|'));
 		}
+
 	
 		var code = [];
 		var state =  {
