@@ -126,7 +126,7 @@ var Mustache = (function(undefined) {
 	}
 
 	var default_tokenizer = /(\r?\n)|({{![\s\S]*?!}})|({{[#\^\/&{>=]?\s*\S*?\s*}?}})|({{=\S*?\s*\S*?=}})/;
-	function create_parser_context(template, partials, openTag, closeTag) {
+	function create_parser_state(template, partials, openTag, closeTag) {
 		openTag = openTag || '{{';
 		closeTag = closeTag || '}}';
 
@@ -267,7 +267,7 @@ var Mustache = (function(undefined) {
 			template = parserContext.partials[variable]; // remember what the partial was
 			parserContext.partials[variable] = noop; // avoid infinite recursion
 			
-			program = parse(create_parser_context(
+			program = parse(create_parser_state(
 				template
 				, parserContext.partials
 			));
@@ -296,7 +296,7 @@ var Mustache = (function(undefined) {
 	
 	function section(parserContext) {
 		function create_section_context(template) {
-			var context = create_parser_context(template, 
+			var context = create_parser_state(template, 
 				parserContext.partials, 
 				parserContext.openTag,
 				parserContext.closeTag);
@@ -349,7 +349,7 @@ var Mustache = (function(undefined) {
 						var o = [],
 							user_send_func = function(str) { o.push(str); };
 					
-						parse(create_parser_context(hosFragment, partials))(context, user_send_func);
+						parse(create_parser_state(hosFragment, partials))(context, user_send_func);
 						
 						return o.join('');
 					}));
@@ -417,7 +417,7 @@ var Mustache = (function(undefined) {
 			throw new Error('Malformed change delimiter token: ' + token);
 		}
 		
-		var context = create_parser_context(
+		var context = create_parser_state(
 			parserContext.tokens.slice(parserContext.cursor+1).join('')
 			, parserContext.partials
 			, matches[1]
@@ -583,7 +583,7 @@ var Mustache = (function(undefined) {
 				}
 			}
 		
-			var program = parse(create_parser_context(template, p));
+			var program = parse(create_parser_state(template, p));
 			return function(view, send_func) {
 				var o = [],
 					user_send_func = send_func || function(str) {
