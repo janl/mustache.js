@@ -57,10 +57,10 @@ test("Parser", function() {
 		'Malformed tags should be handled correctly.'
 	);
 	
-	//var partials = { 'partial' : '{{key}}' };
-	//Mustache.compile('{{>partial}}', partials );
+	var partials = { 'partial' : '{{key}}' };
+	Mustache.compile('{{>partial}}', partials );
 	
-	//equals(partials['partial'], '{{key}}', 'Partials compiler must be non-destructive');
+	equals(partials['partial'], '{{key}}', 'Partials compiler must be non-destructive');
 });
 
 test("Basic Variables", function() {
@@ -273,7 +273,7 @@ test("'#' (Sections)", function() {
 		),
 		'\n  \n    1\n  \n\n  \n    2\n  \n\n  \n    3\n  \n',
 		'Context Nesting'
-	);	
+	);
 });
 
 test("'^' (Inverted Section)", function() {
