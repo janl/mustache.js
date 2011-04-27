@@ -101,6 +101,7 @@ var Mustache = (function(undefined) {
 		}
 	})();
 
+	/* BEGIN Helpers */
 	function noop() {}
 	
 	var escapeCompiledRegex;
@@ -116,17 +117,62 @@ var Mustache = (function(undefined) {
 		
 		return text.replace(escapeCompiledRegex, '\\$1');
 	}
-		
-	function isWhitespace(token) {
-		return token.match(/^\s+$/)!==null;
+	
+	function is_function(a) {
+		return a && typeof a === 'function';
 	}
 	
-	function isNewline(token) {
-		return token.match(/\r?\n/)!==null;
+	function is_object(a) {
+		return a && typeof a === 'object';
 	}
 
+	function is_array(a) {
+		return Object.prototype.toString.call(a) === '[object Array]';
+	}
+	
+	/* END Helpers */
+
+	/* BEGIN Compiler */
+		
+	function compile(state, noReturn) {
+		var n, c, token;
+		
+		for (n = state.tokens.length;state.cursor<n;++state.cursor) {
+			token = state.tokens[state.cursor];
+			if (token==='' || token===undefined) {
+				continue;
+			}
+			
+			if (token.indexOf(state.openTag)===0) {
+				c = token.charAt(state.openTag.length);
+				if (state.parser[c]) {
+					state.parser[c](state, token, c);
+				} else {
+					state.parser.def(state, token);
+				}
+			} else {
+				state.parser.text(state, token);
+			}
+		}
+		
+		if (!noReturn) {
+			var codeList = state.code;
+			if (codeList.length === 0) {
+				return noop;
+			} else if (codeList.length === 1) {
+				return codeList[0];
+			} else {
+				return function(context, send_func) {
+					for (var i=0,n=codeList.length;i<n;++i) {
+						codeList[i](context, send_func);
+					}
+				}
+			}
+		}
+	}
+	
 	var default_tokenizer = /(\r?\n)|({{![\s\S]*?!}})|({{[#\^\/&{>=]?\s*\S*?\s*}?}})|({{=\S*?\s*\S*?=}})/;
-	function create_parser_state(template, partials, openTag, closeTag) {
+	function create_compiler_state(template, partials, openTag, closeTag) {
 		openTag = openTag || '{{';
 		closeTag = closeTag || '}}';
 
@@ -146,216 +192,21 @@ var Mustache = (function(undefined) {
 			, partials: partials || {}
 			, openTag: openTag
 			, closeTag: closeTag
-			, state: 'normal'
+			, parser: default_parser
 			, pragmas: {}
 			, code: code
 			, send_code_func: function(f) {
 				code.push(f);
 			}
 		};
-		
-		// prefilter pragmas
-		pragmas(state);
+				
+		pragmas(state); // use pragmas to determine parsing behaviour
 		
 		// tokenize and initialize a cursor
 		state.tokens = splitFunc.call(state.template, tokenizer);
 		state.cursor = 0;
 		
 		return state;
-	}
-	
-	function is_function(a) {
-		return a && typeof a === 'function';
-	}
-	
-	function is_object(a) {
-		return a && typeof a === 'object';
-	}
-
-	function is_array(a) {
-		return Object.prototype.toString.call(a) === '[object Array]';
-	}
-	
-	/*
-	find `name` in current `context`. That is find me a value
-	from the view object
-	*/
-	function find(name, context) {
-		// Checks whether a value is truthy or false or 0
-		function is_kinda_truthy(bool) {
-			return bool === false || bool === 0 || bool;
-		}
-		
-		var value;
-		if (is_kinda_truthy(context[name])) {
-			value = context[name];
-		}
-
-		if (is_function(value)) {
-			return value.apply(context);
-		}
-		
-		return value;
-	}
-	
-	function find_in_stack(name, context_stack) {
-		var value;
-		
-		value = find(name, context_stack[context_stack.length-1]);
-		if (value!==undefined) { return value; }
-		
-		if (context_stack.length>1) {
-			value = find(name, context_stack[0]);
-			if (value!==undefined) { return value; }
-		}
-		
-		return undefined;
-	}
-
-	function get_variable_name(state, token, prefix, postfix) {
-		var fragment = token
-			.substring(
-				state.openTag.length + (prefix ? 1 : 0)
-				, token.length - state.closeTag.length - (postfix ? 1 : 0)
-			);
-			
-		if (String.prototype.trim) {
-			return fragment.trim();
-		} else {
-			return fragment.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-		}
-	}
-	
-	function interpolate(state, token, escape) {
-		function escapeHTML(str) {
-			return str.replace(/&/g,'&amp;')
-				.replace(/</g,'&lt;')
-				.replace(/>/g,'&gt;');
-		}
-		
-		var prefix, postfix;
-		if (escape==='{') {
-			prefix = postfix = true;
-		} else if (escape==='&') {
-			prefix = true;
-		}
-		
-		var variable = get_variable_name(state, token, prefix, postfix);
-		state.send_code_func((function(variable, escape) { return function(context, send_func) {
-			var res = find_in_stack(variable, context);
-			if (res!==undefined) {
-				if (!escape) {
-					res = escapeHTML('' + res);
-				}
-				
-				send_func('' + res);
-			}
-		};})(variable, escape));
-	}
-	
-	function partial(state, token) {
-		var variable = get_variable_name(state, token, true),
-			template, program;
-		
-		if (!state.partials[variable]) {
-			throw new Error('Unknown partial \'' + variable + '\'');
-		}
-		
-		if (!is_function(state.partials[variable])) {
-			// if the partial has not been compiled yet, do so now
-			
-			template = state.partials[variable]; // remember what the partial was
-			state.partials[variable] = noop; // avoid infinite recursion
-			
-			program = parse(create_parser_state(
-				template
-				, state.partials
-			));
-			
-			state.partials[variable] = function(context, send_func) {
-				var value = find_in_stack(variable, context);
-
-				if (value) {
-					// TODO: According to mustache-spec, partials do not act as implicit sections
-					// this behaviour was carried over from janl's mustache and should either
-					// be discarded or replaced with a pragma
-					context.push(value);
-				}
-
-				program(context, send_func);
-				
-				if (value) {
-					// TODO: See above
-					context.pop();
-				}
-			};
-		}
-		
-		state.send_code_func(function(context, send_func) { state.partials[variable](context, send_func); });
-	}
-	
-	function section(state) {
-		function create_section_state(template) {
-			return create_parser_state(template, 
-				state.partials, 
-				state.openTag,
-				state.closeTag);
-		}
-		
-		// by @langalex, support for arrays of strings
-		function create_context(_context) {
-			if(is_object(_context)) {
-				return _context;
-			} else {
-				var ctx = {}, 
-					iterator = (state.pragmas['IMPLICIT-ITERATOR'] || {iterator: '.'}).iterator;
-				
-				ctx[iterator] = _context;
-				
-				return ctx;
-			}
-		}		
-		
-		var s = state.section, template = s.template_buffer.join('')
-			program = parse(create_section_state(template));
-		
-		if (s.inverted) {
-			state.send_code_func((function(program, variable){ return function(context, send_func) {
-				var value = find_in_stack(variable, context);
-				if (!value || is_array(value) && value.length === 0) { // false or empty list, render it
-					program(context, send_func);
-				}
-			};})(program, s.variable));
-		} else {
-			state.send_code_func((function(program, variable, template, partials){ return function(context, send_func) {
-				var value = find_in_stack(variable, context);			
-				if (is_array(value)) { // Enumerable, Let's loop!
-					for (var i=0, n=value.length; i<n; ++i) {
-						context.push(create_context(value[i]));
-						program(context, send_func);
-						context.pop();
-					}
-				} else if (is_object(value)) { // Object, Use it as subcontext!
-					context.push(value);
-					program(context, send_func);
-					context.pop();
-				} else if (is_function(value)) { // higher order section
-					// note that HOS triggers a compilation on the hosFragment.
-					// this is slow (in relation to a fully compiled template) 
-					// since it invokes a call to the parser
-					send_func(value.call(context[context.length-1], template, function(hosFragment) {
-						var o = [],
-							user_send_func = function(str) { o.push(str); };
-					
-						parse(create_parser_state(hosFragment, partials))(context, user_send_func);
-						
-						return o.join('');
-					}));
-				} else if (value) { // truthy
-					program(context, send_func);
-				}
-			};})(program, s.variable, template, state.partials));
-		}
 	}
 	
 	function pragmas(state) {
@@ -408,6 +259,222 @@ var Mustache = (function(undefined) {
 		});
 	}
 	
+	/* END Compiler */
+	
+	/* BEGIN Run Time Helpers */
+	
+	/*
+	find `name` in current `context`. That is find me a value
+	from the view object
+	*/
+	function find(name, context) {
+		// Checks whether a value is truthy or false or 0
+		function is_kinda_truthy(bool) {
+			return bool === false || bool === 0 || bool;
+		}
+		
+		var value;
+		if (is_kinda_truthy(context[name])) {
+			value = context[name];
+		}
+
+		if (is_function(value)) {
+			return value.apply(context);
+		}
+		
+		return value;
+	}
+	
+	function find_in_stack(name, context_stack) {
+		var value;
+		
+		value = find(name, context_stack[context_stack.length-1]);
+		if (value!==undefined) { return value; }
+		
+		if (context_stack.length>1) {
+			value = find(name, context_stack[0]);
+			if (value!==undefined) { return value; }
+		}
+		
+		return undefined;
+	}
+	
+	/* END Run Time Helpers */
+
+	function text(state, token) {
+		state.send_code_func(function(context, send_func) { send_func(token); });	
+	}
+	
+	function interpolate(state, token, mark) {
+		function escapeHTML(str) {
+			return str.replace(/&/g,'&amp;')
+				.replace(/</g,'&lt;')
+				.replace(/>/g,'&gt;');
+		}
+		
+		var escape, prefix, postfix;
+		if (mark==='{') {
+			escape = prefix = postfix = true;
+		} else if (mark==='&') {
+			escape = prefix = true;
+		}
+		
+		var variable = get_variable_name(state, token, prefix, postfix);
+		state.send_code_func((function(variable, escape) { return function(context, send_func) {
+			var res = find_in_stack(variable, context);
+			if (res!==undefined) {
+				if (!escape) {
+					res = escapeHTML('' + res);
+				}
+				
+				send_func('' + res);
+			}
+		};})(variable, escape));
+	}
+	
+	function partial(state, token) {
+		var variable = get_variable_name(state, token, true),
+			template, program;
+		
+		if (!state.partials[variable]) {
+			throw new Error('Unknown partial \'' + variable + '\'');
+		}
+		
+		if (!is_function(state.partials[variable])) {
+			// if the partial has not been compiled yet, do so now
+			
+			template = state.partials[variable]; // remember what the partial was
+			state.partials[variable] = noop; // avoid infinite recursion
+			
+			program = compile(create_compiler_state(
+				template
+				, state.partials
+			));
+			
+			state.partials[variable] = function(context, send_func) {
+				var value = find_in_stack(variable, context);
+
+				if (value) {
+					// TODO: According to mustache-spec, partials do not act as implicit sections
+					// this behaviour was carried over from janl's mustache and should either
+					// be discarded or replaced with a pragma
+					context.push(value);
+				}
+
+				program(context, send_func);
+				
+				if (value) {
+					// TODO: See above
+					context.pop();
+				}
+			};
+		}
+		
+		state.send_code_func(function(context, send_func) { state.partials[variable](context, send_func); });
+	}
+	
+	function section(state) {
+		// by @langalex, support for arrays of strings
+		function create_context(_context) {
+			if(is_object(_context)) {
+				return _context;
+			} else {
+				var ctx = {}, 
+					iterator = (state.pragmas['IMPLICIT-ITERATOR'] || {iterator: '.'}).iterator;
+				
+				ctx[iterator] = _context;
+				
+				return ctx;
+			}
+		}		
+		
+		var s = state.section, template = s.template_buffer.join(''),
+			program = compile(create_compiler_state(template, 
+				state.partials, 
+				state.openTag,
+				state.closeTag));
+		
+		if (s.inverted) {
+			state.send_code_func((function(program, variable){ return function(context, send_func) {
+				var value = find_in_stack(variable, context);
+				if (!value || is_array(value) && value.length === 0) { // false or empty list, render it
+					program(context, send_func);
+				}
+			};})(program, s.variable));
+		} else {
+			state.send_code_func((function(program, variable, template, partials){ return function(context, send_func) {
+				var value = find_in_stack(variable, context);			
+				if (is_array(value)) { // Enumerable, Let's loop!
+					for (var i=0, n=value.length; i<n; ++i) {
+						context.push(create_context(value[i]));
+						program(context, send_func);
+						context.pop();
+					}
+				} else if (is_object(value)) { // Object, Use it as subcontext!
+					context.push(value);
+					program(context, send_func);
+					context.pop();
+				} else if (is_function(value)) { // higher order section
+					// note that HOS triggers a compilation on the hosFragment.
+					// this is slow (in relation to a fully compiled template) 
+					// since it invokes a call to the parser
+					send_func(value.call(context[context.length-1], template, function(hosFragment) {
+						var o = [],
+							user_send_func = function(str) { o.push(str); };
+					
+						compile(create_compiler_state(hosFragment, partials))(context, user_send_func);
+						
+						return o.join('');
+					}));
+				} else if (value) { // truthy
+					program(context, send_func);
+				}
+			};})(program, s.variable, template, state.partials));
+		}
+	}
+
+	/* BEGIN Parser */
+	
+	var default_parser = {
+		'!': noop,
+		'#': begin_section,
+		'^': begin_section,
+		'/': function(state, token) { throw new Error('Unbalanced End Section tag: ' + token); },
+		'&': interpolate,
+		'{': interpolate,
+		'>': partial,
+		'=': change_delimiter,
+		def: interpolate,
+		text: text
+	};
+	
+	var scan_section_parser = {
+		'!': noop,
+		'#': begin_section,
+		'^': begin_section,
+		'/': end_section,
+		'&': buffer_section,
+		'{': buffer_section,
+		'>': buffer_section,
+		'=': change_delimiter,		
+		def: buffer_section,
+		text: buffer_section
+	};
+		
+	function get_variable_name(state, token, prefix, postfix) {
+		var fragment = token
+			.substring(
+				state.openTag.length + (prefix ? 1 : 0)
+				, token.length - state.closeTag.length - (postfix ? 1 : 0)
+			);
+			
+		if (String.prototype.trim) {
+			return fragment.trim();
+		} else {
+			return fragment.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+		}
+	}
+	
 	function change_delimiter(state, token) {
 		var matches = token.match(new RegExp(escape_regex(state.openTag) + '=(\\S*?)\\s*(\\S*?)=' + escape_regex(state.closeTag)));
 
@@ -415,7 +482,7 @@ var Mustache = (function(undefined) {
 			throw new Error('Malformed change delimiter token: ' + token);
 		}
 		
-		var context = create_parser_state(
+		var context = create_compiler_state(
 			state.tokens.slice(state.cursor+1).join('')
 			, state.partials
 			, matches[1]
@@ -425,14 +492,15 @@ var Mustache = (function(undefined) {
 			
 		state.cursor = state.tokens.length; // finish off this level
 		
-		parse(context, true);
+		compile(context, true);
 	}
 	
-	function begin_section(state, token, inverted) {
-		var variable = get_variable_name(state, token, true);
+	function begin_section(state, token, mark) {
+		var inverted = mark === '^', 
+			variable = get_variable_name(state, token, true);
 		
-		if (state.state==='normal') {
-			state.state = 'scan_section';
+		if (state.parser===default_parser) {
+			state.parser = scan_section_parser;
 			state.section = {
 				variable: variable
 				, template_buffer: []
@@ -443,6 +511,10 @@ var Mustache = (function(undefined) {
 			state.section.child_sections.push(variable);
 			state.section.template_buffer.push(token);
 		}
+	}
+	
+	function buffer_section(state, token) {
+		state.section.template_buffer.push(token);
 	}
 	
 	function end_section(state, token) {
@@ -456,104 +528,13 @@ var Mustache = (function(undefined) {
 		} else if (state.section.variable===variable) {
 			section(state);
 			delete state.section;
-			state.state = 'normal';
+			state.parser = default_parser;
 		} else {
 			throw new Error('Unexpected section end tag. Expected: ' + state.section.variable);
 		}
 	}
-	
-	function parse(state, noReturn) {
-		var n, token;
 		
-		for (n = state.tokens.length;state.cursor<n;++state.cursor) {
-			token = state.tokens[state.cursor];
-			if (token==='' || token===undefined) {
-				continue;
-			}
-			
-			stateMachine[state.state](state, token);
-		}
-		
-		if (!noReturn) {
-			var codeList = state.code;
-			if (codeList.length === 0) {
-				return noop;
-			} else if (codeList.length === 1) {
-				return codeList[0];
-			} else {
-				return function(context, send_func) {
-					for (var i=0,n=codeList.length;i<n;++i) {
-						codeList[i](context, send_func);
-					}
-				}
-			}
-		}
-	}
-	
-	var stateMachine = {
-		'normal': function(state, token) {
-			if (token.indexOf(state.openTag)===0) {
-				// the token has the makings of a Mustache tag
-				// perform the appropriate action based on the state machine
-				switch (token.charAt(state.openTag.length)) {
-					case '!': // comment
-						// comments are just discarded, nothing to do
-						break;
-					case '#': // section
-						begin_section(state, token, false);
-						break;
-					case '^': // inverted section
-						begin_section(state, token, true);
-						break;
-					case '/': // end section
-						// in normal flow, this operation is absolutely meaningless
-						throw new Error('Unbalanced End Section tag: ' + token);
-					case '&': // unescaped variable						
-					case '{': // unescaped variable
-						interpolate(state, token, token.charAt(state.openTag.length));
-						break;
-					case '>': // partial
-						partial(state, token);
-						break;
-					case '=': // set delimiter change
-						change_delimiter(state, token);
-						break;
-					default: // escaped variable
-						interpolate(state, token);
-						break;
-				}				
-			} else {
-				// plain jane text
-				state.send_code_func(function(view, send_func) { send_func(token); });
-			}		
-		}
-		, 'scan_section': function(state, token) {
-			if (token.indexOf(state.openTag)===0) {		
-				switch (token.charAt(state.openTag.length)) {
-					case '!': // comments
-						// comments are just discarded, nothing to do
-						break;
-					case '#': // section
-						begin_section(state, token, false);
-						break;
-					case '^': // inverted section
-						begin_section(state, token, true);
-						break;						
-					case '/': // end section
-						end_section(state, token);
-						break;
-					case '=': // set delimiter change
-						change_delimiter(state, token);
-						break;
-					default: // all others
-						state.section.template_buffer.push(token);
-						break;
-				}
-			} else {
-				state.section.template_buffer.push(token);
-			}
-		}
-	}
+	/* END Parser */
 	
 	return({
 		name: "mustache.js",
@@ -581,7 +562,7 @@ var Mustache = (function(undefined) {
 				}
 			}
 		
-			var program = parse(create_parser_state(template, p));
+			var program = compile(create_compiler_state(template, p));
 			return function(view, send_func) {
 				var o = [],
 					user_send_func = send_func || function(str) {
