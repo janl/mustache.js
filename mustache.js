@@ -295,7 +295,7 @@ var Mustache = (function(undefined) {
 	
 	function find_in_stack(name, context_stack) {
 		var value;
-		
+				
 		value = find(name, context_stack[context_stack.length-1]);
 		if (value!==undefined) { return value; }
 		
@@ -329,13 +329,13 @@ var Mustache = (function(undefined) {
 		
 		var variable = get_variable_name(state, token, prefix, postfix);
 		state.send_code_func((function(variable, escape) { return function(context, send_func) {
-			var res = find_in_stack(variable, context);
-			if (res!==undefined) {
+			var value = find_in_stack(variable, context);
+			if (value!==undefined) {
 				if (!escape) {
-					res = escapeHTML('' + res);
+					value = escapeHTML('' + value);
 				}
 				
-				send_func('' + res);
+				send_func('' + value);
 			}
 		};})(variable, escape));
 	}
