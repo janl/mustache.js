@@ -118,6 +118,10 @@ var Mustache = (function(undefined) {
 		return text.replace(escapeCompiledRegex, '\\$1');
 	}
 	
+	function is_newline(token) {
+		return token.match(/\r?\n/);
+	}
+	
 	function is_function(a) {
 		return a && typeof a === 'function';
 	}
@@ -128,6 +132,10 @@ var Mustache = (function(undefined) {
 
 	function is_array(a) {
 		return Object.prototype.toString.call(a) === '[object Array]';
+	}
+	
+	function create_error(line, character, message) {
+		return new Error('(' + line + ',' + character + '): ' + message);
 	}
 	
 	/* END Helpers */
@@ -152,6 +160,13 @@ var Mustache = (function(undefined) {
 				}
 			} else {
 				state.parser.text(state, token);
+			}
+			
+			if (is_newline(token)) {
+				state.character = 1;
+				state.line++;
+			} else {
+				state.character+=token.length;
 			}
 		}
 		
@@ -193,10 +208,10 @@ var Mustache = (function(undefined) {
 			tokenizer = new RegExp(parts.join('|'));
 		}
 
-	
 		var code = [];
 		var state =  {
-			template: template || ''
+			line: 1, character: 1
+			, template: template || ''
 			, partials: partials || {}
 			, openTag: openTag
 			, closeTag: closeTag
@@ -251,7 +266,7 @@ var Mustache = (function(undefined) {
 				for (i=0, n=optionPairs.length; i<n; ++i) {
 					scratch = optionPairs[i].split('=');
 					if (scratch.length !== 2) {
-						throw new Error('Malformed pragma options:' + optionPairs[i]);
+						throw create_error(state.line, state.character, 'Malformed pragma option "' + optionPairs[i] + '".');
 					}
 					options[scratch[0]] = scratch[1];
 				}
@@ -260,7 +275,7 @@ var Mustache = (function(undefined) {
 			if (is_function(directives[pragma])) {
 				directives[pragma](options);
 			} else {
-				throw new Error('This implementation of mustache does not implement the "' + pragma + '" pragma');
+				throw create_error(state.line, state.character, 'This implementation of mustache does not implement the "' + pragma + '" pragma.');
 			}
 
 			return ''; // blank out all pragmas
@@ -345,7 +360,7 @@ var Mustache = (function(undefined) {
 			template, program;
 		
 		if (!state.partials[variable]) {
-			throw new Error('Unknown partial \'' + variable + '\'');
+			throw create_error(state.line, state.character, 'Unknown partial "' + variable + '".');
 		}
 		
 		if (!is_function(state.partials[variable])) {
@@ -394,7 +409,7 @@ var Mustache = (function(undefined) {
 				
 				return ctx;
 			}
-		}		
+		}
 		
 		var s = state.section, template = s.template_buffer.join(''),
 			program = compile(create_compiler_state(template, 
@@ -447,7 +462,7 @@ var Mustache = (function(undefined) {
 		'!': noop,
 		'#': begin_section,
 		'^': begin_section,
-		'/': function(state, token) { throw new Error('Unbalanced End Section tag: ' + token); },
+		'/': function(state, token) { throw create_error(state.line, state.character, 'Unbalanced End Section tag "' + token + '".'); },
 		'&': interpolate,
 		'{': interpolate,
 		'>': partial,
@@ -487,7 +502,7 @@ var Mustache = (function(undefined) {
 		var matches = token.match(new RegExp(escape_regex(state.openTag) + '=(\\S*?)\\s*(\\S*?)=' + escape_regex(state.closeTag)));
 
 		if ((matches || []).length!==3) {
-			throw new Error('Malformed change delimiter token: ' + token);
+			throw create_error(state.line, state.character, 'Malformed change delimiter token: "' + token + '".');
 		}
 		
 		var new_state = create_compiler_state(
@@ -543,7 +558,7 @@ var Mustache = (function(undefined) {
 			delete state.section;
 			state.parser = default_parser;
 		} else {
-			throw new Error('Unexpected section end tag "' + variable + '". Expected: ' + state.section.variable);
+			throw create_error(state.line, state.character, 'Unexpected section end tag "' + variable + '", expected "' + state.section.variable + '".');
 		}
 	}
 		

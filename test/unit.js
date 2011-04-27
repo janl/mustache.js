@@ -52,7 +52,7 @@ test("Parser", function() {
 				{}
 			);
 		}, function(e) {
-			return e.message === 'Malformed change delimiter token: {{=tag1}}';
+			return e.message === '(1,1): Malformed change delimiter token: "{{=tag1}}".';
 		},
 		'Malformed tags should be handled correctly.'
 	);
@@ -387,7 +387,7 @@ test("'>' (Partials)", function() {
 				{partal: ''}
 			);
 		}, function(e) {
-			return e.message === "Unknown partial 'partial'";
+			return e.message === '(1,1): Unknown partial "partial".';
 		},
 		'Missing partials should be handled correctly.'
 	);
@@ -477,7 +477,7 @@ test("'%' (Pragmas)", function() {
 			);
 		},
 		function(e) {
-			return e.message === 'This implementation of mustache does not implement the "I-HAVE-THE-GREATEST-MUSTACHE" pragma';
+			return e.message === '(1,1): This implementation of mustache does not implement the "I-HAVE-THE-GREATEST-MUSTACHE" pragma.';
 		},
 		'Notification of unimplemented pragmas'
 	);
