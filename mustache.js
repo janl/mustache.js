@@ -543,7 +543,7 @@ var Mustache = (function(undefined) {
 			delete state.section;
 			state.parser = default_parser;
 		} else {
-			throw new Error('Unexpected section end tag. Expected: ' + state.section.variable);
+			throw new Error('Unexpected section end tag "' + variable + '". Expected: ' + state.section.variable);
 		}
 	}
 		
