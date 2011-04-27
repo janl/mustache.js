@@ -399,6 +399,18 @@ test("'=' (Set Delimiter)", function() {
 		'*\nIt worked the first time.\n* And it worked the second time.\n\n* Then, surprisingly, it worked the third time.\n\n* Fourth time also fine!.',
 		'Simple Set Delimiter'
 	);
+		
+	equals(
+		Mustache.to_html(
+			'{{#noData}}{{=~~ ~~=}}Set Change Delimiter ~~data~~ ~~={{ }}=~~{{/noData}}'
+			, {
+				noData: true
+				, data: false
+			}
+			, {}
+		)
+		, 'Set Change Delimiter false '
+		, 'Change Delimiter inside Section');	
 });
 
 test("'!' (Comments)", function() {

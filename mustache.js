@@ -482,17 +482,22 @@ var Mustache = (function(undefined) {
 			throw new Error('Malformed change delimiter token: ' + token);
 		}
 		
-		var context = create_compiler_state(
+		var new_state = create_compiler_state(
 			state.tokens.slice(state.cursor+1).join('')
 			, state.partials
 			, matches[1]
 			, matches[2]);
-		context.code = state.code;
-		context.send_code_func = state.send_code_func;
-			
+		new_state.code = state.code;
+		new_state.send_code_func = state.send_code_func;
+		new_state.parser = state.parser;
+		new_state.section = state.section;
+		if (new_state.section) {
+			new_state.section.template_buffer.push(token);
+		}
+		
 		state.cursor = state.tokens.length; // finish off this level
 		
-		compile(context, true);
+		compile(new_state, true);
 	}
 	
 	function begin_section(state, token, mark) {
