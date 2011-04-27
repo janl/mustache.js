@@ -141,7 +141,7 @@ var Mustache = (function(undefined) {
 		}
 	
 		var code = [];
-		var context =  {
+		var state =  {
 			template: template || ''
 			, partials: partials || {}
 			, openTag: openTag
@@ -155,13 +155,13 @@ var Mustache = (function(undefined) {
 		};
 		
 		// prefilter pragmas
-		pragmas(context);
+		pragmas(state);
 		
 		// tokenize and initialize a cursor
-		context.tokens = splitFunc.call(context.template, tokenizer);
-		context.cursor = 0;
+		state.tokens = splitFunc.call(state.template, tokenizer);
+		state.cursor = 0;
 		
-		return context;
+		return state;
 	}
 	
 	function is_function(a) {
@@ -198,14 +198,14 @@ var Mustache = (function(undefined) {
 		return value;
 	}
 	
-	function find_in_stack(name, contextStack) {
+	function find_in_stack(name, context_stack) {
 		var value;
 		
-		value = find(name, contextStack[contextStack.length-1]);
+		value = find(name, context_stack[context_stack.length-1]);
 		if (value!==undefined) { return value; }
 		
-		if (contextStack.length>1) {
-			value = find(name, contextStack[0]);
+		if (context_stack.length>1) {
+			value = find(name, context_stack[0]);
 			if (value!==undefined) { return value; }
 		}
 		
