@@ -318,7 +318,7 @@ var Mustache = (function(undefined) {
 			}
 		}		
 		
-		var s = parserContext.section, variable = s.variable, template = s.template_buffer.join('')
+		var s = parserContext.section, template = s.template_buffer.join('')
 			program = parse(create_section_context(template));
 		
 		if (s.inverted) {
@@ -327,9 +327,9 @@ var Mustache = (function(undefined) {
 				if (!value || is_array(value) && value.length === 0) { // false or empty list, render it
 					program(context, send_func);
 				}
-			};})(program, variable));
+			};})(program, s.variable));
 		} else {
-			parserContext.send_code_func((function(program, variable, partials){ return function(context, send_func) {
+			parserContext.send_code_func((function(program, variable, template, partials){ return function(context, send_func) {
 				var value = find_in_stack(variable, context);			
 				if (is_array(value)) { // Enumerable, Let's loop!
 					for (var i=0, n=value.length; i<n; ++i) {
@@ -356,7 +356,7 @@ var Mustache = (function(undefined) {
 				} else if (value) { // truthy
 					program(context, send_func);
 				}
-			};})(program, variable, parserContext.partials));
+			};})(program, s.variable, template, parserContext.partials));
 		}
 	}
 	
