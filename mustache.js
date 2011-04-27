@@ -459,7 +459,7 @@ var Mustache = (function(undefined) {
 		
 		for (n = parserContext.tokens.length;parserContext.cursor<n;++parserContext.cursor) {
 			token = parserContext.tokens[parserContext.cursor];
-			if (token==='') {
+			if (token==='' || token===undefined) {
 				continue;
 			}
 			
