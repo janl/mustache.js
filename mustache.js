@@ -398,6 +398,7 @@ var Mustache = (function(undefined) {
 				, state.partials				
 			);
 			new_state.metrics.partial = variable;
+			// TODO: Determine if partials should inherit pragma state from parent
 			program = compile(new_state);
 			
 			state.partials[variable] = function(context, send_func) {
@@ -552,6 +553,7 @@ var Mustache = (function(undefined) {
 		new_state.metrics.character = state.metrics.character + token.length;
 		new_state.metrics.partial = state.metrics.partial;
 		new_state.section = state.section;
+		new_state.pragmas = state.pragmas;
 		if (new_state.section) {
 			new_state.section.template_buffer.push(token);
 		}

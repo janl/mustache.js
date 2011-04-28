@@ -499,8 +499,19 @@ test("'%' (Pragmas)", function() {
 			{ dataSet: [ 'Object 1', 'Object 2', 'Object 3' ] },
 			{}
 		),
-		"Object 1:Object 2:Object 3:"
+		"Object 1:Object 2:Object 3:",
+		'Default behaviour for IMPLICIT ITERATOR'
 	);
+	
+	equals(
+		Mustache.to_html(
+			'{{%IMPLICIT-ITERATOR iterator=rob}}{{=<% %>=}}<%#dataSet%><%rob%>:<%/dataSet%>',
+			{ dataSet: [ 'Object 1', 'Object 2', 'Object 3' ] },
+			{}
+		),
+		"Object 1:Object 2:Object 3:",
+		'Change Delimiter and Pragma mixes'
+	);	
 });
 
 test("Empty", function() {
