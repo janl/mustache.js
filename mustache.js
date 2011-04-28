@@ -285,7 +285,6 @@ var Mustache = (function(undefined) {
 			
 			if (suffix.length>0) {
 				optionPairs = suffix.split(',');
-				scratch;
 				
 				options = {};
 				for (i=0, n=optionPairs.length; i<n; ++i) {
