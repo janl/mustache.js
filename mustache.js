@@ -134,8 +134,24 @@ var Mustache = (function(undefined) {
 		return Object.prototype.toString.call(a) === '[object Array]';
 	}
 	
-	function create_error(line, character, message) {
-		return new Error('(' + line + ',' + character + '): ' + message);
+	function create_error(metrics, message) {
+		var str = '', err;
+		
+		if (metrics) {
+			str = '(' + metrics.line + ',' + metrics.character + '): ';
+			if (metrics.partial) {
+				str = '[' + metrics.partial + ']' + str;
+			}
+		}
+		
+		err = new Error(str + message);
+		if (metrics) {
+			err.line = metrics.line;
+			err.character = metrics.character;
+			err.partial = metrics.partial;
+		}
+		
+		return err;
 	}
 	
 	/* END Helpers */
@@ -145,7 +161,7 @@ var Mustache = (function(undefined) {
 	function compile(state, noReturn) {
 		var n, c, token;
 		
-		for (n = state.tokens.length;state.cursor<n;++state.cursor) {
+		for (n = state.tokens.length;state.cursor<n && !state.terminated;++state.cursor) {
 			token = state.tokens[state.cursor];
 			if (token==='' || token===undefined) {
 				continue;
@@ -163,11 +179,15 @@ var Mustache = (function(undefined) {
 			}
 			
 			if (is_newline(token)) {
-				state.character = 1;
-				state.line++;
+				state.metrics.character = 1;
+				state.metrics.line++;
 			} else {
-				state.character+=token.length;
+				state.metrics.character+=token.length;
 			}
+		}
+		
+		if (state.parser === scan_section_parser && !state.terminated) {
+			throw create_error(state.metrics, 'Closing section tag "' + state.section.variable + '" expected.');
 		}
 		
 		if (!noReturn) {
@@ -187,7 +207,7 @@ var Mustache = (function(undefined) {
 	}
 	
 	var default_tokenizer = /(\r?\n)|({{![\s\S]*?!}})|({{[#\^\/&>]?\s*[^!{=]\S*?\s*}})|({{{\s*\S*?\s*}}})|({{=\S*?\s*\S*?=}})/;
-	function create_compiler_state(template, partials, openTag, closeTag) {
+	function create_compiler_state(template, partials, openTag, closeTag, parse_pragma) {
 		openTag = openTag || '{{';
 		closeTag = closeTag || '}}';
 
@@ -208,9 +228,12 @@ var Mustache = (function(undefined) {
 			tokenizer = new RegExp(parts.join('|'));
 		}
 
-		var code = [];
-		var state =  {
-			line: 1, character: 1
+		var code = [], state =  {
+			metrics: {
+				partial: null
+				, line: 1
+				, character: 1
+			}
 			, template: template || ''
 			, partials: partials || {}
 			, openTag: openTag
@@ -222,8 +245,10 @@ var Mustache = (function(undefined) {
 				code.push(f);
 			}
 		};
-				
-		pragmas(state); // use pragmas to determine parsing behaviour
+		
+		if (parse_pragma!==false) { // explicit check, by default, look for pragma
+			pragmas(state); // use pragmas to determine parsing behaviour
+		}
 		
 		// tokenize and initialize a cursor
 		state.tokens = splitFunc.call(state.template, tokenizer);
@@ -266,7 +291,7 @@ var Mustache = (function(undefined) {
 				for (i=0, n=optionPairs.length; i<n; ++i) {
 					scratch = optionPairs[i].split('=');
 					if (scratch.length !== 2) {
-						throw create_error(state.line, state.character, 'Malformed pragma option "' + optionPairs[i] + '".');
+						throw create_error(undefined, 'Malformed pragma option "' + optionPairs[i] + '".');
 					}
 					options[scratch[0]] = scratch[1];
 				}
@@ -275,7 +300,7 @@ var Mustache = (function(undefined) {
 			if (is_function(directives[pragma])) {
 				directives[pragma](options);
 			} else {
-				throw create_error(state.line, state.character, 'This implementation of mustache does not implement the "' + pragma + '" pragma.');
+				throw create_error(undefined, 'This implementation of mustache does not implement the "' + pragma + '" pragma.');
 			}
 
 			return ''; // blank out all pragmas
@@ -360,7 +385,7 @@ var Mustache = (function(undefined) {
 			template, program;
 		
 		if (!state.partials[variable]) {
-			throw create_error(state.line, state.character, 'Unknown partial "' + variable + '".');
+			throw create_error(state.metrics, 'Unknown partial "' + variable + '".');
 		}
 		
 		if (!is_function(state.partials[variable])) {
@@ -369,10 +394,12 @@ var Mustache = (function(undefined) {
 			template = state.partials[variable]; // remember what the partial was
 			state.partials[variable] = noop; // avoid infinite recursion
 			
-			program = compile(create_compiler_state(
+			var new_state = create_compiler_state(
 				template
-				, state.partials
-			));
+				, state.partials				
+			);
+			new_state.metrics.partial = variable;
+			program = compile(new_state);
 			
 			state.partials[variable] = function(context, send_func) {
 				var value = find_in_stack(variable, context);
@@ -412,10 +439,11 @@ var Mustache = (function(undefined) {
 		}
 		
 		var s = state.section, template = s.template_buffer.join(''),
-			program = compile(create_compiler_state(template, 
-				state.partials, 
-				state.openTag,
-				state.closeTag));
+			program, 
+			new_state = create_compiler_state(template, state.partials, state.openTag, state.closeTag, false);
+		
+		new_state.metrics = s.metrics;
+		program = compile(new_state);
 		
 		if (s.inverted) {
 			state.send_code_func((function(program, variable){ return function(context, send_func) {
@@ -445,7 +473,9 @@ var Mustache = (function(undefined) {
 						var o = [],
 							user_send_func = function(str) { o.push(str); };
 					
-						compile(create_compiler_state(hosFragment, partials))(context, user_send_func);
+						var new_state = create_compiler_state(hosFragment, partials);
+						new_state.metrics.partial = 'HOS@@anon';
+						compile(new_state)(context, user_send_func);
 						
 						return o.join('');
 					}));
@@ -462,7 +492,7 @@ var Mustache = (function(undefined) {
 		'!': noop,
 		'#': begin_section,
 		'^': begin_section,
-		'/': function(state, token) { throw create_error(state.line, state.character, 'Unbalanced End Section tag "' + token + '".'); },
+		'/': function(state, token) { throw create_error(state.metrics, 'Unbalanced End Section tag "' + token + '".'); },
 		'&': interpolate,
 		'{': interpolate,
 		'>': partial,
@@ -485,40 +515,49 @@ var Mustache = (function(undefined) {
 	};
 		
 	function get_variable_name(state, token, prefix, postfix) {
-		var fragment = token
-			.substring(
-				state.openTag.length + (prefix ? 1 : 0)
-				, token.length - state.closeTag.length - (postfix ? 1 : 0)
-			);
-			
+		var fragment = token.substring(
+			state.openTag.length + (prefix ? 1 : 0)
+			, token.length - state.closeTag.length - (postfix ? 1 : 0)
+		);
+		
 		if (String.prototype.trim) {
-			return fragment.trim();
+			fragment = fragment.trim();
 		} else {
-			return fragment.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+			fragment = fragment.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 		}
+		
+		if (fragment.indexOf(' ')!==-1) {
+			throw create_error(state.metrics, 'Malformed variable name "' + fragment + '".');
+		}
+		
+		return fragment;
 	}
 	
 	function change_delimiter(state, token) {
 		var matches = token.match(new RegExp(escape_regex(state.openTag) + '=(\\S*?)\\s*(\\S*?)=' + escape_regex(state.closeTag)));
 
 		if ((matches || []).length!==3) {
-			throw create_error(state.line, state.character, 'Malformed change delimiter token: "' + token + '".');
+			throw create_error(state.metrics, 'Malformed change delimiter token "' + token + '".');
 		}
 		
 		var new_state = create_compiler_state(
 			state.tokens.slice(state.cursor+1).join('')
 			, state.partials
 			, matches[1]
-			, matches[2]);
+			, matches[2]
+			, false);
 		new_state.code = state.code;
 		new_state.send_code_func = state.send_code_func;
 		new_state.parser = state.parser;
+		new_state.metrics.line = state.metrics.line;
+		new_state.metrics.character = state.metrics.character + token.length;
+		new_state.metrics.partial = state.metrics.partial;
 		new_state.section = state.section;
 		if (new_state.section) {
 			new_state.section.template_buffer.push(token);
 		}
 		
-		state.cursor = state.tokens.length; // finish off this level
+		state.terminated = true; // finish off this level
 		
 		compile(new_state, true);
 	}
@@ -534,6 +573,11 @@ var Mustache = (function(undefined) {
 				, template_buffer: []
 				, inverted: inverted
 				, child_sections: []
+				, metrics: {
+					partial: state.metrics.partial
+					, line: state.metrics.line
+					, character: state.metrics.character + token.length
+				}
 			};
 		} else {
 			state.section.child_sections.push(variable);
@@ -548,17 +592,20 @@ var Mustache = (function(undefined) {
 	function end_section(state, token) {
 		var variable = get_variable_name(state, token, true);
 		
-		if (state.section.child_sections.length > 0 && 
-			state.section.child_sections[state.section.child_sections.length-1] === variable) {
-			
-			state.section.child_sections.pop();			
-			state.section.template_buffer.push(token);			
+		if (state.section.child_sections.length > 0) {
+			var child_section = state.section.child_sections[state.section.child_sections.length-1];
+			if (child_section === variable) {
+				state.section.child_sections.pop();			
+				state.section.template_buffer.push(token);
+			} else {
+				throw create_error(state.metrics, 'Unexpected section end tag "' + variable + '", expected "' + child_section + '".');
+			}
 		} else if (state.section.variable===variable) {
 			section(state);
 			delete state.section;
 			state.parser = default_parser;
 		} else {
-			throw create_error(state.line, state.character, 'Unexpected section end tag "' + variable + '", expected "' + state.section.variable + '".');
+			throw create_error(state.metrics, 'Unexpected section end tag "' + variable + '", expected "' + state.section.variable + '".');
 		}
 	}
 		

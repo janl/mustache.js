@@ -52,10 +52,21 @@ test("Parser", function() {
 				{}
 			);
 		}, function(e) {
-			return e.message === '(1,1): Malformed change delimiter token: "{{=tag1}}".';
+			return e.message === '(1,1): Malformed change delimiter token "{{=tag1}}".';
 		},
 		'Malformed tags should be handled correctly.'
 	);
+	
+	raises(
+		function() {
+			Mustache.to_html(
+				'{{tag blah}}'
+			)	
+		}, function(e) {
+			return e.message === '(1,1): Malformed variable name "tag blah".';
+		},
+		'Malformed tags should be handled correctly.'
+	);	
 	
 	var partials = { 'partial' : '{{key}}' };
 	Mustache.compile('{{>partial}}', partials );
@@ -477,7 +488,7 @@ test("'%' (Pragmas)", function() {
 			);
 		},
 		function(e) {
-			return e.message === '(1,1): This implementation of mustache does not implement the "I-HAVE-THE-GREATEST-MUSTACHE" pragma.';
+			return e.message === 'This implementation of mustache does not implement the "I-HAVE-THE-GREATEST-MUSTACHE" pragma.';
 		},
 		'Notification of unimplemented pragmas'
 	);
@@ -587,6 +598,60 @@ test("Demo", function() {
 		),
 		expected_result,
 		'A complex template'
+	);
+});
+
+test("Error Handling", function() {
+	raises(
+		function() {
+			Mustache.to_html(
+				'this is a partial\nyes it is. {{>partial}}',
+				{},
+				{partal: ''}
+			);
+		}, function(e) {
+			return e.line === 2 && e.character === 12;
+		},
+		'Missing partial line and character correctness.'
+	);
+	
+	raises(
+		function() {
+			Mustache.to_html(
+				'this is a partial\nyes it is. {{>partial}}',
+				{},
+				{partial: 'error in {{#foobar}}'}
+			);
+		}, function(e) {
+			return e.message === '[partial](1,21): Closing section tag "foobar" expected.'
+		},
+		'Unbalanced section correctness (Part 1).'
+	);
+	
+	raises(
+		function() {
+			Mustache.to_html(
+				'something something something {{/darkside}}.',
+				{},
+				{}
+			);
+		}, function(e) {
+			return e.message === '(1,31): Unbalanced End Section tag "{{/darkside}}".'
+		},
+		'Unbalanced section correctness (Part 2).'
+	);
+
+	raises(
+		function() {
+			Mustache.to_html(
+				'this is a partial\nyes it is. {{>maria}}',
+				{},
+				{maria: 'error in {{#foobar}}this is the most aw\ns\nme think {{#evar}}hello joe{{/foobar}}{{/evar}}'}
+			);
+		}, function(e) {
+			return e.message === '[maria](3,28): Unexpected section end tag "foobar", expected "evar".'
+		},
+		'Partials metric correctness.'
 	);
 });
 
