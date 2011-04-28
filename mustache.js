@@ -207,7 +207,7 @@ var Mustache = (function(undefined) {
 	}
 	
 	var default_tokenizer = /(\r?\n)|({{![\s\S]*?!}})|({{[#\^\/&>]?\s*[^!{=]\S*?\s*}})|({{{\s*\S*?\s*}}})|({{=\S*?\s*\S*?=}})/;
-	function create_compiler_state(template, partials, openTag, closeTag, parse_pragma) {
+	function create_compiler_state(template, partials, openTag, closeTag) {
 		openTag = openTag || '{{';
 		closeTag = closeTag || '}}';
 
@@ -246,9 +246,7 @@ var Mustache = (function(undefined) {
 			}
 		};
 		
-		if (parse_pragma!==false) { // explicit check, by default, look for pragma
-			pragmas(state); // use pragmas to determine parsing behaviour
-		}
+		pragmas(state); // use pragmas to control parsing behaviour
 		
 		// tokenize and initialize a cursor
 		state.tokens = splitFunc.call(state.template, tokenizer);
@@ -440,7 +438,7 @@ var Mustache = (function(undefined) {
 		
 		var s = state.section, template = s.template_buffer.join(''),
 			program, 
-			new_state = create_compiler_state(template, state.partials, state.openTag, state.closeTag, false);
+			new_state = create_compiler_state(template, state.partials, state.openTag, state.closeTag);
 		
 		new_state.metrics = s.metrics;
 		program = compile(new_state);
@@ -544,8 +542,7 @@ var Mustache = (function(undefined) {
 			state.tokens.slice(state.cursor+1).join('')
 			, state.partials
 			, matches[1]
-			, matches[2]
-			, false);
+			, matches[2]);
 		new_state.code = state.code;
 		new_state.send_code_func = state.send_code_func;
 		new_state.parser = state.parser;
