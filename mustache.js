@@ -324,6 +324,6 @@ var Mustache = function() {
   });
 }();
 
-if(typeof module != 'undefined' && module.exports){
+if(typeof module == 'object' && module.exports){
   module.exports = Mustache;
 }
