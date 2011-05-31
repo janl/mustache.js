@@ -7,6 +7,32 @@
 var Mustache = function() {
   var Renderer = function() {};
 
+  function findMatchingCloseTag(template, oIndex, oRegex, cIndex, cRegex) {
+    // Find the first close tag
+    var t = template.substr(cIndex);
+    var cMatch = cRegex.exec(t);
+    if( !cMatch ) {
+      return null;
+    } else {
+      // Check for a match start tag
+      var cIndex = cIndex + cMatch.index;
+      t = template.substr(oIndex, (cIndex-oIndex));
+      var oMatch = oRegex.exec(t);
+      if( !oMatch ) {
+        // the close tag is valid
+        return {
+          0: cMatch[0]
+          ,index: cIndex
+          ,length: 1
+        };
+      } else {
+        // Continue searching
+        return findMatchingCloseTag(template, oIndex+oMatch.index+oMatch[0].length, oRegex
+                ,cIndex+cMatch[0].length, cRegex);
+      };
+    };
+  };
+  
   Renderer.prototype = {
     otag: "{{",
     ctag: "}}",
@@ -103,13 +129,34 @@ var Mustache = function() {
       }
 
       var that = this;
-      // CSW - Added "+?" so it finds the tighest bound, not the widest
-      var regex = new RegExp(this.otag + "(\\^|\\#)\\s*(.+)\\s*" + this.ctag +
-              "\n*([\\s\\S]+?)" + this.otag + "\\/\\s*\\2\\s*" + this.ctag +
-              "\\s*", "mg");
+      if( !this.sectionRegex ) {
+        this.sectionRegex = new RegExp(this.otag + "(\\^|\\#)\\s*(\\S+?)\\s*" + this.ctag);
+      };
+      var match = this.sectionRegex.exec(template);
+      if( !match ) {
+        // No open tag found, return unmodified template
+        return template;
+      };
 
-      // for each {{#foo}}{{/foo}} section do...
-      return template.replace(regex, function(match, type, name, content) {
+      // Look for close tag
+      var type = match[1];
+      var name = match[2];
+      oRegex = new RegExp(this.otag + "(\\^|\\#)\\s*" + name + "\\s*" + this.ctag);
+      var cRegex = new RegExp(this.otag + "\\/\\s*" + name + "\\s*" + this.ctag);
+      var oIndex = match.index + match[0].length;
+      var close = findMatchingCloseTag(template, oIndex, oRegex, oIndex, cRegex);
+      if( !close ) {
+        // no matching close tag found, continue passed the tag
+        var content = this.render_section(template.substr(oIndex),context,partials);
+        return template.substr(0,oIndex)+content;
+      };
+      
+      // Transform between o and c tags, continue work after c tag
+      var content = transform(type, name, template.substr(oIndex,(close.index-oIndex)));
+      var after = this.render_section(template.substr(close.index+close[0].length),context,partials);
+      return template.substr(0,match.index)+content+after;
+
+      function transform(type, name, content) {
         var value = that.find(name, context);
         if(type == "^") { // inverted section
           if(!value || that.is_array(value) && value.length === 0) {
@@ -138,7 +185,7 @@ var Mustache = function() {
             return "";
           }
         }
-      });
+      };
     },
 
     /*
