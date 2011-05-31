@@ -323,3 +323,7 @@ var Mustache = function() {
     }
   });
 }();
+
+if(typeof module == 'object' && module.exports){
+  module.exports = Mustache;
+}
