@@ -273,7 +273,7 @@ var Mustache = (function(undefined) {
 			return state.template;
 		}
 
-		state.template = state.template.replace(/{{%([\w-]+)(\s*)(.*?(?=}}))}}/, function(match, pragma, space, suffix) {
+		state.template = state.template.replace(/{{%([\w-]+)(\s*)(.*?(?=}}))}}/g, function(match, pragma, space, suffix) {
 			var options = undefined,
 				optionPairs, scratch,
 				i, n;

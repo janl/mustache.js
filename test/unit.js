@@ -511,6 +511,21 @@ test("'%' (Pragmas)", function() {
 		),
 		"Object 1:Object 2:Object 3:",
 		'Change Delimiter and Pragma mixes'
+	);
+
+
+	raises(
+		function() {
+			Mustache.to_html(
+				'{{%IMPLICIT-ITERATOR iterator=rob}}{{%I-HAVE-THE-GREATEST-MUSTACHE}}',
+				{},
+				{}
+			);
+		},
+		function(e) {
+			return e.message === 'This implementation of mustache does not implement the "I-HAVE-THE-GREATEST-MUSTACHE" pragma.';
+		},
+		'Multiple Pragmas'
 	);	
 });
 
