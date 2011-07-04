@@ -717,4 +717,13 @@ test("Regression Suite", function() {
 		, 'foobar'
 		, 'Nested Sections with the same name'
 	);
+	
+	equals(
+		Mustache.to_html(
+			'{{=~~ ~~=}} ~~>staticInfoPanel~~ ~~={{ }}=~~'
+			, {}
+			, { staticInfoPanel: 'Hello' }
+		)
+		, ' Hello '
+		, 'Change Delimiter + Partial');
 });
