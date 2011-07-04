@@ -255,21 +255,17 @@ var Mustache = (function(undefined) {
 		return state;
 	}
 	
+	var pragma_directives = {
+		'IMPLICIT-ITERATOR': function(state, options) {
+			state.pragmas['IMPLICIT-ITERATOR'] = {iterator: ((options || {iterator:undefined}).iterator) || '.'};
+		}
+	};
+		
 	function pragmas(state) {
 		/* includes tag */
 		function includes(needle, haystack) {
 			return haystack.indexOf('{{' + needle) !== -1;
 		}
-		
-		var directives = {
-			'IMPLICIT-ITERATOR': function(options) {
-				state.pragmas['IMPLICIT-ITERATOR'] = {iterator: '.'};
-				
-				if (options) {
-					state.pragmas['IMPLICIT-ITERATOR'].iterator = options['iterator'];
-				}
-			}
-		};
 		
 		// no pragmas, easy escape
 		if(!includes("%", state.template)) {
@@ -294,8 +290,8 @@ var Mustache = (function(undefined) {
 				}
 			}
 			
-			if (is_function(directives[pragma])) {
-				directives[pragma](options);
+			if (is_function(pragma_directives[pragma])) {
+				pragma_directives[pragma](state, options);
 			} else {
 				throw create_error(undefined, 'This implementation of mustache does not implement the "' + pragma + '" pragma.');
 			}
