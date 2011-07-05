@@ -1,6 +1,4 @@
 test("Argument validation", function() {
-	expect(4);
-	
 	equals(Mustache.to_html(undefined), '', 'No parameters');
 	equals(Mustache.to_html('{{hi}}'), '', ' No View or Partials');
 	equals(Mustache.to_html('{{hi}}', {hi:'Hi.'}), 'Hi.', 'No Partials');
@@ -8,8 +6,6 @@ test("Argument validation", function() {
 });
 
 test("Parser", function() {
-	expect(4);
-
 	// matches whitespace_partial.html
 	equals(
 		Mustache.to_html(
@@ -47,18 +43,30 @@ test("Parser", function() {
 		'Hello\n\n\nWorld\n',
 		'Preservation of white space'
 	);
-	
-	try {
-		Mustache.to_html(
-			'{{=tag1}}',
-			{ tag1: 'Hello' },
-			{}
-		);
 
-		ok(false);
-	} catch (e) {
-		equals(e.message, 'Unexpected end of document.');
-	}
+	raises(
+		function() {
+			Mustache.to_html(
+				'{{=tag1}}',
+				{ tag1: 'Hello' },
+				{}
+			);
+		}, function(e) {
+			return e instanceof Mustache.Error && e.message === '(1,1): Malformed change delimiter token "{{=tag1}}".';
+		},
+		'Malformed tags should be handled correctly.'
+	);
+	
+	raises(
+		function() {
+			Mustache.to_html(
+				'{{tag blah}}'
+			)	
+		}, function(e) {
+			return e.message === '(1,1): Malformed variable name "tag blah".';
+		},
+		'Malformed tags should be handled correctly.'
+	);	
 	
 	var partials = { 'partial' : '{{key}}' };
 	Mustache.compile('{{>partial}}', partials );
@@ -67,8 +75,6 @@ test("Parser", function() {
 });
 
 test("Basic Variables", function() {
-	expect(4);
-	
 	// matches escaped.html
 	equals(
 		Mustache.to_html(
@@ -131,8 +137,6 @@ test("Basic Variables", function() {
 });
 
 test("'{' or '&' (Unescaped Variable)", function() {
-	expect(2);
-	
 	// matches unescaped.html
 	equals(
 		Mustache.to_html(
@@ -161,11 +165,19 @@ test("'{' or '&' (Unescaped Variable)", function() {
 		'<h1>Bear > Shark</h1>',
 		'& character'
 	);
+	
+	equals(
+		Mustache.to_html(
+			'<h1>{{title}}}</h1>',
+			{ title: 'Bear > Shark' }
+			, {}
+		),
+		'<h1>Bear &gt; Shark}</h1>'
+		, 'Potential false positive'
+	);
 });
 
 test("'#' (Sections)", function() {
-	expect(8);
-	
 	// matches array_of_partials_implicit_partial.html
 	equals(
 		Mustache.to_html(
@@ -282,12 +294,10 @@ test("'#' (Sections)", function() {
 		),
 		'\n  \n    1\n  \n\n  \n    2\n  \n\n  \n    3\n  \n',
 		'Context Nesting'
-	);	
+	);
 });
 
 test("'^' (Inverted Section)", function() {
-	expect(1);
-	
 	// matches inverted_section.html
 	equals(
 		Mustache.to_html(
@@ -302,8 +312,6 @@ test("'^' (Inverted Section)", function() {
 });
 
 test("'>' (Partials)", function() {
-	expect(5);
-	
 	// matches view_partial.html
 	equals(
 		Mustache.to_html(
@@ -382,21 +390,21 @@ test("'>' (Partials)", function() {
 		'1\n\n1.1\n\n1.1.1\n\n\n'
 	);
 	
-	try {
-		Mustache.to_html(
-			'{{>partial}}',
-			{},
-			{partal: ''}
-		);
-		ok(false);
-	} catch(e) {
-		equals(e.message, "Unknown partial 'partial'");
-	}
+	raises(
+		function() {
+			Mustache.to_html(
+				'{{>partial}}',
+				{},
+				{partal: ''}
+			);
+		}, function(e) {
+			return e.message === '(1,1): Unknown partial "partial".';
+		},
+		'Missing partials should be handled correctly.'
+	);
 });
 
 test("'=' (Set Delimiter)", function() {
-	expect(1);
-	
 	// matches delimiter.html
 	equals(
 		Mustache.to_html(
@@ -412,11 +420,21 @@ test("'=' (Set Delimiter)", function() {
 		'*\nIt worked the first time.\n* And it worked the second time.\n\n* Then, surprisingly, it worked the third time.\n\n* Fourth time also fine!.',
 		'Simple Set Delimiter'
 	);
+		
+	equals(
+		Mustache.to_html(
+			'{{#noData}}{{=~~ ~~=}}Set Change Delimiter ~~data~~ ~~={{ }}=~~{{/noData}}'
+			, {
+				noData: true
+				, data: false
+			}
+			, {}
+		)
+		, 'Set Change Delimiter false '
+		, 'Change Delimiter inside Section');	
 });
 
 test("'!' (Comments)", function() {
-	expect(4);
-	
 	equals(
 		Mustache.to_html('{{! this is a single line comment !}}'),
 		'',
@@ -448,8 +466,6 @@ test("'!' (Comments)", function() {
 });
 
 test("'%' (Pragmas)", function() {
-	expect(3);
-	
 	// matches array_of_strings_options.html
 	equals(
 		Mustache.to_html(
@@ -462,20 +478,20 @@ test("'%' (Pragmas)", function() {
 	);
 	
 	// matches unknown_pragma.txt
-	try {
-		equals(
+	
+	raises(
+		function() {
 			Mustache.to_html(
 				'{{%I-HAVE-THE-GREATEST-MUSTACHE}}\n',
 				{},
 				{}
-			),
-			'hello world ',
-			'IMPLICIT-ITERATOR pragma'
-		);
-		ok(false);
-	} catch (e) {
-		equals(e.message, 'This implementation of mustache doesn\'t understand the \'I-HAVE-THE-GREATEST-MUSTACHE\' pragma');
-	}
+			);
+		},
+		function(e) {
+			return e.message === 'This implementation of mustache does not implement the "I-HAVE-THE-GREATEST-MUSTACHE" pragma.';
+		},
+		'Notification of unimplemented pragmas'
+	);
 	
 	equals(
 		Mustache.to_html(
@@ -483,13 +499,37 @@ test("'%' (Pragmas)", function() {
 			{ dataSet: [ 'Object 1', 'Object 2', 'Object 3' ] },
 			{}
 		),
-		"Object 1:Object 2:Object 3:"
+		"Object 1:Object 2:Object 3:",
+		'Default behaviour for IMPLICIT ITERATOR'
 	);
+	
+	equals(
+		Mustache.to_html(
+			'{{%IMPLICIT-ITERATOR iterator=rob}}{{=<% %>=}}<%#dataSet%><%rob%>:<%/dataSet%>',
+			{ dataSet: [ 'Object 1', 'Object 2', 'Object 3' ] },
+			{}
+		),
+		"Object 1:Object 2:Object 3:",
+		'Change Delimiter and Pragma mixes'
+	);
+
+
+	raises(
+		function() {
+			Mustache.to_html(
+				'{{%IMPLICIT-ITERATOR iterator=rob}}{{%I-HAVE-THE-GREATEST-MUSTACHE}}',
+				{},
+				{}
+			);
+		},
+		function(e) {
+			return e.message === 'This implementation of mustache does not implement the "I-HAVE-THE-GREATEST-MUSTACHE" pragma.';
+		},
+		'Multiple Pragmas'
+	);	
 });
 
 test("Empty", function() {
-	expect(2);
-	
 	// matches empty_template.html
 	equals(
 		Mustache.to_html(
@@ -516,8 +556,6 @@ test("Empty", function() {
 });
 
 test("Demo", function() {
-	expect(2);
-	
 	// matches simple.html
 	equals(
 		Mustache.to_html(
@@ -589,9 +627,61 @@ test("Demo", function() {
 	);
 });
 
-test("Regression Suite", function() {
-	expect(4);
+test("Error Handling", function() {
+	raises(
+		function() {
+			Mustache.to_html(
+				'this is a partial\nyes it is. {{>partial}}',
+				{},
+				{partal: ''}
+			);
+		}, function(e) {
+			return e.line === 2 && e.character === 12;
+		},
+		'Missing partial line and character correctness.'
+	);
 	
+	raises(
+		function() {
+			Mustache.to_html(
+				'this is a partial\nyes it is. {{>partial}}',
+				{},
+				{partial: 'error in {{#foobar}}'}
+			);
+		}, function(e) {
+			return e.message === '[partial](1,21): Closing section tag "foobar" expected.'
+		},
+		'Unbalanced section correctness (Part 1).'
+	);
+	
+	raises(
+		function() {
+			Mustache.to_html(
+				'something something something {{/darkside}}.',
+				{},
+				{}
+			);
+		}, function(e) {
+			return e.message === '(1,31): Unbalanced End Section tag "{{/darkside}}".'
+		},
+		'Unbalanced section correctness (Part 2).'
+	);
+
+	raises(
+		function() {
+			Mustache.to_html(
+				'this is a partial\nyes it is. {{>maria}}',
+				{},
+				{maria: 'error in {{#foobar}}this is the most aw\ns\nme think {{#evar}}hello joe{{/foobar}}{{/evar}}'}
+			);
+		}, function(e) {
+			return e.message === '[maria](3,28): Unexpected section end tag "foobar", expected "evar".'
+		},
+		'Partials metric correctness.'
+	);
+});
+
+test("Regression Suite", function() {
 	// matches bug_11_eating_whitespace.html
 	equals(
 		Mustache.to_html(
@@ -642,4 +732,13 @@ test("Regression Suite", function() {
 		, 'foobar'
 		, 'Nested Sections with the same name'
 	);
+	
+	equals(
+		Mustache.to_html(
+			'{{=~~ ~~=}} ~~>staticInfoPanel~~ ~~={{ }}=~~'
+			, {}
+			, { staticInfoPanel: 'Hello' }
+		)
+		, ' Hello '
+		, 'Change Delimiter + Partial');
 });

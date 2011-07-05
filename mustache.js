@@ -7,46 +7,15 @@
   See http://www.saliences.com/projects/mustache/mustache.html for details.
 */
 
-var Mustache = function() {
-	function ParserException(message) { 
-		this.message = message;
-	}
-	ParserException.prototype = {};
-	
-	var Renderer = function(send_func) {
-		this._escapeCompiledRegex = null;
-		if (!Renderer.TokenizerRegex) {
-			Renderer.TokenizerRegex = this._createTokenizerRegex('{{', '}}');
-		}
-		
-		this.user_send_func = send_func;
-		this.commandSet = this.compiler;
-		
-		this.cached_output = [];
-		this.send_func = function(text) {
-			this.cached_output.push(text);
-		}
-		
-		this.pragmas = {};
-		
-		// Fix up the stupidness that is IE's split implementation
-		this._compliantExecNpcg = /()??/.exec("")[1] === undefined; // NPCG: nonparticipating capturing group
-		var hasCapturingSplit = '{{hi}}'.split(/(hi)/).length === 3;
-		if (!hasCapturingSplit) {
-			this.splitFunc = this.capturingSplit;
-		} else {
-			this.splitFunc = String.prototype.split;
-		}
-	};
-	Renderer.TokenizerRegex = null;
-	
-	Renderer.prototype = {
-		capturingSplit: function(separator) {
-			// fix up the stupidness that is IE's broken String.split implementation
-			// originally by Steven Levithan
-			/* Cross-Browser Split 1.0.1
-			(c) Steven Levithan <stevenlevithan.com>; MIT License
-			An ECMA-compliant, uniform cross-browser split method */
+var Mustache = (function(undefined) {
+	var splitFunc = (function() {
+		// fix up the stupidness that is IE's broken String.split implementation
+		/* Cross-Browser Split 1.0.1
+		(c) Steven Levithan <stevenlevithan.com>; MIT License
+		An ECMA-compliant, uniform cross-browser split method 
+		*/
+		var compliantExecNpcg = /()??/.exec("")[1] === undefined; // NPCG: nonparticipating capturing group
+		function capturingSplit(separator) {
 			var str = this;
 			var limit = undefined;
 			
@@ -64,7 +33,7 @@ var Mustache = function() {
 				separator2, match, lastIndex, lastLength;
 
 			str = str + ""; // type conversion
-			if (!this._compliantExecNpcg) {
+			if (!compliantExecNpcg) {
 				separator2 = RegExp("^" + separator.source + "$(?!\\s)", flags); // doesn't need /g or /y, but they don't hurt
 			}
 
@@ -90,7 +59,7 @@ var Mustache = function() {
 					output.push(str.slice(lastLastIndex, match.index));
 
 					// fix browsers whose `exec` methods don't consistently return `undefined` for nonparticipating capturing groups
-					if (!this._compliantExecNpcg && match.length > 1) {
+					if (!compliantExecNpcg && match.length > 1) {
 						match[0].replace(separator2, function () {
 							for (var i = 1; i < arguments.length - 2; i++) {
 								if (arguments[i] === undefined) {
@@ -126,652 +95,537 @@ var Mustache = function() {
 			}
 
 			return output.length > limit ? output.slice(0, limit) : output;
-		},
+		}
 		
-		render: function(template, partials) {
-			template = this.parse_pragmas(template, '{{', '}}');
-			
-			var tokens = this.tokenize(template, '{{', '}}');
-			
-			this.parse(this.createParserContext(tokens, partials, '{{', '}}'));
-		},
-		
-		createParserContext: function(tokens, partials, openTag, closeTag) {
-			return {
-				tokens: tokens,
-				token: tokens[0],
-				index: 0,
-				length: tokens.length,
-				partials: partials,
-				stack: [],
-				openTag: openTag,
-				closeTag: closeTag
-			};
-		},
-		
-		_createTokenizerRegex: function(openTag, closeTag) {
-			var delimiters = [
-				'\\{',
-				'&',
-				'\\}',
-				'#',
-				'\\^',
-				'\\/',
-				'>',
-				'=',
-				'%',
-				'!',
-				'\\s+'
-			];
-			delimiters.unshift(this.escape_regex(openTag));
-			delimiters.unshift(this.escape_regex(closeTag));
-			
-			return new RegExp('(' + delimiters.join('|') + ')');
-		},
-		
-		tokenize: function(template, openTag, closeTag) {
-			var regex;			
-			if (openTag==='{{' && closeTag==='}}') {
-				// the common case, use the stored compiled regex
-				regex = Renderer.TokenizerRegex;
-			} else {
-				regex = this._createTokenizerRegex(openTag, closeTag);
-			}
-			
-			return this.splitFunc.call(template, regex);
-		},
-		
-		/*
-			Looks for %PRAGMAS
-		*/
-		parse_pragmas: function(template, openTag, closeTag) {
-			/* includes tag */
-			function includes(needle, haystack) {
-				return haystack.indexOf(openTag + needle) !== -1;
-			}	
-			
-			// no pragmas, easy escape
-			if(!includes("%", template)) {
-				return template;
-			}
+		if ('lol'.split(/(o)/).length !== 3) {
+			return capturingSplit;
+		} else {
+			return String.prototype.split;
+		}
+	})();
 
-			var that = this;
-			var regex = new RegExp(this.escape_regex(openTag) + "%([\\w-]+)(\\s*)(.*?(?=" + this.escape_regex(closeTag) + "))" + this.escape_regex(closeTag));
-			return template.replace(regex, function(match, pragma, space, suffix) {
-				var options = undefined;
-				
-				if (suffix.length>0) {
-					var optionPairs = suffix.split(',');
-					var scratch;
-					
-					options = {};
-					for (var i=0, n=optionPairs.length; i<n; ++i) {
-						scratch = optionPairs[i].split('=');
-						if (scratch.length !== 2) {
-							throw new ParserException('Malformed pragma options');
-						}
-						options[scratch[0]] = scratch[1];
-					}
-				}
-				
-				if (that.is_function(that.pragmaDirectives[pragma])) {
-					that.pragmaDirectives[pragma].call(that, options);
-				} else {
-					throw new ParserException("This implementation of mustache doesn't understand the '" + pragma + "' pragma");
-				}
-
-				return ""; // blank out all pragmas
-			});
-		},
-			
-		parse: function(parserContext) {
-			var state = 'text';
-			
-			for (; parserContext.index<parserContext.length; ++parserContext.index) {
-				parserContext.token = parserContext.tokens[parserContext.index];
-				
-				if (parserContext.token === '') continue;
-				
-				state = this.stateMachine[state].call(this, parserContext);
-			}
-			
-			// make sure the parser finished at an appropriate terminal state
-			if (state!=='text') {
-				this.stateMachine['endOfDoc'].call(this, parserContext);
-			} else {
-				this.commandSet.text.call(this);
-			}
-		},
-		
-		escape_regex: function(text) {
-			// thank you Simon Willison
-			if (!this._escapeCompiledRegex) {
-				var specials = [
-					'/', '.', '*', '+', '?', '|',
-					'(', ')', '[', ']', '{', '}', '\\'
-				];
-				this._escapeCompiledRegex = new RegExp('(\\' + specials.join('|\\') + ')', 'g');
-			}
-			
-			return text.replace(this._escapeCompiledRegex, '\\$1');
-		},
+	/* BEGIN Helpers */
+	function noop() {}
 	
-		isWhitespace: function(token) {
-			return token.match(/^\s+$/)!==null;
-		},
+	var escapeCompiledRegex;
+	function escape_regex(text) {
+		// thank you Simon Willison
+		if (!escapeCompiledRegex) {
+			var specials = [
+				'/', '.', '*', '+', '?', '|',
+				'(', ')', '[', ']', '{', '}', '\\'
+			];
+			escapeCompiledRegex = new RegExp('(\\' + specials.join('|\\') + ')', 'g');
+		}
 		
-		stateMachine: {
-			text: function(parserContext) {
-				switch (parserContext.token) {
-					case parserContext.openTag:
-						this.commandSet.text.call(this);
-						
-						return 'openMustache';
-					default:
-						this.send_func(parserContext.token);
-						
-						return 'text';
-				}
-			},
-			openMustache: function(parserContext) {
-				switch (parserContext.token) {
-					case '{':
-						parserContext.stack.push({tagType:'unescapedVariable', subtype: 'tripleMustache'});
-						return 'keyName';
-					case '&':
-						parserContext.stack.push({tagType:'unescapedVariable'});
-						return 'keyName';
-					case '#':
-						parserContext.stack.push({tagType:'section'});
-						return 'keyName';
-					case '^':
-						parserContext.stack.push({tagType:'invertedSection'});
-						return 'keyName';
-					case '>':
-						parserContext.stack.push({tagType:'partial'});
-					
-						return 'simpleKeyName';
-					case '=':
-						parserContext.stack.push({tagType: 'setDelimiter'});
-						
-						return 'setDelimiterStart';
-					case '!':
-						return 'discard';
-					case '%':
-						throw new ParserException('Pragmas are only supported as a preprocessing directive.');
-					case '/': // close mustache
-						throw new ParserException('Unexpected closing tag.');
-					case '}': // close triple mustache
-						throw new ParserException('Unexpected token encountered.');
-					default:					
-						parserContext.stack.push({tagType:'variable'});
+		return text.replace(escapeCompiledRegex, '\\$1');
+	}
+	
+	function is_newline(token) {
+		return token.match(/\r?\n/);
+	}
+	
+	function is_function(a) {
+		return a && typeof a === 'function';
+	}
+	
+	function is_object(a) {
+		return a && typeof a === 'object';
+	}
 
-						return this.stateMachine.keyName.call(this, parserContext);
-				}
-			},
-			closeMustache: function(parserContext) {
-				if (this.isWhitespace(parserContext.token)) {
-					return 'closeMustache';
-				} else if (parserContext.token===parserContext.closeTag) {
-					return this.dispatchCommand(parserContext);
-				}
-			},
-			expectClosingMustache: function(parserContext) {
-				if (parserContext.closeTag==='}}' && 
-					parserContext.token==='}}') {
-					return 'expectClosingParenthesis';
-				} else if (parserContext.token==='}') {
-					return 'closeMustache';
-				} else {
-					throw new ParserException('Unexpected token encountered.');
-				}
-			},
-			expectClosingParenthesis: function(parserContext) {
-				if (parserContext.token==='}') {
-					return this.dispatchCommand(parserContext);
-				} else {
-					throw new ParserException('Unexpected token encountered.');
-				}
-			},
-			keyName: function(parserContext) {
-				var result = this.stateMachine.simpleKeyName.call(this, parserContext);
-				
-				if (result==='closeMustache') {
-					var tagKey = parserContext.stack[parserContext.stack.length-1],
-						tag = parserContext.stack[parserContext.stack.length-2];
-					
-					if (tag.tagType==='unescapedVariable' && tag.subtype==='tripleMustache') {
-						parserContext.stack[parserContext.stack.length-2] = {tagType:'unescapedVariable'};
-						
-						return 'expectClosingMustache';
-					} else {
-						return 'closeMustache';
-					}
-				} else if (result==='simpleKeyName') {
-					return 'keyName';
-				} else {
-					throw new ParserException('Unexpected branch in tag name: ' + result);
-				}
-			},
-			simpleKeyName: function(parserContext) {
-				if (this.isWhitespace(parserContext.token)) {
-					return 'simpleKeyName';
-				} else {
-					parserContext.stack.push(parserContext.token);
-					
-					return 'closeMustache';
-				}
-			},
-			
-			setDelimiterStart: function(parserContext) {
-				if (this.isWhitespace(parserContext.token) ||
-					parserContext.token==='=') {
-					throw new ParserException('Syntax error in Set Delimiter tag');
-				} else {
-					parserContext.stack.push(parserContext.token);
-					return 'setDelimiterStartOrWhitespace';
-				}				
-			},
-			setDelimiterStartOrWhitespace: function(parserContext) {
-				if (this.isWhitespace(parserContext.token)) {
-					return 'setDelimiterEnd';
-				} else if (parserContext.token==='='){
-					throw new ParserException('Syntax error in Set Delimiter tag');
-				} else {
-					parserContext.stack[parserContext.stack.length-1] += parserContext.token;
-					
-					return 'setDelimiterStartOrWhitespace';
-				}
-			},
-			setDelimiterEnd: function(parserContext) {
-				if (this.isWhitespace(parserContext.token)) {
-					return 'setDelimiterEnd';
-				} else if (parserContext.token==='=') {
-					throw new ParserException('Syntax error in Set Delimiter tag');
-				} else {
-					parserContext.stack.push(parserContext.token);
-				
-					return 'setDelimiterEndOrEqualSign';
-				}
-			},
-			setDelimiterEndOrEqualSign: function(parserContext) {
-				if (parserContext.token==='=') {
-					return 'setDelimiterExpectClosingTag';
-				} else if (this.isWhitespace(parserContext.token)) {
-					throw new ParserException('Syntax error in Set Delimiter tag');
-				} else {
-					parserContext.stack[parserContext.stack.length-1] += parserContext.token;
-					
-					return 'setDelimiterEndOrEqualSign';
-				}
-			},
-			setDelimiterExpectClosingTag: function(parserContext) {
-				if (parserContext.token===parserContext.closeTag) {
-					var newCloseTag = parserContext.stack.pop();
-					var newOpenTag = parserContext.stack.pop();
-					var command = parserContext.stack.pop();
-					
-					if (command.tagType!=='setDelimiter') {
-						throw new ParserException('Syntax error in Set Delimiter tag');
-					} else {
-						var tokens = this.tokenize(
-							parserContext.tokens.slice(parserContext.index+1).join(''),
-							newOpenTag,
-							newCloseTag);
-							
-						var newParserContext = this.createParserContext(tokens,
-							parserContext.partials,
-							newOpenTag,
-							newCloseTag);
+	function is_array(a) {
+		return Object.prototype.toString.call(a) === '[object Array]';
+	}
 
-						parserContext.tokens = newParserContext.tokens;
-						parserContext.index = -1;
-						parserContext.length = newParserContext.length;
-						parserContext.openTag = newParserContext.openTag;
-						parserContext.closeTag = newParserContext.closeTag;
-						
-						return 'text';
-					}
-				} else {
-					throw new ParserException('Syntax error in Set Delimiter tag');
-				}
-			},
-			
-			endSectionScan: function(parserContext) {
-				switch (parserContext.token) {
-					case parserContext.openTag:
-						return 'expectSectionOrEndSection';
-					default:
-						parserContext.stack[parserContext.stack.length-1].content.push(parserContext.token);
-						return 'endSectionScan';
-				}
-			},
-			expectSectionOrEndSection: function(parserContext) {
-				switch (parserContext.token) {
-					case '#':
-					case '^':
-						parserContext.stack[parserContext.stack.length-1].depth++;
-						parserContext.stack[parserContext.stack.length-1].content.push(parserContext.openTag, parserContext.token);
-						return 'endSectionScan';
-					case '/':
-						parserContext.stack.push({tagType:'endSection'});
-						return 'simpleKeyName';
-					default:
-						parserContext.stack[parserContext.stack.length-1].content.push(parserContext.openTag, parserContext.token);
-						return 'endSectionScan';
-				}
-			},
-			
-			discard: function(parserContext) {
-				if (parserContext.token==='!') {
-					return 'closeComment';
-				} else {
-					return 'discard';
-				}
-			},
-			
-			closeComment: function(parserContext) {
-				if (parserContext.token!==parserContext.closeTag) {
-					return 'discard';
-				} else {
-					return 'text';
-				}
-			},
-			
-			endOfDoc: function(parserContext) {
-				// eventually we may want to give better error messages
-				throw new ParserException('Unexpected end of document.');
-			}
-		},
+	var MustacheError = function(message, metrics) {
+		var str = '';
 
-		dispatchCommand: function(parserContext) {			
-			var key = parserContext.stack.pop();
-			var command = parserContext.stack.pop();
-			
-			switch (command.tagType) {
-				case 'section':
-				case 'invertedSection':
-					parserContext.stack.push({sectionType:command.tagType, key:key, content:[], depth:1});
-					return 'endSectionScan';
-				case 'variable':
-					this.commandSet.variable.call(this, key);
-					return 'text';
-				case 'unescapedVariable':
-					this.commandSet.unescaped_variable.call(this, key);
-					return 'text';
-				case 'partial':
-					this.commandSet.partial.call(this, key,
-						parserContext.partials,
-						parserContext.openTag,
-						parserContext.closeTag);
-						
-					return 'text';
-				case 'endSection':
-					var section = parserContext.stack[parserContext.stack.length-1];
-					if (--section.depth === 0) {
-						if (section.key === key) {
-							parserContext.stack.pop();
-							this.commandSet.section.call(this, section.sectionType,
-								section.content,
-								key,
-								parserContext.partials,
-								parserContext.openTag,
-								parserContext.closeTag);
-								
-							return 'text';
-						} else {
-							throw new ParserException('Unbalanced open/close section tags');
-						}
-					} else {
-						section.content.push('{{', '/', key, '}}');
-						
-						return 'endSectionScan';
-					}
-				default:
-					throw new ParserException('Unknown dispatch command: ' + command.tagType);
-			}
-		},
+		this.prototype = Error.prototype;
+		this.name = 'MustacheError';
 		
-		pragmaDirectives: {
-			'IMPLICIT-ITERATOR': function(options) {
-				this.pragmas['IMPLICIT-ITERATOR'] = {};
-				
-				if (options) {
-					this.pragmas['IMPLICIT-ITERATOR'].iterator = options['iterator'];
-				}
+		if (metrics) {
+			str = '(' + metrics.line + ',' + metrics.character + '): ';
+			if (metrics.partial) {
+				str = '[' + metrics.partial + ']' + str;
 			}
-		},
+		}
 		
-		/*
-		find `name` in current `context`. That is find me a value
-		from the view object
-		*/
-		find: function(name, context) {
-			// Checks whether a value is truthy or false or 0
-			function is_kinda_truthy(bool) {
-				return bool === false || bool === 0 || bool;
-			}
+		this.message = str + message;		
+		if (metrics) {
+			this.line = metrics.line;
+			this.character = metrics.character;
+			this.partial = metrics.partial;
+		}
+	};
+	
+	/* END Helpers */
 
-			var value;
-			if (is_kinda_truthy(context[name])) {
-				value = context[name];
-			}
-
-			if (this.is_function(value)) {
-				return value.apply(context);
-			}
-			
-			return value;
-		},
+	/* BEGIN Compiler */
 		
-		find_in_stack: function(name, contextStack) {
-			var value;
-			
-			value = this.find(name, contextStack[contextStack.length-1]);
-			if (value!==undefined) { return value; }
-			
-			if (contextStack.length>1) {
-				value = this.find(name, contextStack[0]);
-				if (value!==undefined) { return value; }
+	function compile(state, noReturn) {
+		var n, c, token;
+		
+		for (n = state.tokens.length;state.cursor<n && !state.terminated;++state.cursor) {
+			token = state.tokens[state.cursor];
+			if (token==='' || token===undefined) {
+				continue;
 			}
 			
-			return undefined;
-		},
-
-		is_function: function(a) {
-			return a && typeof a === 'function';
-		},
-		
-		is_object: function(a) {
-			return a && typeof a === 'object';
-		},
-
-		is_array: function(a) {
-			return Object.prototype.toString.call(a) === '[object Array]';
-		},	
-		
-		compiler: {
-			text: function() {
-				var outputText = this.cached_output.join('');
-				this.cached_output = [];
-				
-				this.user_send_func(function(contextStack, send_func) {
-					send_func(outputText);
-				});
-			},
-			variable: function(key) {
-				function escapeHTML(str) {
-					return ('' + str).replace(/&/g,'&amp;')
-						.replace(/</g,'&lt;')
-						.replace(/>/g,'&gt;');
-				}
-
-				var that = this;
-				this.user_send_func(function(contextStack, send_func) {
-					var result = that.find_in_stack(key, contextStack);
-					if (result!==undefined) {
-						send_func(escapeHTML(result));
-					}
-				});
-			},
-			unescaped_variable: function(key) {
-				var that = this;
-				this.user_send_func(function(contextStack, send_func) {
-					var result = that.find_in_stack(key, contextStack);
-					if (result!==undefined) {
-						send_func(result);
-					}
-				});
-			},
-			partial: function(key, partials, openTag, closeTag) {
-				if (!partials || partials[key] === undefined) {
-					throw new ParserException('Unknown partial \'' + key + '\'');
-				}
-				
-				if (!this.is_function(partials[key])) {
-					var old_user_send_func = this.user_send_func;
-					var commands = [];
-					this.user_send_func = function(command) { commands.push(command); };
-					
-					var tokens = this.tokenize(partials[key], openTag, closeTag);
-					partials[key] = function() {}; // blank out the paritals so that infinite recursion doesn't happen
-					this.parse(this.createParserContext(tokens, partials, openTag, closeTag));
-				
-					this.user_send_func = old_user_send_func;
-					
-					var that = this;
-					partials[key] = function(contextStack, send_func) {
-						var res = that.find_in_stack(key, contextStack),
-							isObj = that.is_object(res);
-						
-						if (isObj) {
-							contextStack.push(res);
-						}
-					
-						for (var i=0,n=commands.length; i<n; ++i) {
-							commands[i](contextStack, send_func);
-						}
-						
-						if (isObj) {
-							contextStack.pop();
-						}
-					};
-				}
-				
-				this.user_send_func(function(contextStack, send_func) { partials[key](contextStack, send_func); });
-			},
-			section: function(sectionType, fragmentTokens, key, partials, openTag, closeTag) {
-				// by @langalex, support for arrays of strings
-				var that = this;
-				function create_context(_context) {
-					if(that.is_object(_context)) {
-						return _context;
-					} else {
-						var iterator = '.';
-						
-						if(that.pragmas["IMPLICIT-ITERATOR"] &&
-							that.pragmas["IMPLICIT-ITERATOR"].iterator) {
-							iterator = that.pragmas["IMPLICIT-ITERATOR"].iterator;
-						}
-						var ctx = {};
-						ctx[iterator] = _context;
-						return ctx;
-					}
-				}
-				
-				var old_user_send_func = this.user_send_func;
-				var commands = [];
-				
-				this.user_send_func = function(command) { commands.push(command); };
-				
-				this.parse(this.createParserContext(fragmentTokens, partials, openTag, closeTag));
-				
-				this.user_send_func = old_user_send_func;
-				
-				var section_command = function(contextStack, send_func) {
-					for (var i=0, n=commands.length; i<n; ++i) {
-						commands[i](contextStack, send_func);
-					}
-				};
-				
-				if (sectionType==='invertedSection') {
-					this.user_send_func(function(contextStack, send_func) {
-						var value = that.find_in_stack(key, contextStack);
-						
-						if (!value || that.is_array(value) && value.length === 0) {
-							// false or empty list, render it
-							section_command(contextStack, send_func);
-						}
-					});
-				} else if (sectionType==='section') {
-					this.user_send_func(function(contextStack, send_func) {
-						var value = that.find_in_stack(key, contextStack);
-						
-						if (that.is_array(value)) { // Enumerable, Let's loop!
-							for (var i=0, n=value.length; i<n; ++i) {
-								contextStack.push(create_context(value[i]));
-								section_command(contextStack, send_func);
-								contextStack.pop();
-							}
-						} else if (that.is_object(value)) { // Object, Use it as subcontext!
-							contextStack.push(value);
-							section_command(contextStack, send_func);
-							contextStack.pop();
-						} else if (that.is_function(value)) {
-							// higher order section
-							// note that HOS triggers a compilation on the resultFragment.
-							// this is slow (in relation to a fully compiled template) 
-							// since it invokes a call to the parser
-							var result = value.call(contextStack[contextStack.length-1], fragmentTokens.join(''), function(resultFragment) {
-								var cO = [];
-								var s = function(command) { cO.push(command); };
-			
-								var hos_renderer = new Renderer(s);
-
-								resultFragment = hos_renderer.parse_pragmas(resultFragment, openTag, closeTag);
-								var tokens = hos_renderer.tokenize(resultFragment, openTag, closeTag);
-								hos_renderer.parse(hos_renderer.createParserContext(tokens, partials, openTag, closeTag));
-
-								var o = [];
-								var sT = function(output) { o.push(output); };
-				
-								for (var i=0,n=cO.length; i<n; ++i) {
-									commands[i](contextStack, sT);
-								}
-				
-								return o.join('');
-							});
-							
-							send_func(result);
-						} else if (value) {
-							section_command(contextStack, send_func);
-						}
-					});
+			if (token.indexOf(state.openTag)===0) {
+				c = token.charAt(state.openTag.length);
+				if (state.parser[c]) {
+					state.parser[c](state, token, c);
 				} else {
-					throw new ParserException('Unknown section type ' + sectionType);
+					state.parser.def(state, token);
+				}
+			} else {
+				state.parser.text(state, token);
+			}
+			
+			if (is_newline(token)) {
+				state.metrics.character = 1;
+				state.metrics.line++;
+			} else {
+				state.metrics.character+=token.length;
+			}
+		}
+		
+		if (state.parser === scan_section_parser && !state.terminated) {
+			throw new MustacheError('Closing section tag "' + state.section.variable + '" expected.', state.metrics);
+		}
+		
+		if (!noReturn) {
+			var codeList = state.code;
+			if (codeList.length === 0) {
+				return noop;
+			} else if (codeList.length === 1) {
+				return codeList[0];
+			} else {
+				return function(context, send_func) {
+					for (var i=0,n=codeList.length;i<n;++i) {
+						codeList[i](context, send_func);
+					}
 				}
 			}
 		}
 	}
 	
+	var default_tokenizer = /(\r?\n)|({{![\s\S]*?!}})|({{[#\^\/&>]?\s*[^!{=]\S*?\s*}})|({{{\s*\S*?\s*}}})|({{=\S*?\s*\S*?=}})/;
+	function create_compiler_state(template, partials, openTag, closeTag) {
+		openTag = openTag || '{{';
+		closeTag = closeTag || '}}';
+
+		var tokenizier;		
+		if (openTag === '{{' && closeTag === '}}') {
+			tokenizer = default_tokenizer;
+		} else {
+			var rOTag = escape_regex(openTag),
+				rETag = escape_regex(closeTag);
+
+			var parts = [
+				'(\\r?\\n)' // new lines
+				, '(' + rOTag + '![\\s\\S]*?!' + rETag + ')' // comments
+				, '(' + rOTag + '[#\^\/&>]?\\s*[^!{=]\\S*?\\s*' + rETag + ')' // all other tags
+				, '(' + rOTag + '{\\s*\\S*?\\s*}' + rETag + ')' // { unescape token
+				, '(' + rOTag + '=\\S*?\\s*\\S*?=' + rETag + ')' // set delimiter change
+			];
+			tokenizer = new RegExp(parts.join('|'));
+		}
+
+		var code = [], state =  {
+			metrics: {
+				partial: null
+				, line: 1
+				, character: 1
+			}
+			, template: template || ''
+			, partials: partials || {}
+			, openTag: openTag
+			, closeTag: closeTag
+			, parser: default_parser
+			, pragmas: {}
+			, code: code
+			, send_code_func: function(f) {
+				code.push(f);
+			}
+		};
+		
+		pragmas(state); // use pragmas to control parsing behaviour
+		
+		// tokenize and initialize a cursor
+		state.tokens = splitFunc.call(state.template, tokenizer);
+		state.cursor = 0;
+		
+		return state;
+	}
+	
+	var pragma_directives = {
+		'IMPLICIT-ITERATOR': function(state, options) {
+			state.pragmas['IMPLICIT-ITERATOR'] = {iterator: ((options || {iterator:undefined}).iterator) || '.'};
+		}
+	};
+		
+	function pragmas(state) {
+		/* includes tag */
+		function includes(needle, haystack) {
+			return haystack.indexOf('{{' + needle) !== -1;
+		}
+		
+		// no pragmas, easy escape
+		if(!includes("%", state.template)) {
+			return state.template;
+		}
+
+		state.template = state.template.replace(/{{%([\w-]+)(\s*)(.*?(?=}}))}}/g, function(match, pragma, space, suffix) {
+			var options = undefined,
+				optionPairs, scratch,
+				i, n;
+			
+			if (suffix.length>0) {
+				optionPairs = suffix.split(',');
+				
+				options = {};
+				for (i=0, n=optionPairs.length; i<n; ++i) {
+					scratch = optionPairs[i].split('=');
+					if (scratch.length !== 2) {
+						throw new MustacheError('Malformed pragma option "' + optionPairs[i] + '".');
+					}
+					options[scratch[0]] = scratch[1];
+				}
+			}
+			
+			if (is_function(pragma_directives[pragma])) {
+				pragma_directives[pragma](state, options);
+			} else {
+				throw new MustacheError('This implementation of mustache does not implement the "' + pragma + '" pragma.', undefined);
+			}
+
+			return ''; // blank out all pragmas
+		});
+	}
+	
+	/* END Compiler */
+	
+	/* BEGIN Run Time Helpers */
+	
+	/*
+	find `name` in current `context`. That is find me a value
+	from the view object
+	*/
+	function find(name, context) {
+		// Checks whether a value is truthy or false or 0
+		function is_kinda_truthy(bool) {
+			return bool === false || bool === 0 || bool;
+		}
+		
+		var value;
+		if (is_kinda_truthy(context[name])) {
+			value = context[name];
+		}
+
+		if (is_function(value)) {
+			return value.apply(context);
+		}
+		
+		return value;
+	}
+	
+	function find_in_stack(name, context_stack) {
+		var value;
+				
+		value = find(name, context_stack[context_stack.length-1]);
+		if (value!==undefined) { return value; }
+		
+		if (context_stack.length>1) {
+			value = find(name, context_stack[0]);
+			if (value!==undefined) { return value; }
+		}
+		
+		return undefined;
+	}
+	
+	/* END Run Time Helpers */
+
+	function text(state, token) {
+		state.send_code_func(function(context, send_func) { send_func(token); });	
+	}
+	
+	function interpolate(state, token, mark) {
+		function escapeHTML(str) {
+			return str.replace(/&/g,'&amp;')
+				.replace(/</g,'&lt;')
+				.replace(/>/g,'&gt;');
+		}
+		
+		var escape, prefix, postfix;
+		if (mark==='{') {
+			escape = prefix = postfix = true;
+		} else if (mark==='&') {
+			escape = prefix = true;
+		}
+		
+		var variable = get_variable_name(state, token, prefix, postfix);
+		state.send_code_func((function(variable, escape) { return function(context, send_func) {
+			var value = find_in_stack(variable, context);
+			if (value!==undefined) {
+				if (!escape) {
+					value = escapeHTML('' + value);
+				}
+				
+				send_func('' + value);
+			}
+		};})(variable, escape));
+	}
+	
+	function partial(state, token) {
+		var variable = get_variable_name(state, token, true),
+			template, program;
+		
+		if (!state.partials[variable]) {
+			throw new MustacheError('Unknown partial "' + variable + '".', state.metrics);
+		}
+		
+		if (!is_function(state.partials[variable])) {
+			// if the partial has not been compiled yet, do so now
+			
+			template = state.partials[variable]; // remember what the partial was
+			state.partials[variable] = noop; // avoid infinite recursion
+			
+			var new_state = create_compiler_state(
+				template
+				, state.partials				
+			);
+			new_state.metrics.partial = variable;
+			// TODO: Determine if partials should inherit pragma state from parent
+			program = compile(new_state);
+			
+			state.partials[variable] = function(context, send_func) {
+				var value = find_in_stack(variable, context);
+
+				if (value) {
+					// TODO: According to mustache-spec, partials do not act as implicit sections
+					// this behaviour was carried over from janl's mustache and should either
+					// be discarded or replaced with a pragma
+					context.push(value);
+				}
+
+				program(context, send_func);
+				
+				if (value) {
+					// TODO: See above
+					context.pop();
+				}
+			};
+		}
+		
+		state.send_code_func(function(context, send_func) { state.partials[variable](context, send_func); });
+	}
+	
+	function section(state) {
+		// by @langalex, support for arrays of strings
+		function create_context(_context) {
+			if(is_object(_context)) {
+				return _context;
+			} else {
+				var ctx = {}, 
+					iterator = (state.pragmas['IMPLICIT-ITERATOR'] || {iterator: '.'}).iterator;
+				
+				ctx[iterator] = _context;
+				
+				return ctx;
+			}
+		}
+		
+		var s = state.section, template = s.template_buffer.join(''),
+			program, 
+			new_state = create_compiler_state(template, state.partials, state.openTag, state.closeTag);
+		
+		new_state.metrics = s.metrics;
+		program = compile(new_state);
+		
+		if (s.inverted) {
+			state.send_code_func((function(program, variable){ return function(context, send_func) {
+				var value = find_in_stack(variable, context);
+				if (!value || is_array(value) && value.length === 0) { // false or empty list, render it
+					program(context, send_func);
+				}
+			};})(program, s.variable));
+		} else {
+			state.send_code_func((function(program, variable, template, partials){ return function(context, send_func) {
+				var value = find_in_stack(variable, context);			
+				if (is_array(value)) { // Enumerable, Let's loop!
+					for (var i=0, n=value.length; i<n; ++i) {
+						context.push(create_context(value[i]));
+						program(context, send_func);
+						context.pop();
+					}
+				} else if (is_object(value)) { // Object, Use it as subcontext!
+					context.push(value);
+					program(context, send_func);
+					context.pop();
+				} else if (is_function(value)) { // higher order section
+					// note that HOS triggers a compilation on the hosFragment.
+					// this is slow (in relation to a fully compiled template) 
+					// since it invokes a call to the parser
+					send_func(value.call(context[context.length-1], template, function(hosFragment) {
+						var o = [],
+							user_send_func = function(str) { o.push(str); };
+					
+						var new_state = create_compiler_state(hosFragment, partials);
+						new_state.metrics.partial = 'HOS@@anon';
+						compile(new_state)(context, user_send_func);
+						
+						return o.join('');
+					}));
+				} else if (value) { // truthy
+					program(context, send_func);
+				}
+			};})(program, s.variable, template, state.partials));
+		}
+	}
+
+	/* BEGIN Parser */
+	
+	var default_parser = {
+		'!': noop,
+		'#': begin_section,
+		'^': begin_section,
+		'/': function(state, token) { throw new MustacheError('Unbalanced End Section tag "' + token + '".', state.metrics); },
+		'&': interpolate,
+		'{': interpolate,
+		'>': partial,
+		'=': change_delimiter,
+		def: interpolate,
+		text: text
+	};
+	
+	var scan_section_parser = {
+		'!': noop,
+		'#': begin_section,
+		'^': begin_section,
+		'/': end_section,
+		'&': buffer_section,
+		'{': buffer_section,
+		'>': buffer_section,
+		'=': change_delimiter,		
+		def: buffer_section,
+		text: buffer_section
+	};
+		
+	function get_variable_name(state, token, prefix, postfix) {
+		var fragment = token.substring(
+			state.openTag.length + (prefix ? 1 : 0)
+			, token.length - state.closeTag.length - (postfix ? 1 : 0)
+		);
+		
+		if (String.prototype.trim) {
+			fragment = fragment.trim();
+		} else {
+			fragment = fragment.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+		}
+		
+		if (fragment.indexOf(' ')!==-1) {
+			throw new MustacheError('Malformed variable name "' + fragment + '".', state.metrics);
+		}
+		
+		return fragment;
+	}
+	
+	function change_delimiter(state, token) {
+		var matches = token.match(new RegExp(escape_regex(state.openTag) + '=(\\S*?)\\s*(\\S*?)=' + escape_regex(state.closeTag)));
+
+		if ((matches || []).length!==3) {
+			throw new MustacheError('Malformed change delimiter token "' + token + '".', state.metrics);
+		}
+		
+		var new_state = create_compiler_state(
+			state.tokens.slice(state.cursor+1).join('')
+			, state.partials
+			, matches[1]
+			, matches[2]);
+		new_state.code = state.code;
+		new_state.send_code_func = state.send_code_func;
+		new_state.parser = state.parser;
+		new_state.metrics.line = state.metrics.line;
+		new_state.metrics.character = state.metrics.character + token.length;
+		new_state.metrics.partial = state.metrics.partial;
+		new_state.section = state.section;
+		new_state.pragmas = state.pragmas;
+		if (new_state.section) {
+			new_state.section.template_buffer.push(token);
+		}
+		
+		state.terminated = true; // finish off this level
+		
+		compile(new_state, true);
+	}
+	
+	function begin_section(state, token, mark) {
+		var inverted = mark === '^', 
+			variable = get_variable_name(state, token, true);
+		
+		if (state.parser===default_parser) {
+			state.parser = scan_section_parser;
+			state.section = {
+				variable: variable
+				, template_buffer: []
+				, inverted: inverted
+				, child_sections: []
+				, metrics: {
+					partial: state.metrics.partial
+					, line: state.metrics.line
+					, character: state.metrics.character + token.length
+				}
+			};
+		} else {
+			state.section.child_sections.push(variable);
+			state.section.template_buffer.push(token);
+		}
+	}
+	
+	function buffer_section(state, token) {
+		state.section.template_buffer.push(token);
+	}
+	
+	function end_section(state, token) {
+		var variable = get_variable_name(state, token, true);
+		
+		if (state.section.child_sections.length > 0) {
+			var child_section = state.section.child_sections[state.section.child_sections.length-1];
+			if (child_section === variable) {
+				state.section.child_sections.pop();			
+				state.section.template_buffer.push(token);
+			} else {
+				throw new MustacheError('Unexpected section end tag "' + variable + '", expected "' + child_section + '".', state.metrics);
+			}
+		} else if (state.section.variable===variable) {
+			section(state);
+			delete state.section;
+			state.parser = default_parser;
+		} else {
+			throw new MustacheError('Unexpected section end tag "' + variable + '", expected "' + state.section.variable + '".', state.metrics);
+		}
+	}
+		
+	/* END Parser */
+	
 	return({
 		name: "mustache.js",
-		version: "0.4.0-vcs",
+		version: "0.5.0-vcs",
 
 		/*
 		Turns a template and view into HTML
 		*/
 		to_html: function(template, view, partials, send_func) {
-			return (Mustache.compile(template, partials))(view, send_func);
+			var program = Mustache.compile(template, partials),
+				result = program(view, send_func);
+			
+			if (!send_func) {
+				return result;
+			}
 		},
 		
-		/*
-		Compiles a template into an equivalent JS function for faster
-		repeated execution. 
-		*/
 		compile: function(template, partials) {
-			if (!template) { return function() { return '' }; }
-			
 			var p = {};
 			if (partials) {
 				for (var key in partials) {
@@ -780,26 +634,22 @@ var Mustache = function() {
 					}
 				}
 			}
-			
-			var commands = [];
-			var s = function(command) { commands.push(command); };
-			
-			(new Renderer(s)).render(template, p);
-
+		
+			var program = compile(create_compiler_state(template, p));
 			return function(view, send_func) {
-				view = [view || {}];
-				
-				var o = send_func ? undefined : [];
-				var s = send_func || function(output) { o.push(output); };	
-			
-				for (var i=0,n=commands.length; i<n; ++i) {
-					commands[i](view, s);
-				}
+				var o = [],
+					user_send_func = send_func || function(str) {
+						o.push(str);
+					};
+					
+				program([view || {}], user_send_func);
 				
 				if (!send_func) {
 					return o.join('');
 				}
-			};
-		}
+			}
+		},
+		
+		Error: MustacheError
 	});
-}();
+})();
