@@ -1,6 +1,6 @@
 # mustache.js Changes
 
-## 0.4.0-vcs
+## 0.5.0-vcs
 
 * Added Compiled Template support
 * Correct Set Delimiter implementation
