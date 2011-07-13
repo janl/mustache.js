@@ -80,8 +80,10 @@ var Mustache = function() {
       }
 
       var that = this;
-      var regex = new RegExp(this.otag + "%([\\w-]+) ?([\\w]+=[\\w]+)?" +
-            this.ctag);
+      var regex = this.getCachedRegex("render_pragmas", function(otag, ctag) {
+        return new RegExp(otag + "%([\\w-]+) ?([\\w]+=[\\w]+)?" + ctag);
+      });
+
       return template.replace(regex, function(match, pragma, options) {
         if(!that.pragmas_implemented[pragma]) {
           throw({message:
@@ -123,23 +125,26 @@ var Mustache = function() {
 
       var that = this;
 
-      // This regex matches _the first_ section ({{#foo}}{{/foo}}), and captures the remainder
-      var regex = new RegExp(
-        "^([\\s\\S]*?)" +         // all the crap at the beginning that is not {{*}} ($1)
+      var regex = this.getCachedRegex("render_section", function(otag, ctag) {
+        // This regex matches _the first_ section ({{#foo}}{{/foo}}), and captures the remainder
+        return new RegExp(
+          "^([\\s\\S]*?)" +         // all the crap at the beginning that is not {{*}} ($1)
 
-        this.otag +               // {{
-        "(\\^|\\#)\\s*(.+)\\s*" + //  #foo (# == $2, foo == $3)
-        this.ctag +               // }}
+          otag +                    // {{
+          "(\\^|\\#)\\s*(.+)\\s*" + //  #foo (# == $2, foo == $3)
+          ctag +                    // }}
 
-        "\n*([\\s\\S]*?)" +       // between the tag ($2). leading newlines are dropped
+          "\n*([\\s\\S]*?)" +       // between the tag ($2). leading newlines are dropped
 
-        this.otag +               // {{
-        "\\/\\s*\\3\\s*" +        //  /foo (backreference to the opening tag).
-        this.ctag +               // }}
+          otag +                    // {{
+          "\\/\\s*\\3\\s*" +        //  /foo (backreference to the opening tag).
+          ctag +                    // }}
 
-        "\\s*([\\s\\S]*)$",       // everything else in the string ($4). leading whitespace is dropped.
+          "\\s*([\\s\\S]*)$",       // everything else in the string ($4). leading whitespace is dropped.
 
-      "g");
+        "g");
+      });
+
 
       // for each {{#foo}}{{/foo}} section do...
       return template.replace(regex, function(match, before, type, name, content, after) {
@@ -192,9 +197,12 @@ var Mustache = function() {
       // tit for tat
       var that = this;
 
+
+
       var new_regex = function() {
-        return new RegExp(that.otag + "(=|!|>|\\{|%)?([^\\/#\\^]+?)\\1?" +
-          that.ctag + "+", "g");
+        return that.getCachedRegex("render_tags", function(otag, ctag) {
+          return new RegExp(otag + "(=|!|>|\\{|%)?([^\\/#\\^]+?)\\1?" + ctag + "+", "g");
+        });
       };
 
       var regex = new_regex();
@@ -344,6 +352,29 @@ var Mustache = function() {
         }
         return r;
       }
+    },
+
+    getCachedRegex: function(name, generator) {
+      if (!this._regexCache) {
+        this._regexCache = {};
+      }
+
+      var byOtag = this._regexCache[this.otag];
+      if (!byOtag) {
+        byOtag = this._regexCache[this.otag] = {};
+      }
+
+      var byCtag = byOtag[this.ctag];
+      if (!byCtag) {
+        byCtag = byOtag[this.ctag] = {};
+      }
+
+      var regex = byCtag[name];
+      if (!regex) {
+        regex = byCtag[name] = generator(this.ctag, this.otag);
+      }
+
+      return regex;
     }
   };
 
