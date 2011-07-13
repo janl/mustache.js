@@ -5,6 +5,7 @@
 */
 
 var Mustache = function() {
+  var regexCache = {};
   var Renderer = function() {};
 
   Renderer.prototype = {
@@ -355,13 +356,9 @@ var Mustache = function() {
     },
 
     getCachedRegex: function(name, generator) {
-      if (!this._regexCache) {
-        this._regexCache = {};
-      }
-
-      var byOtag = this._regexCache[this.otag];
+      var byOtag = regexCache[this.otag];
       if (!byOtag) {
-        byOtag = this._regexCache[this.otag] = {};
+        byOtag = regexCache[this.otag] = {};
       }
 
       var byCtag = byOtag[this.ctag];
@@ -371,7 +368,7 @@ var Mustache = function() {
 
       var regex = byCtag[name];
       if (!regex) {
-        regex = byCtag[name] = generator(this.ctag, this.otag);
+        regex = byCtag[name] = generator(this.otag, this.ctag);
       }
 
       return regex;
