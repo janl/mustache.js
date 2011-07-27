@@ -104,7 +104,7 @@ var Mustache = function() {
 
       var that = this;
       // CSW - Added "+?" so it finds the tighest bound, not the widest
-      var regex = new RegExp(this.otag + "(\\^|\\#)\\s*(.+)\\s*" + this.ctag +
+      var regex = new RegExp(this.otag + "(\\^|\\#)\\s*(.+?)\\s*" + this.ctag +
               "\n*([\\s\\S]+?)" + this.otag + "\\/\\s*\\2\\s*" + this.ctag +
               "\\s*", "mg");
 
