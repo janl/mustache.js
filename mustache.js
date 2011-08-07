@@ -155,24 +155,53 @@ var Mustache = function() {
 
       var regex = new_regex();
       var tag_replace_callback = function(match, operator, name) {
-        switch(operator) {
-        case "!": // ignore comments
-          return "";
-        case "=": // set new delimiters, rebuild the replace regexp
-          that.set_delimiters(name);
-          regex = new_regex();
-          return "";
-        case ">": // render partial
-          return that.render_partial(name, context, partials);
-        case "{": // the triple mustache is unescaped
-          return that.find(name, context);
-        default: // escape the value
-          return that.escape(that.find(name, context));
+
+        var truncate = {
+            identifier: ':',
+            shouldI: false,
+            after: null
+        };
+
+        if (name.indexOf(truncate.identifier) !== -1) {
+            truncate.after = name.split(truncate.identifier)[1];
+            truncate.shouldI = true;
+
+            name = name.replace(truncate.identifier, '');
+            name = name.replace(truncate.after, '');
         }
+
+        var found = null;
+
+        switch(operator) {
+            case "!": // ignore comments
+                found = "";
+            break;
+            case "=": // set new delimiters, rebuild the replace regexp
+                that.set_delimiters(name);
+                regex = new_regex();
+                found = "";
+            break;
+            case ">": // render partial
+                found = that.render_partial(name, context, partials);
+            break;
+            case "{": // the triple mustache is unescaped
+                found = that.find(name, context);
+            default: // escape the value
+                found = that.escape(that.find(name, context));
+            break;
+        }
+
+        if (truncate.shouldI && found) {
+            found = found.substring(0, truncate.after) + ' ...';
+        }
+
+        return found;
       };
+
       var lines = template.split("\n");
       for(var i = 0; i < lines.length; i++) {
         lines[i] = lines[i].replace(regex, tag_replace_callback, this);
+
         if(!in_recursion) {
           this.send(lines[i]);
         }
