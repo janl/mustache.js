@@ -191,7 +191,7 @@ var Mustache = function() {
             break;
         }
 
-        if (truncate.shouldI && found) {
+        if (truncate.shouldI && found && found.length > truncate.after) {
             found = found.substring(0, truncate.after) + ' ...';
         }
 
