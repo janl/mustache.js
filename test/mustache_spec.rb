@@ -22,11 +22,17 @@ def load_test(dir, name, partial=false)
   end
 end
 
+JSC_PATH = "/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc"
+RHINO_JAR = "org.mozilla.javascript.tools.shell.Main"
+
+engines_run = 0
+
 describe "mustache" do
 
   shared_examples_for "Mustache rendering" do
 
     before(:all) do
+      engines_run += 1
       mustache = File.read(__DIR__ + "/../mustache.js")
       stubbed_gettext = <<-JS
         // Stubbed gettext translation method for {{_i}}{{/i}} tags in Mustache.
@@ -168,18 +174,57 @@ describe "mustache" do
   end
 
   context "running in JavaScriptCore (WebKit, Safari)" do
-    before(:each) do
-      @run_js = :run_js_jsc
+    if File.exists?(JSC_PATH)
+      before(:each) do
+        @run_js = :run_js_jsc
+      end
+
+      before(:all) do
+        puts "\nTesting mustache.js in JavaScriptCore:\n"
+      end
+
+      after(:all) do
+        puts "\nDone\n"
+      end
+
+      it_should_behave_like "Mustache rendering"
+    else
+      puts "\nSkipping tests in JavaScriptCore (jsc not found)\n"
     end
-    it_should_behave_like "Mustache rendering"
   end
 
   context "running in Rhino (Mozilla)" do
-    before(:each) do
-      @run_js = :run_js_rhino
+    if !`java #{RHINO_JAR} 'foo' 2>&1`.match(/ClassNotFoundException/)
+      before(:each) do
+        @run_js = :run_js_rhino
+      end
+
+      before(:all) do
+        puts "\nTesting mustache.js in Rhino:\n"
+      end
+
+      after(:all) do
+        puts "\nDone\n"
+      end
+
+      it_should_behave_like "Mustache rendering"
+    else
+      puts "\nSkipping tests in Rhino (JAR #{RHINO_JAR} was not found)\n"
+    end
+  end
+
+  context "suite" do
+    before(:all) do
+      puts "\nVerifying that we ran at the tests in at least one engine\n"
     end
 
-    it_should_behave_like "Mustache rendering"
+    after(:all) do
+      puts "\nDone\n"
+    end
+
+    it "should have run at least one time" do
+      engines_run.should > 0
+    end
   end
 
   def run_js(runner, js)
@@ -188,12 +233,12 @@ describe "mustache" do
 
   def run_js_jsc(js)
     File.open("runner.js", 'w') {|f| f << js}
-    `/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc runner.js`
+    `#{JSC_PATH} runner.js`
   end
 
   def run_js_rhino(js)
     File.open("runner.js", 'w') {|f| f << js}
-    `java org.mozilla.javascript.tools.shell.Main runner.js`
+    `java #{RHINO_JAR} runner.js`
   end
 end
 
