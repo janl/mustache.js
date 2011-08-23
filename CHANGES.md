@@ -1,5 +1,9 @@
 # mustache.js Changes
 
+## 0.3.1-dev-twitter-b (8/23/2011)
+
+* Cached regexes for improved performance
+
 ## 0.3.1-dev-twitter (12/3/2010)
 
 * fixed double-rendering bug
