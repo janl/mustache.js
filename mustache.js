@@ -20,7 +20,6 @@ var Mustache = function() {
     render: function(template, context, partials, in_recursion) {
       // reset buffer & set context
       if(!in_recursion) {
-        this.context = context;
         this.buffer = []; // TODO: make this non-lazy
       }
 
@@ -124,11 +123,11 @@ var Mustache = function() {
         } else if(type == "#") { // normal section
           if(that.is_array(value)) { // Enumerable, Let's loop!
             return that.map(value, function(row) {
-              return that.render(content, that.create_context(row),
+              return that.render(content, that.create_context(row, context),
                 partials, true);
             }).join("");
           } else if(that.is_object(value)) { // Object, Use it as subcontext!
-            return that.render(content, that.create_context(value),
+            return that.render(content, that.create_context(value, context),
               partials, true);
           } else if(typeof value === "function") {
             // higher order section
@@ -221,12 +220,13 @@ var Mustache = function() {
 
       var value = context;
       var path = (name === '.') ? ['.'] : name.split(/\./);
-      for(var i = 0; i < path.length; i++) {
+      for (var i = 0; i < path.length; i++) {
         name = path[i];
         if(value && is_kinda_truthy(value[name])) {
           value = value[name];
-        } else if(i == 0 && is_kinda_truthy(this.context[name])) {
-          value = this.context[name];
+        } else if ((i == 0) && value.__parent_context) {
+          i--; // fix the loop thingie
+          value = value.__parent_context;
         } else {
           value = undefined;
         }
@@ -268,9 +268,11 @@ var Mustache = function() {
     },
 
     // by @langalex, support for arrays of strings
-    create_context: function(_context) {
+    create_context: function(_context, parent_context) {
       if(this.is_object(_context)) {
-        return _context;
+        var ctx = this.clone(_context);
+        ctx.__parent_context = parent_context;
+        return ctx;
       } else {
         var iterator = ".";
         if(this.pragmas["IMPLICIT-ITERATOR"]) {
@@ -278,8 +280,19 @@ var Mustache = function() {
         }
         var ctx = {};
         ctx[iterator] = _context;
+        ctx.__parent_context = parent_context;
         return ctx;
       }
+    },
+
+    clone: function (o) {
+      function c(o) {
+        for (var i in o) {
+          this[i] = o[i];
+        }
+      }
+
+      return new c(o);
     },
 
     is_object: function(a) {
