@@ -215,11 +215,14 @@ var Mustache = function() {
       }
 
       var value;
-      if(is_kinda_truthy(context[name])) {
-        value = context[name];
-      } else if(is_kinda_truthy(this.context[name])) {
-        value = this.context[name];
+      while (context) {
+        if(is_kinda_truthy(context[name])) {
+          value = context[name];
+          break;
         }
+
+        context = context.__parent_context;
+      }
 
       if(typeof value === "function") {
         return value.apply(context);
