@@ -289,7 +289,8 @@ Or just install it as a RubyGem:
 ## Plugins for jQuery, Dojo, Yui, CommonJS
 
 This repository lets you build modules for [jQuery][], [Dojo][], [Yui][] and
-[CommonJS][] / [Node.js][] with the help of `rake`:
+[CommonJS][] / [Node.js][] with the help of `rake`. You may need to install
+rspec first by running `gem install rspec`.
 
 Run `rake jquery` to get a jQuery compatible plugin file in the
 `mustache-jquery/` directory.
