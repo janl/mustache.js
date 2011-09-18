@@ -1,5 +1,14 @@
 # mustache.js Changes
 
+## 0.3.1-dev-twitter-b (8/23/2011)
+
+* Cached regexes for improved performance
+
+## 0.3.1-dev-twitter (12/3/2010)
+
+* fixed double-rendering bug
+* added Rhino test-runner alongside JavaScriptCore
+
 ## 0.3.1 (??-??-????)
 
 ## 0.3.0 (21-07-2010)

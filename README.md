@@ -199,11 +199,10 @@ will tell mustache.js to look for a object in the context's property
 `winnings`. It will then use that object as the context for the template found
 in `partials` for `winnings`.
 
-
 ## Escaping
 
 mustache.js does escape all values when using the standard double mustache
-syntax. Characters which will be escaped: `& \ " < >`. To disable escaping,
+syntax. Characters which will be escaped: `& \ " ' < >`. To disable escaping,
 simply use triple mustaches like `{{{unescaped_variable}}}`.
 
 Example: Using `{{variable}}` inside a template for `5 > 2` will result in `5 &gt; 2`, where as the usage of `{{{variable}}}` will result in `5 > 2`.
@@ -304,8 +303,38 @@ directory.
 Run `rake commonjs` to get a CommonJS compatible plugin file in the
 `mustache-commonjs/` directory which you can also use with [Node.js][].
 
+## Testing
+
+To run the mustache.js test suite, run `rake spec`.  All specs will be run first with JavaScriptCore (using `jsc`)
+and again with Rhino, using `java org.mozilla.javascript.tools.shell.Main`.
+
+JavaScriptCore is used from the OSX default location:
+
+    /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc
+
+To install Rhino on OSX, follow [these instructions](Rhino Install).
+
+### Adding Tests
+
+Tests are located in the `examples/` directory.  Adding a new test requires three files.  Here's an example to add a test named "foo":
+
+`examples/foo.html` (the template):
+
+    foo {{bar}}
+
+`examples/foo.js` (the view context):
+
+    var foo = {
+      bar: "baz"
+    };
+
+`examples/foo.txt` (the expected output):
+
+    foo baz
+
 [jQuery]: http://jquery.com/
 [Dojo]: http://www.dojotoolkit.org/
 [Yui]: http://developer.yahoo.com/yui/
 [CommonJS]: http://www.commonjs.org/
 [Node.js]: http://nodejs.org/
+[Rhino Install]: http://michaux.ca/articles/installing-rhino-on-os-x
