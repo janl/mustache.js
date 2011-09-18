@@ -22,6 +22,7 @@ def load_test(dir, name, partial=false)
   end
 end
 
+JS_PATH = `which js`.strip()
 JSC_PATH = "/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc"
 RHINO_JAR = "org.mozilla.javascript.tools.shell.Main"
 
@@ -173,6 +174,27 @@ describe "mustache" do
     end
   end
 
+  context "running in SpiderMonkey (Mozilla, Firefox)" do
+    p JS_PATH
+    if !JS_PATH.empty?
+      before(:each) do
+        @run_js = :run_js_js
+      end
+
+      before(:all) do
+        puts "\nTesting mustache.js in SpiderMonkey:\n"
+      end
+
+      after(:all) do
+        puts "\nDone\n"
+      end
+
+      it_should_behave_like "Mustache rendering"
+    else
+      puts "\nSkipping tests in SpiderMonkey (js not found)\n"
+    end
+  end
+
   context "running in JavaScriptCore (WebKit, Safari)" do
     if File.exists?(JSC_PATH)
       before(:each) do
@@ -229,6 +251,11 @@ describe "mustache" do
 
   def run_js(runner, js)
     send(runner, js)
+  end
+
+  def run_js_js(js)
+    File.open("runner.js", 'w') {|f| f << js}
+    `#{JS_PATH} runner.js`
   end
 
   def run_js_jsc(js)
