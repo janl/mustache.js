@@ -135,7 +135,8 @@ var Mustache = function() {
               return that.render(text, context, partials, true);
             });
           } else if(value) { // boolean section
-            return that.render(content, context, partials, true);
+            return that.render(content, that.create_context(value, context),
+                               partials, true);
           } else {
             return "";
           }
