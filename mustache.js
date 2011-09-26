@@ -181,7 +181,7 @@ var Mustache = function() {
               return that.render(text, context, partials, true);
             });
           } else if (value) { // boolean section
-            renderedContent = that.render(content, context, partials, true);
+            renderedContent = that.render(content, that.create_context(value), partials, true);
           } else {
             renderedContent = "";
           }
