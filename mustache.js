@@ -319,6 +319,7 @@ var Mustache = (function(undefined) {
 		}
 		
 		var value;
+		
 		if (is_kinda_truthy(context[name])) {
 			value = context[name];
 		}
@@ -364,9 +365,32 @@ var Mustache = (function(undefined) {
 			escape = prefix = true;
 		}
 		
-		var variable = get_variable_name(state, token, prefix, postfix);
+		var variable = get_variable_name(state, token, prefix, postfix),
+			implicit_iterator = (state.pragmas['IMPLICIT-ITERATOR'] || {iterator: '.'}).iterator;
+		
 		state.send_code_func((function(variable, escape) { return function(context, send_func) {
-			var value = find_in_stack(variable, context);
+			var variable_components,
+				i, n, value;
+			
+			if ( variable === implicit_iterator ) { // special case for implicit iterator (usually '.')
+				value = {}; value[implicit_iterator] = context[context.length-1];
+				value = find(variable, value);
+			} else {
+				variable_components = variable.split('.');
+				i = 1;
+				n = variable_components.length;
+				
+				value = find_in_stack(variable_components[0], context);
+				while (value && i<n) {
+					value = find(variable_components[i], value);
+					i++;
+				}
+			
+				if (i!==n && !value) {
+					value = undefined;
+				}
+			}
+
 			if (value!==undefined) {
 				if (!escape) {
 					value = escapeHTML('' + value);
@@ -422,25 +446,12 @@ var Mustache = (function(undefined) {
 	}
 	
 	function section(state) {
-		// by @langalex, support for arrays of strings
-		function create_context(_context) {
-			if(is_object(_context)) {
-				return _context;
-			} else {
-				var ctx = {}, 
-					iterator = (state.pragmas['IMPLICIT-ITERATOR'] || {iterator: '.'}).iterator;
-				
-				ctx[iterator] = _context;
-				
-				return ctx;
-			}
-		}
-		
 		var s = state.section, template = s.template_buffer.join(''),
 			program, 
 			new_state = create_compiler_state(template, state.partials, state.openTag, state.closeTag);
 		
 		new_state.metrics = s.metrics;
+		new_state.pragmas = state.pragmas;
 		program = compile(new_state);
 		
 		if (s.inverted) {
@@ -455,7 +466,7 @@ var Mustache = (function(undefined) {
 				var value = find_in_stack(variable, context);			
 				if (is_array(value)) { // Enumerable, Let's loop!
 					for (var i=0, n=value.length; i<n; ++i) {
-						context.push(create_context(value[i]));
+						context.push(value[i]);
 						program(context, send_func);
 						context.pop();
 					}

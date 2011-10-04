@@ -136,6 +136,45 @@ test("Basic Variables", function() {
 	
 });
 
+test("Dot Notation", function() {
+	equals(
+		Mustache.to_html(
+			'{{a.b.c}}',
+			{ a: { b: { c: 0 } } },
+			{}
+		),
+		'0'
+	);
+
+	equals(
+		Mustache.to_html(
+			'{{a.b.c}}',
+			{ a: { b: {} } },
+			{}
+		),
+		''
+	);
+
+	equals(
+		Mustache.to_html(
+			'{{a.b.c}}',
+			{ a: { b: 0 } },
+			{}
+		),
+		''
+	);
+
+	equals(
+		Mustache.to_html(
+			'{{a.b.c}}',
+			{ a: { b: function() { return { c: 5 } } } },
+			{}
+		),
+		'5'
+	);	
+});
+
+
 test("'{' or '&' (Unescaped Variable)", function() {
 	// matches unescaped.html
 	equals(
