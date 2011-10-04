@@ -345,6 +345,23 @@ var Mustache = (function(undefined) {
 		return undefined;
 	}
 	
+	function find_with_dot_notation(name, context) {
+		var name_components = name.split('.'),
+			i = 1, n = name_components.length,
+			value = find_in_stack(name_components[0], context);
+			
+		while (value && i<n) {
+			value = find(name_components[i], value);
+			i++;
+		}
+	
+		if (i!==n && !value) {
+			value = undefined;
+		}
+		
+		return value;
+	}
+	
 	/* END Run Time Helpers */
 
 	function text(state, token) {
@@ -369,26 +386,13 @@ var Mustache = (function(undefined) {
 			implicit_iterator = (state.pragmas['IMPLICIT-ITERATOR'] || {iterator: '.'}).iterator;
 		
 		state.send_code_func((function(variable, escape) { return function(context, send_func) {
-			var variable_components,
-				i, n, value;
+			var value;
 			
 			if ( variable === implicit_iterator ) { // special case for implicit iterator (usually '.')
 				value = {}; value[implicit_iterator] = context[context.length-1];
 				value = find(variable, value);
 			} else {
-				variable_components = variable.split('.');
-				i = 1;
-				n = variable_components.length;
-				
-				value = find_in_stack(variable_components[0], context);
-				while (value && i<n) {
-					value = find(variable_components[i], value);
-					i++;
-				}
-			
-				if (i!==n && !value) {
-					value = undefined;
-				}
+				value = find_with_dot_notation(variable, context);
 			}
 
 			if (value!==undefined) {
@@ -456,14 +460,14 @@ var Mustache = (function(undefined) {
 		
 		if (s.inverted) {
 			state.send_code_func((function(program, variable){ return function(context, send_func) {
-				var value = find_in_stack(variable, context);
+				var value = find_with_dot_notation(variable, context);
 				if (!value || is_array(value) && value.length === 0) { // false or empty list, render it
 					program(context, send_func);
 				}
 			};})(program, s.variable));
 		} else {
 			state.send_code_func((function(program, variable, template, partials){ return function(context, send_func) {
-				var value = find_in_stack(variable, context);			
+				var value = find_with_dot_notation(variable, context);
 				if (is_array(value)) { // Enumerable, Let's loop!
 					for (var i=0, n=value.length; i<n; ++i) {
 						context.push(value[i]);

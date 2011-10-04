@@ -172,6 +172,15 @@ test("Dot Notation", function() {
 		),
 		'5'
 	);	
+
+	equals(
+		Mustache.to_html(
+			'{{#a.b.c}}{{d}}{{/a.b.c}}',
+			{ a: { b: function() { return { c: [ {d: 'a'}, {d: 'b'}, {d: 'c'} ] } } } },
+			{}
+		),
+		'abc'
+	);	
 });
 
 
