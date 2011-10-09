@@ -42,6 +42,7 @@ end
 
 templated_build "CommonJS", :location => "lib", :extra => "package.json"
 templated_build "jQuery"
+templated_build "qooxdoo"
 templated_build "Dojo", :location => "dojox/string"
 templated_build "YUI3", :location => "yui3/mustache"
 templated_build "requirejs"
