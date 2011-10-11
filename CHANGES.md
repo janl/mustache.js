@@ -1,5 +1,9 @@
 # mustache.js Changes
 
+## 0.5.1-vsc
+
+* Added Dot Notation Support
+
 ## 0.5.0-vcs
 
 * Added Compiled Template support
