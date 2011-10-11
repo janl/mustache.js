@@ -267,15 +267,6 @@ to the compiled Javascript function using the following code block:
 	var template = Mustache.compile('<b>{{>foo}}{{#bar}} had a bar.{{/bar}}</b>', { foo: 'Snow White' });
 	var html = template({bar:true});
 	
-## F.A.Q.
-
-### Why doesn’t Mustache allow dot notation like `{{variable.member}}`?
-
-The reason is given in the [mustache.rb
-bugtracker](http://github.com/defunkt/mustache/issues/issue/6).
-
-Mustache implementations strive to be template-compatible.
-
 ## Command Line
 
 See `mustache(1)` man page or
