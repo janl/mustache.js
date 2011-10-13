@@ -285,7 +285,7 @@ Or just install it as a RubyGem:
 [couchdb]: http://couchdb.apache.org
 
 
-## Plugins for jQuery, Dojo, Yui, CommonJS
+## Plugins for jQuery, Dojo, Yui, CommonJS, qooxdoo
 
 This repository lets you build modules for [jQuery][], [Dojo][], [Yui][] and
 [CommonJS][] / [Node.js][] with the help of `rake`. You may need to install
@@ -302,6 +302,8 @@ directory.
 
 Run `rake commonjs` to get a CommonJS compatible plugin file in the
 `mustache-commonjs/` directory which you can also use with [Node.js][].
+
+Run `rake qooxdoo` to get a qooxdoo compatible file named `qooxdoo.mustache.js`.
 
 ## Testing
 
