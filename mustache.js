@@ -275,6 +275,10 @@ var Mustache = function() {
         value = this.context[name];
       }
 
+  		if(name.match(/([a-z_]+)\.?/ig)){
+				value = this.walk_context(name, context);
+			}
+
       if(typeof value === "function") {
         return value.apply(context);
       }
@@ -284,6 +288,20 @@ var Mustache = function() {
       // silently ignore unkown variables
       return "";
     },
+
+		walk_context: function(name, context){
+			var path = name.split('.')
+			var value_context = context;
+			var value = context[path.shift()];
+			while(value != undefined && path.length > 0){
+				value_context = value
+				value = value[path.shift()];
+			}
+			if(typeof value === "function") {
+        return value.apply(value_context);
+      }
+			return value;
+		},
 
     // Utility methods
 
