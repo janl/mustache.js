@@ -1,0 +1,4 @@
+<h1>A Book</h1>
+<p>Price: &euro;200 Euro</p>
+<p>VAT: &euro;40</p>
+<p>Available Now</p>
