@@ -14,5 +14,10 @@ var dot_notation = {
 	availability:{
 		status: true,
 	  text: "In Stock"
+	},
+	// And now, some truthy false values
+	truthy: {
+		zero: 0,
+		notTrue: false
 	}
 };
