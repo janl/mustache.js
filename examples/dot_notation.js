@@ -1,5 +1,6 @@
 var dot_notation = {
 	name: "A Book",
+	authors: ["John Power", "Jamie Walsh"],
 	price:{
 	  value: 200,
 	  vat: function() {
@@ -10,5 +11,8 @@ var dot_notation = {
 			name: 'Euro'
 		}
 	},
-  in_stock: true
+	availability:{
+		status: true,
+	  text: "In Stock"
+	}
 };
