@@ -1,0 +1,4 @@
+<h1>A Book</h1>
+<p>Authors: <ul><li>John Power</li><li>Jamie Walsh</li></ul></p>
+<p>Price: &euro;200 Euro <b>In Stock</b></p>
+<p>VAT: &euro;40</p>

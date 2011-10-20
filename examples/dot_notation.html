@@ -1,0 +1,4 @@
+<h1>{{name}}</h1>
+<p>Authors: <ul>{{#authors}}<li>{{.}}</li>{{/authors}}</ul></p>
+<p>Price: {{price.currency.symbol}}{{price.value}} {{#price.currency}}{{name}} <b>{{availability.text}}</b>{{/price.currency}}</p>
+<p>VAT: {{price.currency.symbol}}{{price.vat}}</p>
