@@ -215,7 +215,7 @@ var Mustache = (function(undefined) {
 		openTag = openTag || '{{';
 		closeTag = closeTag || '}}';
 
-		var tokenizier;		
+		var tokenizer;		
 		if (openTag === '{{' && closeTag === '}}') {
 			tokenizer = default_tokenizer;
 		} else {
