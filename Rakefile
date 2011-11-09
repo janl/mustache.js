@@ -1,15 +1,15 @@
 require 'rake'
-require 'rspec/core/rake_task'
 
 task :default => :spec
 
-RSpec::Core::RakeTask.new(:spec) do |t|
-  #t.spec_opts = ['--options', "\"#{File.dirname(__FILE__)}/spec/spec.opts\""]
-  t.pattern = 'test/*_spec.rb'
-end
-
 desc "Run all specs"
-task :spec
+task :spec do
+  require 'rspec/core/rake_task'
+  RSpec::Core::RakeTask.new(:spec) do |t|
+    #t.spec_opts = ['--options', "\"#{File.dirname(__FILE__)}/spec/spec.opts\""]
+    t.pattern = 'test/*_spec.rb'
+  end
+end
 
 def templated_build(name, opts={})
   # Create a rule that uses the .tmpl.{pre,post} stuff to make a final,
