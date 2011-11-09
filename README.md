@@ -53,6 +53,21 @@ Tags are always surrounded by mustaches like this `{{foobar}}`.
 
     template = "{{say_hello}}, {{name}}"
 
+#### Accessing values in nested objects (Dot Notation)
+
+To access data logically grouped into nested objects, specify a '.' delimited
+path to the value.
+
+    var contact = {
+      name: {first: "Bill", last: "Bobitybob" },
+      age: 37
+    }
+
+    template = "Hello, {{name.first}} {{name.last}}. You are {{age}} years old."
+
+*NOTICE*: The dot notation feature was recently implemented for the 0.4
+  release, which is not out as of Nov 9 2011. You can find the feature in the
+  current master branch of mustachejs.
 
 ### Conditional Sections
 
@@ -93,7 +108,7 @@ enumeration section.
 If a section key returns a function, it will be called and passed both the
 unrendered block of text and a renderer convenience function.
 
-Given this JS:
+Given this object:
 
     "name": "Tater",
     "bolder": function() {
@@ -115,39 +130,36 @@ to implement caching, filters (like syntax highlighting), etc.
 
 You can use `this.name` to access the attribute `name` from your view.
 
-### Dereferencing Section
+### Dereferencing Sections
 
-If you have a nested object structure in your view, it can sometimes be easier
-to use sections like this:
+If your data has components that are logically grouped into nested objects,
+you may wish to dereference an object to access its values.
 
-    var objects = {
-      a_object: {
-        title: 'this is an object',
-        description: 'one of its attributes is a list',
-        a_list: [{label: 'listitem1'}, {label: 'listitem2'}]
+Given this object:
+
+    {
+      "name": "Bill",
+      "address": {
+        "street": "801 Streetly street",
+        "city": "Boston",
+        "state": "MA",
+        "zip" "02101"
       }
-    };
+    }
 
-This is our template:
+And this template:
 
-    {{#a_object}}
-      <h1>{{title}}</h1>
-      <p>{{description}}</p>
-      <ul>
-        {{#a_list}}
-          <li>{{label}}</li>
-        {{/a_list}}
-      </ul>
-    {{/a_object}}
+    <h1>Contact: {{name}}</h1>
+    {{#address}}
+      <p>{{street}}</p>
+      <p>{{city}}, {{state}} {{zip}}</p>
+    {{/address}}
 
-Here is the result:
+We'll get this output:
 
-    <h1>this is an object</h1>
-      <p>one of its attributes is a list</p>
-      <ul>
-        <li>listitem1</li>
-        <li>listitem2</li>
-      </ul>
+    <h1>Contact: Bill</h1>
+      <p>801 Streetly street</p>
+      <p>Boston, MA 02101</p>
 
 ### Inverted Sections
 
@@ -254,16 +266,6 @@ own iteration marker:
     {{#foo}}
       {{bob}}
     {{/foo}}
-
-## F.A.Q.
-
-### Why doesn’t Mustache allow dot notation like `{{variable.member}}`?
-
-The reason is given in the [mustache.rb
-bugtracker](http://github.com/defunkt/mustache/issues/issue/6).
-
-Mustache implementations strive to be template-compatible.
-
 
 ## More Examples and Documentation
 
