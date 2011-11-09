@@ -53,6 +53,21 @@ Tags are always surrounded by mustaches like this `{{foobar}}`.
 
     template = "{{say_hello}}, {{name}}"
 
+#### Accessing values in nested objects (Dot Notation)
+
+To access data logically grouped into nested objects, specify a '.' delimited
+path to the value.
+
+    var contact = {
+      name: {first: "Bill", last: "Bobitybob" },
+      age: 37
+    }
+
+    template = "Hello, {{name.first}} {{name.last}}. You are {{age}} years old."
+
+*NOTICE*: The dot notation feature was recently implemented for the 0.4
+  release, which is not out as of Nov 9 2011. You can find the feature in the
+  current master branch of mustachejs.
 
 ### Conditional Sections
 
@@ -251,16 +266,6 @@ own iteration marker:
     {{#foo}}
       {{bob}}
     {{/foo}}
-
-## F.A.Q.
-
-### Why doesn’t Mustache allow dot notation like `{{variable.member}}`?
-
-The reason is given in the [mustache.rb
-bugtracker](http://github.com/defunkt/mustache/issues/issue/6).
-
-Mustache implementations strive to be template-compatible.
-
 
 ## More Examples and Documentation
 
