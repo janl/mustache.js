@@ -1,0 +1,1 @@
+ERROR: Helper 'lcase' is not a registered helper
