@@ -270,20 +270,13 @@ var Mustache = function() {
       }
 
       var value;
-      var helper;
+      var helpers;
 
-      // check for helper e.g. name = "helperfun name"
-      var helper_name = name.split(" ");
-      if(helper_name.length == 2)  { // we have a helper
-        helper = helper_name[0];
-        name = helper_name[1];
-        if(!this.helper_functions[helper]
-            || typeof this.helper_functions[helper] != "function") {
-          throw {message:
-            "Helper '" + helper + "' is not a registered helper"};
-        } else {
-          helper = this.helper_functions[helper];
-        }
+      // check for helper e.g. name = "name|helperfun"
+      var helper_name = name.split("|");
+      if(helper_name.length > 1)  { // we have at least one helper
+        name = helper_name[0];
+        helpers = helper_name.slice(1);
       }
 
       // check for dot notation eg. foo.bar
@@ -305,8 +298,16 @@ var Mustache = function() {
         value = value.apply(context);
       }
 
-      if(helper) {
-        value = helper.apply(context, [value]);
+      if(helpers) {
+        for(var idx in helpers) {
+          var helper = helpers[idx];
+          if(!this.helper_functions[helper]
+            || typeof this.helper_functions[helper] != "function") {
+              throw {message:
+                "Helper '" + helper + "' is not a registered helper"};
+          }
+          value = this.helper_functions[helper].apply(context, [value]);
+        }
       }
 
       if(value !== undefined) {
