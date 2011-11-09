@@ -290,8 +290,10 @@ Or just install it as a RubyGem:
 ## Plugins for jQuery, Dojo, Yui, CommonJS, qooxdoo
 
 This repository lets you build modules for [jQuery][], [Dojo][], [Yui][] and
-[CommonJS][] / [Node.js][] with the help of `rake`. You may need to install
-rspec first by running `gem install rspec`.
+[CommonJS][] / [Node.js][] with the help of `rake`.
+
+NOTE: The default `rake` task is only used for testing and require rspec to be
+installed (see below).
 
 Run `rake jquery` to get a jQuery compatible plugin file in the
 `mustache-jquery/` directory.
@@ -308,6 +310,8 @@ Run `rake commonjs` to get a CommonJS compatible plugin file in the
 Run `rake qooxdoo` to get a qooxdoo compatible file named `qooxdoo.mustache.js`.
 
 ## Testing
+
+NOTE: You will need to install rspec first by running `gem install rspec`.
 
 To run the mustache.js test suite, run `rake spec`.  All specs will be run first with JavaScriptCore (using `jsc`)
 and again with Rhino, using `java org.mozilla.javascript.tools.shell.Main`.
