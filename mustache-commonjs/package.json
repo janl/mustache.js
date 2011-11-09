@@ -1,7 +1,11 @@
 {
     "name": "mustache",
-    "author": "http://mustache.github.com/",
+    "author": "Vastardis Capital Services",
+	"contributors": [
+		"Mustache <http://mustache.github.com>"		
+	],
     "description": "{{ mustache }} in JavaScript — Logic-less templates.",
     "keywords": ["template"],
-    "version": "{{version}}"
+    "version": "0.5.1-vsc",
+    "main": "./mustache"
 }

@@ -1,6 +1,6 @@
 # mustache.js Changes
 
-## 0.5.1-vsc
+## 0.5.1-vcs
 
 * Added Dot Notation Support
 

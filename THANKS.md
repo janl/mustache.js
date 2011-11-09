@@ -2,6 +2,8 @@
 
 Mustache.js wouldn't kick ass if it weren't for these fine souls:
 
+## janl (mainline) Branch:
+
  * Chris Wanstrath / defunkt
  * Alexander Lang / langalex
  * Sebastian Cohnen / tisba
@@ -18,3 +20,8 @@ Mustache.js wouldn't kick ass if it weren't for these fine souls:
  * Jason Smith / jhs
  * Aaron Gibralter / agibralter
  * Ross Boucher / boucher
+
+## doodad Branch:
+
+ * Gregory Jacobs / gjslick
+ 
