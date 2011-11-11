@@ -1,3 +1,5 @@
+rvm:
+  - 1.9.2
 before_script:
   - sudo apt-get install xulrunner-1.9
   - gem install rspec
