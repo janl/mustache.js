@@ -1,3 +1,3 @@
 before_script:
-  - sudo apt-get install libmozjs-dev
+  - sudo apt-get install libmozjs2d
   - gem install rspec
