@@ -1,0 +1,3 @@
+before_script:
+  - sudo apt-get install spidermonkey
+  - gem install rspec
