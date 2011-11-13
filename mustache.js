@@ -667,6 +667,19 @@ var Mustache = (function(undefined) {
 				return result;
 			}
 		},
+		
+		format: function(template/*, args */) {
+			var program = Mustache.compile(template),
+				args = Array.prototype.slice.call(arguments),
+				view = {};
+			
+			args.shift();
+			for (var i = 0, n = args.length; i < n; ++i) {
+				view['' + i] = args[i];
+			}
+			
+			return program(view);
+		},
 
 		Error: MustacheError
 	});
