@@ -628,18 +628,9 @@ var Mustache = (function(undefined) {
 		name: "mustache.js",
 		version: "0.5.1-vcs",
 
-		/*
-		Turns a template and view into HTML
+		/* 
+		Turns a template into a JS function
 		*/
-		to_html: function(template, view, partials, send_func) {
-			var program = Mustache.compile(template, partials),
-				result = program(view, send_func);
-			
-			if (!send_func) {
-				return result;
-			}
-		},
-		
 		compile: function(template, partials) {
 			var p = {};
 			if (partials) {
@@ -665,6 +656,18 @@ var Mustache = (function(undefined) {
 			}
 		},
 		
+		/*
+		Turns a template and view into HTML
+		*/
+		to_html: function(template, view, partials, send_func) {
+			var program = Mustache.compile(template, partials),
+				result = program(view, send_func);
+			
+			if (!send_func) {
+				return result;
+			}
+		},
+
 		Error: MustacheError
 	});
 })();
