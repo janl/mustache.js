@@ -1,5 +1,10 @@
 # mustache.js Changes
 
+## 0.5.2-vcs
+
+* Fixed a scoping bug (thanks gjslick)
+* Added Mustache.format function (similar to String.format from C#)
+
 ## 0.5.1-vcs
 
 * Added Dot Notation Support
