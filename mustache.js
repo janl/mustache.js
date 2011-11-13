@@ -273,11 +273,8 @@ var Mustache = function() {
       var helpers;
 
       // check for helper e.g. name = "name|helperfun"
-      var helper_name = name.split("|");
-      if(helper_name.length > 1)  { // we have at least one helper
-        name = helper_name[0];
-        helpers = helper_name.slice(1);
-      }
+      var helpers = name.split("|");
+      name = helpers.shift();
 
       // check for dot notation eg. foo.bar
       if(name.match(/([a-z_]+)\./ig)){
@@ -298,8 +295,9 @@ var Mustache = function() {
         value = value.apply(context);
       }
 
-      if(helpers) {
-        for(var idx in helpers) {
+      var number_of_helpers = helpers.length;
+      if(number_of_helpers > 0) {
+        for(var idx = 0; idx < number_of_helpers; idx++) {
           var helper = helpers[idx];
           if(!this.helper_functions[helper]
             || typeof this.helper_functions[helper] != "function") {
