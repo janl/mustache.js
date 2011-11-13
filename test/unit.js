@@ -790,3 +790,23 @@ test("Regression Suite", function() {
 		, ' Hello '
 		, 'Change Delimiter + Partial');
 });
+
+test("Mustache.format", function() {
+	equals(
+		Mustache.format('{{0}} {{1}}, {{2}} {{3}}.', 'And', 'it', 'was', 'good'),
+		'And it, was good.',
+		'Simple Version'
+	);
+	
+	equals(
+		Mustache.format('{{0}}', function() { return 'Groucho Marx'; } ),
+		'Groucho Marx',
+		'With Functions'
+	);
+	
+	equals(
+		Mustache.format('{{0}}'),
+		'',
+		'Insufficient parameters (no failure)'
+	);
+});
