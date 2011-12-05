@@ -5,14 +5,38 @@
 */
 
 var Mustache = function() {
-  var regexCache = {};
-  var Renderer = function() {};
-
   var _toString = Object.prototype.toString;
 
   Array.isArray = Array.isArray || function (obj) {
     return _toString.call(obj) == "[object Array]";
   }
+
+  var _trim = String.prototype.trim, trim;
+
+  if (_trim) {
+    trim = function (text) {
+      return text == null ? "" : _trim.call(text);
+    }
+  } else {
+    var trimLeft, trimRight;
+
+    // IE doesn't match non-breaking spaces with \s.
+    if ((/\S/).test("\xA0")) {
+      trimLeft = /^[\s\xA0]+/;
+      trimRight = /[\s\xA0]+$/;
+    } else {
+      trimLeft = /^\s+/;
+      trimRight = /\s+$/;
+    }
+
+    trim = function (text) {
+      return text == null ? "" :
+        text.toString().replace(trimLeft, "").replace(trimRight, "");
+    }
+  }
+
+  var regexCache = {};
+  var Renderer = function () {};
 
   Renderer.prototype = {
     otag: "{{",
@@ -111,7 +135,7 @@ var Mustache = function() {
       Tries to find a partial in the curent scope and render it
     */
     render_partial: function(name, context, partials) {
-      name = this.trim(name);
+      name = trim(name);
       if(!partials || partials[name] === undefined) {
         throw({message: "unknown_partial '" + name + "'"});
       }
@@ -267,7 +291,7 @@ var Mustache = function() {
       from the view object
     */
     find: function(name, context) {
-      name = this.trim(name);
+      name = trim(name);
 
       // Checks whether a value is thruthy or false or 0
       function is_kinda_truthy(bool) {
@@ -358,13 +382,6 @@ var Mustache = function() {
 
     is_object: function(a) {
       return a && typeof a == "object";
-    },
-
-    /*
-      Gets rid of leading and trailing whitespace
-    */
-    trim: function(s) {
-      return s.replace(/^\s*|\s*$/g, "");
     },
 
     /*
