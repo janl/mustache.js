@@ -1,3 +1,5 @@
+.DS_Store
+.rvmrc
 runner.js
 jquery.mustache.js
 dojox
