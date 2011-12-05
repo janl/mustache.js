@@ -175,8 +175,7 @@ describe "mustache" do
   end
 
   context "running in SpiderMonkey (Mozilla, Firefox)" do
-    p JS_PATH
-    if !JS_PATH.empty?
+    if File.exist?(JS_PATH)
       before(:each) do
         @run_js = :run_js_js
       end
@@ -196,7 +195,7 @@ describe "mustache" do
   end
 
   context "running in JavaScriptCore (WebKit, Safari)" do
-    if File.exists?(JSC_PATH)
+    if File.exist?(JSC_PATH)
       before(:each) do
         @run_js = :run_js_jsc
       end

@@ -1,4 +1,8 @@
 require 'rake'
+require 'rake/clean'
+
+# See mustache_spec.rb
+CLOBBER.include('runner.js')
 
 task :default => :spec
 
@@ -23,13 +27,16 @@ def templated_build(name, opts={})
   short = name.downcase
   source = "mustache-#{short}"
   dependencies = ["mustache.js"] + Dir.glob("#{source}/*.tpl.*")
+  target_js = opts[:location] ? "mustache.js" : "#{short}.mustache.js"
+
+  CLEAN.include(opts[:location] ? opts[:location] : target_js)
 
   desc "Package for #{name}"
   task short.to_sym => dependencies do
-    target_js = opts[:location] ? "mustache.js" : "#{short}.mustache.js"
-
     puts "Packaging for #{name}"
+
     mkdir_p opts[:location] if opts[:location]
+
     sh "cat #{source}/#{target_js}.tpl.pre mustache.js \
      #{source}/#{target_js}.tpl.post > #{opts[:location] || '.'}/#{target_js}"
 
@@ -49,8 +56,3 @@ templated_build "qooxdoo"
 templated_build "Dojo", :location => "dojox/string"
 templated_build "YUI3", :location => "yui3/mustache"
 templated_build "requirejs"
-
-desc "Remove temporary files."
-task :clean do
-  sh "git clean -fdx"
-end
