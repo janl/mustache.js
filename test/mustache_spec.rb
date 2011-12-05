@@ -249,22 +249,19 @@ describe "mustache" do
   end
 
   def run_js(runner, js)
-    send(runner, js)
-  end
+    cmd = case runner
+    when :run_js_js
+      JS_PATH
+    when :run_js_jsc
+      JSC_PATH
+    when :run_js_rhino
+      "java #{RHINO_JAR}"
+    end
 
-  def run_js_js(js)
-    File.open("runner.js", 'w') {|f| f << js}
-    `#{JS_PATH} runner.js`
-  end
-
-  def run_js_jsc(js)
-    File.open("runner.js", 'w') {|f| f << js}
-    `#{JSC_PATH} runner.js`
-  end
-
-  def run_js_rhino(js)
-    File.open("runner.js", 'w') {|f| f << js}
-    `java #{RHINO_JAR} runner.js`
+    runner_file = "runner.js"
+    File.open(runner_file, 'w') {|f| f << js}
+    `#{cmd} #{runner_file}`
+  ensure
+    FileUtils.rm_r(runner_file)
   end
 end
-

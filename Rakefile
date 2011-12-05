@@ -1,9 +1,6 @@
 require 'rake'
 require 'rake/clean'
 
-# See mustache_spec.rb
-CLOBBER.include('runner.js')
-
 task :default => :spec
 
 desc "Run all specs"
