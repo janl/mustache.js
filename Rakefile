@@ -21,7 +21,7 @@ end
 # use different template files and final locations.
 def templated_build(name, opts={})
   short = name.downcase
-  source = "mustache-#{short}"
+  source = File.join("wrappers", short)
   dependencies = ["mustache.js"] + Dir.glob("#{source}/*.tpl.*")
   target_js = opts[:location] ? "mustache.js" : "#{short}.mustache.js"
 
@@ -34,12 +34,12 @@ def templated_build(name, opts={})
     mkdir_p opts[:location] if opts[:location]
 
     sh "cat #{source}/#{target_js}.tpl.pre mustache.js \
-     #{source}/#{target_js}.tpl.post > #{opts[:location] || '.'}/#{target_js}"
+      #{source}/#{target_js}.tpl.post > #{opts[:location] || '.'}/#{target_js}"
 
     # extra
     if opts[:extra]
       sh "sed -e 's/{{version}}/#{version}/' #{source}/#{opts[:extra]} \
-            > #{opts[:location]}/#{opts[:extra]}"
+        > #{opts[:location]}/#{opts[:extra]}"
     end
 
     puts "Done, see #{opts[:location] || '.'}/#{target_js}"

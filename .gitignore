@@ -1,7 +1,10 @@
 .DS_Store
 .rvmrc
 runner.js
+lib
 jquery.mustache.js
+qooxdoo.mustache.js
 dojox
 yui3
-commonjs.mustache.js
+requirejs.mustache.js
+
