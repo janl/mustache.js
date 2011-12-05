@@ -16,11 +16,10 @@ def version
   File.read("mustache.js").match('version: "([^\"]+)",$')[1]
 end
 
+# Creates a rule that uses the .tmpl.{pre,post} stuff to make a final,
+# wrapped, output file. There is some extra complexity because Dojo and YUI3
+# use different template files and final locations.
 def templated_build(name, opts={})
-  # Create a rule that uses the .tmpl.{pre,post} stuff to make a final,
-  # wrapped, output file.
-  # There is some extra complexity because Dojo and YUI3 use different
-  # template files and final locations.
   short = name.downcase
   source = "mustache-#{short}"
   dependencies = ["mustache.js"] + Dir.glob("#{source}/*.tpl.*")
