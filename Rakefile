@@ -11,6 +11,10 @@ task :spec do
   end
 end
 
+def version
+  File.read("mustache.js").match('version: "([^\"]+)",$')[1]
+end
+
 def templated_build(name, opts={})
   # Create a rule that uses the .tmpl.{pre,post} stuff to make a final,
   # wrapped, output file.
@@ -25,7 +29,7 @@ def templated_build(name, opts={})
     target_js = opts[:location] ? "mustache.js" : "#{short}.mustache.js"
 
     puts "Packaging for #{name}"
-    sh "mkdir -p #{opts[:location]}" if opts[:location]
+    mkdir_p opts[:location] if opts[:location]
     sh "cat #{source}/#{target_js}.tpl.pre mustache.js \
      #{source}/#{target_js}.tpl.post > #{opts[:location] || '.'}/#{target_js}"
 
@@ -33,10 +37,9 @@ def templated_build(name, opts={})
     if opts[:extra]
       sh "sed -e 's/{{version}}/#{version}/' #{source}/#{opts[:extra]} \
             > #{opts[:location]}/#{opts[:extra]}"
-     end
+    end
 
-   puts "Done, see #{opts[:location] || '.'}/#{target_js}"
-
+    puts "Done, see #{opts[:location] || '.'}/#{target_js}"
   end
 end
 
@@ -46,12 +49,6 @@ templated_build "qooxdoo"
 templated_build "Dojo", :location => "dojox/string"
 templated_build "YUI3", :location => "yui3/mustache"
 templated_build "requirejs"
-
-
-def version
-  File.read("mustache.js").match('version: "([^\"]+)",$')[1]
-end
-
 
 desc "Remove temporary files."
 task :clean do
