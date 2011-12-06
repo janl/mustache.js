@@ -105,14 +105,14 @@ var Mustache = function() {
       Tries to find a partial in the curent scope and render it
     */
     render_partial: function(name, context, partials) {
+      var partial;
       name = this.trim(name);
       if(!partials || partials[name] === undefined) {
-        throw({message: "unknown_partial '" + name + "'"});
+        partial = '';
+      } else {
+        partial = partials[name];
       }
-      if(typeof(context[name]) != "object") {
-        return this.render(partials[name], context, partials, true);
-      }
-      return this.render(partials[name], context[name], partials, true);
+      return this.render(partial, context, partials, true);
     },
 
     /*
