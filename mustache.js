@@ -348,7 +348,7 @@ var Mustache = function() {
       } else {
         var iterator = ".";
         if(this.pragmas["IMPLICIT-ITERATOR"]) {
-          iterator = this.pragmas["IMPLICIT-ITERATOR"].iterator;
+          iterator = this.pragmas["IMPLICIT-ITERATOR"].iterator || iterator;
         }
         var ctx = {};
         ctx[iterator] = _context;
