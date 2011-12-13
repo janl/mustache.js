@@ -8,6 +8,12 @@ var Mustache = function() {
   var regexCache = {};
   var Renderer = function() {};
 
+  var _toString = Object.prototype.toString;
+
+  Array.isArray = Array.isArray || function (obj) {
+    return _toString.call(obj) == "[object Array]";
+  }
+
   Renderer.prototype = {
     otag: "{{",
     ctag: "}}",
@@ -161,14 +167,14 @@ var Mustache = function() {
             value = that.find(name, context);
 
         if (type === "^") { // inverted section
-          if (!value || that.is_array(value) && value.length === 0) {
+          if (!value || Array.isArray(value) && value.length === 0) {
             // false or empty list, render it
             renderedContent = that.render(content, context, partials, true);
           } else {
             renderedContent = "";
           }
         } else if (type === "#") { // normal section
-          if (that.is_array(value)) { // Enumerable, Let's loop!
+          if (Array.isArray(value)) { // Enumerable, Let's loop!
             renderedContent = that.map(value, function(row) {
               return that.render(content, that.create_context(row), partials, true);
             }).join("");
@@ -269,7 +275,7 @@ var Mustache = function() {
       }
 
       var value;
-      
+
       // check for dot notation eg. foo.bar
       if(name.match(/([a-z_]+)\./ig)){
         var childValue = this.walk_context(name, context);
@@ -352,10 +358,6 @@ var Mustache = function() {
 
     is_object: function(a) {
       return a && typeof a == "object";
-    },
-
-    is_array: function(a) {
-      return Object.prototype.toString.call(a) === '[object Array]';
     },
 
     /*
