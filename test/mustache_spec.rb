@@ -84,9 +84,10 @@ describe "mustache" do
           runner = <<-JS
             try {
               #{@boilerplate}
+              var #{testname}_helpers = null;
               #{view}
               var template = #{template};
-              var result = Mustache.to_html(template, #{testname});
+              var result = Mustache.to_html(template, #{testname}, null, null, #{testname}_helpers);
               print(result);
             } catch(e) {
               print('ERROR: ' + e.message);
@@ -102,6 +103,7 @@ describe "mustache" do
           runner = <<-JS
             try {
               #{@boilerplate}
+              var #{testname}_helpers = null;
               #{view}
               var chunks = [];
               var sendFun = function(chunk) {
@@ -110,7 +112,7 @@ describe "mustache" do
                 }
               }
               var template = #{template};
-              Mustache.to_html(template, #{testname}, null, sendFun);
+              Mustache.to_html(template, #{testname}, null, sendFun, #{testname}_helpers);
               print(chunks.join("\\n"));
             } catch(e) {
               print('ERROR: ' + e.message);
@@ -132,10 +134,11 @@ describe "mustache" do
           runner = <<-JS
             try {
               #{@boilerplate}
+              var #{testname}_helpers = null;
               #{view}
               var template = #{template};
               var partials = {"partial": #{partial}};
-              var result = Mustache.to_html(template, partial_context, partials);
+              var result = Mustache.to_html(template, partial_context, partials, null, #{testname}_helpers);
               print(result);
             } catch(e) {
               print('ERROR: ' + e.message);
@@ -152,7 +155,8 @@ describe "mustache" do
           runner = <<-JS
             try {
               #{@boilerplate}
-              #{view};
+              var #{testname}_helpers = null;
+              #{view}
               var template = #{template};
               var partials = {"partial": #{partial}};
               var chunks = [];
@@ -161,7 +165,7 @@ describe "mustache" do
                   chunks.push(chunk);
                 }
               }
-              Mustache.to_html(template, partial_context, partials, sendFun);
+              Mustache.to_html(template, partial_context, partials, sendFun, #{testname}_helpers);
               print(chunks.join("\\n"));
             } catch(e) {
               print('ERROR: ' + e.message);

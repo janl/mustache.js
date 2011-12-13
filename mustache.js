@@ -13,6 +13,7 @@ var Mustache = function() {
     ctag: "}}",
     pragmas: {},
     buffer: [],
+    helper_functions: {},
     pragmas_implemented: {
       "IMPLICIT-ITERATOR": true
     },
@@ -269,7 +270,12 @@ var Mustache = function() {
       }
 
       var value;
-      
+      var helpers;
+
+      // check for helper e.g. name = "name|helperfun"
+      var helpers = name.split("|");
+      name = helpers.shift();
+
       // check for dot notation eg. foo.bar
       if(name.match(/([a-z_]+)\./ig)){
         var childValue = this.walk_context(name, context);
@@ -286,8 +292,22 @@ var Mustache = function() {
       }
 
       if(typeof value === "function") {
-        return value.apply(context);
+        value = value.apply(context);
       }
+
+      var number_of_helpers = helpers.length;
+      if(number_of_helpers > 0) {
+        for(var idx = 0; idx < number_of_helpers; idx++) {
+          var helper = helpers[idx];
+          if(!this.helper_functions[helper]
+            || typeof this.helper_functions[helper] != "function") {
+              throw {message:
+                "Helper '" + helper + "' is not a registered helper"};
+          }
+          value = this.helper_functions[helper].apply(context, [value]);
+        }
+      }
+
       if(value !== undefined) {
         return value;
       }
@@ -408,10 +428,13 @@ var Mustache = function() {
     /*
       Turns a template and view into HTML
     */
-    to_html: function(template, view, partials, send_fun) {
-      var renderer = new Renderer();
+    to_html: function(template, view, partials, send_fun, helpers) {
+      var renderer = new Renderer(helpers);
       if(send_fun) {
         renderer.send = send_fun;
+      }
+      if(helpers) {
+        renderer.helper_functions = helpers;
       }
       renderer.render(template, view || {}, partials);
       if(!send_fun) {
