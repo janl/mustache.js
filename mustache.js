@@ -139,7 +139,7 @@ var Mustache = function () {
       if (!partials || partials[name] === undefined) {
         throw({message: "unknown_partial '" + name + "'"});
       }
-      if (typeof(context[name]) != "object") {
+      if (typeof context[name] != "object") {
         return this.render(partials[name], context, partials, true);
       }
       return this.render(partials[name], context[name], partials, true);
@@ -205,7 +205,7 @@ var Mustache = function () {
           } else if (that.is_object(value)) { // Object, Use it as subcontext!
             renderedContent = that.render(content, that.create_context(value),
               partials, true);
-          } else if (typeof value === "function") {
+          } else if (typeof value == "function") {
             // higher order section
             renderedContent = value.call(context, content, function (text) {
               return that.render(text, context, partials, true);
@@ -314,7 +314,7 @@ var Mustache = function () {
         }
       }
 
-      if (typeof value === "function") {
+      if (typeof value == "function") {
         return value.apply(context);
       }
       if (value !== undefined) {
@@ -334,7 +334,7 @@ var Mustache = function () {
         value = value[path.shift()];
       }
       // if the value is a function, call it, binding the correct context
-      if (typeof value === "function") {
+      if (typeof value == "function") {
         return value.apply(value_context);
       }
       return value;
