@@ -3,4 +3,12 @@
     return Mustache.to_html(template, view, partials);
   };
 
+  $.fn.mustache = function(view, partials){
+    return $(this).map(function(i, elm){
+        var template = $(elm).html().trim();
+        var output = $.mustache(template, view, partials);
+        return $(output).get();
+    });
+  };
+
 })(jQuery);
