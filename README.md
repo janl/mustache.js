@@ -1,49 +1,54 @@
-# mustache.js — Logic-less templates with JavaScript
+# mustache.js — Logic-less {{mustache}} templates with JavaScript
 
 > What could be more logical awesome than no logic at all?
 
-For a list of implementations (other than JavaScript) and editor
-plugins, see <http://mustache.github.com/>.
+[mustache.js](http://github.com/janl/mustache.js) is an implementation of the
+[Mustache](http://mustache.github.com/) templating system in JavaScript.
 
+[Mustache](http://mustache.github.com/) is a logic-less template syntax. It can
+be used for HTML, config files, source code - anything. It works by expanding
+tags in a template using values provided in a hash or object.
 
-## Where to Use?
+We call it "logic-less" because there are no if statements, else clauses, or for
+loops. Instead there are only tags. Some tags are replaced with a value, some
+nothing, and others a series of values.
 
-You can use mustache.js rendering stuff in various scenarios. E.g. you can
-render templates in your browser, or rendering server-side stuff with
-[node.js][node.js], use it for rendering stuff in [CouchDB][couchdb]’s views.
+For a language-agnostic overview of Mustache's template syntax, see the
+`mustache(5)` [manpage](http://mustache.github.com/mustache.5.html).
 
+## Where to use mustache.js?
 
-## Who Uses Mustache?
+You can use mustache.js to render templates in many various scenarios where you
+can use JavaScript. For example, you can render templates in a browser,
+server-side using [node](http://nodejs.org/), in [CouchDB](http://couchdb.apache.org/)
+views, or in almost any other environment where you can use JavaScript.
 
-An updated list is kept on the Github wiki. Add yourself, if you use
-mustache.js: <http://wiki.github.com/janl/mustache.js/beard-competition>
+## Who uses mustache.js?
 
+An updated list of mustache.js users is kept [on the Github wiki](http://wiki.github.com/janl/mustache.js/beard-competition).
+Add yourself or your company if you use mustache.js!
 
 ## Usage
 
-A quick example how to use mustache.js:
+Below is quick example how to use mustache.js:
 
     var view = {
       title: "Joe",
       calc: function() {
         return 2 + 4;
       }
-    }
+    };
 
-    var template = "{{title}} spends {{calc}}";
+    var html = Mustache.to_html("{{title}} spends {{calc}}", view);
 
-    var html = Mustache.to_html(template, view);
-
-`template` is a simple string with mustache tags and `view` is a JavaScript
-object containing the data and any code to render the template.
+In this example, the `Mustache.to_html` function takes two parameters: 1) the
+[mustache](http://mustache.github.com/) template and 2) a `view` object that
+contains the data and code needed to render the template.
 
 
 ## Template Tag Types
 
 There are several types of tags currently implemented in mustache.js.
-
-For a language-agnostic overview of Mustache’s template syntax, see the
-`mustache(5)` manpage or <http://mustache.github.com/mustache.5.html>.
 
 ### Simple Tags
 
@@ -267,82 +272,48 @@ own iteration marker:
       {{bob}}
     {{/foo}}
 
-## More Examples and Documentation
+## Plugins for JavaScript Libraries
 
-See `examples/` for more goodies and read the [original mustache docs][m]
+mustache.js may be built specifically for several different client libraries
+and platforms, including the following:
 
-## Command Line
+  - [node](http://nodejs.org/) (or other CommonJS platforms)
+  - [jQuery](http://jquery.com/)
+  - [Dojo](http://www.dojotoolkit.org/)
+  - [YUI](http://developer.yahoo.com/yui/)
+  - [RequireJS](http://requirejs.org/)
+  - [qooxdoo](http://qooxdoo.org/)
 
-See `mustache(1)` man page or
-<http://defunkt.github.com/mustache/mustache.1.html>
-for command line docs.
+These may be built using [Rake](http://rake.rubyforge.org/) and one of the
+following commands:
 
-Or just install it as a RubyGem:
+    $ rake commonjs
+    $ rake jquery
+    $ rake dojo
+    $ rake yui
+    $ rake requirejs
+    $ rake qooxdoo
 
-    $ gem install mustache
-    $ mustache -h
+## Thanks
 
-[m]: http://github.com/defunkt/mustache/#readme
-[node.js]: http://nodejs.org
-[couchdb]: http://couchdb.apache.org
+Mustache.js wouldn't kick ass if it weren't for these fine souls:
 
-
-## Plugins for jQuery, Dojo, Yui, CommonJS, qooxdoo
-
-This repository lets you build modules for [jQuery][], [Dojo][], [Yui][] and
-[CommonJS][] / [Node.js][] with the help of `rake`.
-
-NOTE: The default `rake` task is only used for testing and require rspec to be
-installed (see below).
-
-Run `rake jquery` to get a jQuery compatible plugin file in the
-`mustache-jquery/` directory.
-
-Run `rake dojo` to get a Dojo compatible plugin file in the `mustache-dojo/`
-directory.
-
-Run `rake yui` to get a Yui compatible plugin file in the `mustache-yui/`
-directory.
-
-Run `rake commonjs` to get a CommonJS compatible plugin file in the
-`mustache-commonjs/` directory which you can also use with [Node.js][].
-
-Run `rake qooxdoo` to get a qooxdoo compatible file named `qooxdoo.mustache.js`.
-
-## Testing
-
-NOTE: You will need to install rspec first by running `gem install rspec`.
-
-To run the mustache.js test suite, run `rake spec`.  All specs will be run first with JavaScriptCore (using `jsc`)
-and again with Rhino, using `java org.mozilla.javascript.tools.shell.Main`.
-
-JavaScriptCore is used from the OSX default location:
-
-    /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc
-
-To install Rhino on OSX, follow [these instructions](Rhino Install).
-
-### Adding Tests
-
-Tests are located in the `examples/` directory.  Adding a new test requires three files.  Here's an example to add a test named "foo":
-
-`examples/foo.html` (the template):
-
-    foo {{bar}}
-
-`examples/foo.js` (the view context):
-
-    var foo = {
-      bar: "baz"
-    };
-
-`examples/foo.txt` (the expected output):
-
-    foo baz
-
-[jQuery]: http://jquery.com/
-[Dojo]: http://www.dojotoolkit.org/
-[Yui]: http://developer.yahoo.com/yui/
-[CommonJS]: http://www.commonjs.org/
-[Node.js]: http://nodejs.org/
-[Rhino Install]: http://michaux.ca/articles/installing-rhino-on-os-x
+  * Chris Wanstrath / defunkt
+  * Alexander Lang / langalex
+  * Sebastian Cohnen / tisba
+  * J Chris Anderson / jchris
+  * Tom Robinson / tlrobinson
+  * Aaron Quint / quirkey
+  * Douglas Crockford
+  * Nikita Vasilyev / NV
+  * Elise Wood / glytch
+  * Damien Mathieu / dmathieu
+  * Jakub Kuźma / qoobaa
+  * Will Leinweber / will
+  * dpree
+  * Jason Smith / jhs
+  * Aaron Gibralter / agibralter
+  * Ross Boucher / boucher
+  * Matt Sanford / mzsanford
+  * Ben Cherry / bcherry
+  * Michael Jackson / mjijackson
