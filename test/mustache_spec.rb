@@ -17,7 +17,7 @@ def load_test(dir, name, partial=false)
   if not partial
     [view, template, expect]
   else
-    if File.exists(dir + "/../examples/#{name}.2.html")
+    if File.exists?(dir + "/../examples/#{name}.2.html")
       partial = File.read(dir + "/../examples/#{name}.2.html").to_json
     else
       partial = ""
