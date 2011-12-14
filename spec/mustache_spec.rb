@@ -1,11 +1,13 @@
 require 'rubygems'
 require 'json'
 
-ROOT = File.expand_path("../..", __FILE__)
+ROOT = File.expand_path('../..', __FILE__)
+SPEC = File.join(ROOT, 'spec')
+FILES = File.join(SPEC, '_files')
 
 MUSTACHE = File.read(File.join(ROOT, "mustache.js"))
 
-TESTS = Dir.glob(File.join(ROOT, 'examples', '*.js')).map do |name|
+TESTS = Dir.glob(File.join(FILES, '*.js')).map do |name|
   File.basename name, '.js'
 end
 
@@ -18,14 +20,14 @@ JSC_PATH = "/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resou
 RHINO_JAR = "org.mozilla.javascript.tools.shell.Main"
 
 def load_test(name, is_partial=false)
-  view = File.read(File.join(ROOT, "examples", "#{name}.js"))
-  template = File.read(File.join(ROOT, "examples", "#{name}.html")).to_json
-  expect = File.read(File.join(ROOT, "examples", "#{name}.txt"))
+  view = File.read(File.join(FILES, "#{name}.js"))
+  template = File.read(File.join(FILES, "#{name}.html")).to_json
+  expect = File.read(File.join(FILES, "#{name}.txt"))
 
   test = [view, template, expect]
 
   if is_partial
-    test << File.read(File.join(ROOT, "examples", "#{name}.2.html")).to_json
+    test << File.read(File.join(FILES, "#{name}.2.html")).to_json
   end
 
   test

@@ -8,7 +8,7 @@ task :spec do
   require 'rspec/core/rake_task'
   RSpec::Core::RakeTask.new(:spec) do |t|
     #t.spec_opts = ['--options', "\"#{File.dirname(__FILE__)}/spec/spec.opts\""]
-    t.pattern = 'test/*_spec.rb'
+    t.pattern = 'spec/*_spec.rb'
   end
 end
 
