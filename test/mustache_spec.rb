@@ -1,55 +1,61 @@
 require 'rubygems'
 require 'json'
 
-__DIR__ = File.dirname(__FILE__)
+ROOT = File.expand_path("../..", __FILE__)
 
-testnames = Dir.glob(__DIR__ + '/../examples/*.js').map do |name|
+MUSTACHE = File.read(File.join(ROOT, "mustache.js"))
+
+TESTS = Dir.glob(File.join(ROOT, 'examples', '*.js')).map do |name|
   File.basename name, '.js'
 end
 
-non_partials = testnames.select{|t| not t.include? "partial"}
-partials = testnames.select{|t| t.include? "partial"}
+PARTIALS = TESTS.select {|t| t.include? "partial" }
+NON_PARTIALS = TESTS.select {|t| not t.include? "partial" }
 
-def load_test(dir, name, partial=false)
-  view = File.read(dir + "/../examples/#{name}.js")
-  template = File.read(dir + "/../examples/#{name}.html").to_json
-  expect = File.read(dir + "/../examples/#{name}.txt")
-  if not partial
-    [view, template, expect]
-  else
-    partial = File.read(dir + "/../examples/#{name}.2.html").to_json
-    [view, template, partial, expect]
-  end
-end
-
-JS_PATH = `which js`.strip()
+NODE_PATH = `which node`.strip
+JS_PATH = `which js`.strip
 JSC_PATH = "/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc"
 RHINO_JAR = "org.mozilla.javascript.tools.shell.Main"
 
-engines_run = 0
+def load_test(name, is_partial=false)
+  view = File.read(File.join(ROOT, "examples", "#{name}.js"))
+  template = File.read(File.join(ROOT, "examples", "#{name}.html")).to_json
+  expect = File.read(File.join(ROOT, "examples", "#{name}.txt"))
+
+  test = [view, template, expect]
+
+  if is_partial
+    test << File.read(File.join(ROOT, "examples", "#{name}.2.html")).to_json
+  end
+
+  test
+end
+
+def run_js(runner, js)
+  cmd = case runner
+    when :spidermonkey
+      JS_PATH
+    when :jsc
+      JSC_PATH
+    when :rhino
+      "java #{RHINO_JAR}"
+    when :node
+      NODE_PATH
+    end
+
+  runner_file = "runner.js"
+  File.open(runner_file, 'w') {|file| file.write(js) }
+  `#{cmd} #{runner_file}`
+ensure
+  FileUtils.rm_r(runner_file)
+end
+
+$engines_run = 0
 
 describe "mustache" do
-
-  shared_examples_for "Mustache rendering" do
-
+  shared_examples_for "mustache rendering" do
     before(:all) do
-      engines_run += 1
-      mustache = File.read(__DIR__ + "/../mustache.js")
-      stubbed_gettext = <<-JS
-        // Stubbed gettext translation method for {{_i}}{{/i}} tags in Mustache.
-        function _(params) {
-          if (typeof params === "string") {
-            return params
-          }
-
-          return params.text;
-        }
-      JS
-
-      @boilerplate = <<-JS
-        #{mustache}
-        #{stubbed_gettext}
-      JS
+      $engines_run += 1
     end
 
     it "should return the same when invoked multiple times" do
@@ -58,8 +64,8 @@ describe "mustache" do
         Mustache.to_html("x")
         print(Mustache.to_html("x"));
       JS
-      run_js(@run_js, js).should == "x\n"
 
+      run_js(@runner, js).should == "x\n"
     end
 
     it "should clear the context after each run" do
@@ -72,34 +78,34 @@ describe "mustache" do
           print('ERROR: ' + e.message);
         }
       JS
-      run_js(@run_js, js).should == "\n"
+
+      run_js(@runner, js).should == "\n"
     end
 
-    non_partials.each do |testname|
-      describe testname do
+    NON_PARTIALS.each do |test|
+      describe test do
         it "should generate the correct html" do
+          view, template, expect = load_test(test)
 
-          view, template, expect = load_test(__DIR__, testname)
-
-          runner = <<-JS
+          js = <<-JS
             try {
               #{@boilerplate}
               #{view}
               var template = #{template};
-              var result = Mustache.to_html(template, #{testname});
+              var result = Mustache.to_html(template, #{test});
               print(result);
             } catch(e) {
               print('ERROR: ' + e.message);
             }
           JS
 
-          run_js(@run_js, runner).should == expect
+          run_js(@runner, js).should == expect
         end
+
         it "should sendFun the correct html" do
+          view, template, expect = load_test(test)
 
-          view, template, expect = load_test(__DIR__, testname)
-
-          runner = <<-JS
+          js = <<-JS
             try {
               #{@boilerplate}
               #{view}
@@ -110,26 +116,24 @@ describe "mustache" do
                 }
               }
               var template = #{template};
-              Mustache.to_html(template, #{testname}, null, sendFun);
+              Mustache.to_html(template, #{test}, null, sendFun);
               print(chunks.join("\\n"));
             } catch(e) {
               print('ERROR: ' + e.message);
             }
           JS
 
-          run_js(@run_js, runner).strip.should == expect.strip
+          run_js(@runner, js).strip.should == expect.strip
         end
       end
     end
 
-    partials.each do |testname|
-      describe testname do
+    PARTIALS.each do |test|
+      describe test do
         it "should generate the correct html" do
+          view, template, expect, partial = load_test(test, true)
 
-          view, template, partial, expect =
-                load_test(__DIR__, testname, true)
-
-          runner = <<-JS
+          js = <<-JS
             try {
               #{@boilerplate}
               #{view}
@@ -142,14 +146,13 @@ describe "mustache" do
             }
           JS
 
-          run_js(@run_js, runner).should == expect
+          run_js(@runner, js).should == expect
         end
+
         it "should sendFun the correct html" do
+          view, template, expect, partial = load_test(test, true)
 
-          view, template, partial, expect =
-                load_test(__DIR__, testname, true)
-
-          runner = <<-JS
+          js = <<-JS
             try {
               #{@boilerplate}
               #{view};
@@ -168,100 +171,104 @@ describe "mustache" do
             }
           JS
 
-          run_js(@run_js, runner).strip.should == expect.strip
+          run_js(@runner, js).strip.should == expect.strip
         end
       end
     end
   end
 
-  context "running in SpiderMonkey (Mozilla, Firefox)" do
-    if File.exist?(JS_PATH)
-      before(:each) do
-        @run_js = :run_js_js
-      end
-
+  context "running in node" do
+    if File.exist?(NODE_PATH)
       before(:all) do
-        puts "\nTesting mustache.js in SpiderMonkey:\n"
+        $stdout.write "Testing in node "
+        @runner = :node
+        @boilerplate = MUSTACHE.dup
+        @boilerplate << <<-JS
+        function print(message) {
+          console.log(message);
+        }
+        JS
       end
 
       after(:all) do
-        puts "\nDone\n"
+        puts " Done!"
       end
 
-      it_should_behave_like "Mustache rendering"
+      it_should_behave_like "mustache rendering"
     else
-      puts "\nSkipping tests in SpiderMonkey (js not found)\n"
+      puts "Skipping tests in node (node not found)"
+    end
+  end
+
+  context "running in SpiderMonkey (Mozilla, Firefox)" do
+    if File.exist?(JS_PATH)
+      before(:all) do
+        $stdout.write "Testing in SpiderMonkey "
+        @runner = :spidermonkey
+        @boilerplate = MUSTACHE.dup
+      end
+
+      after(:all) do
+        puts " Done!"
+      end
+
+      it_should_behave_like "mustache rendering"
+    else
+      puts "Skipping tests in SpiderMonkey (js not found)"
     end
   end
 
   context "running in JavaScriptCore (WebKit, Safari)" do
     if File.exist?(JSC_PATH)
-      before(:each) do
-        @run_js = :run_js_jsc
-      end
-
       before(:all) do
-        puts "\nTesting mustache.js in JavaScriptCore:\n"
+        $stdout.write "Testing in JavaScriptCore "
+        @runner = :jsc
+        @boilerplate = MUSTACHE.dup
       end
 
       after(:all) do
-        puts "\nDone\n"
+        puts " Done!"
       end
 
-      it_should_behave_like "Mustache rendering"
+      it_should_behave_like "mustache rendering"
     else
-      puts "\nSkipping tests in JavaScriptCore (jsc not found)\n"
+      puts "Skipping tests in JavaScriptCore (jsc not found)"
     end
   end
 
   context "running in Rhino (Mozilla)" do
-    if !`java #{RHINO_JAR} 'foo' 2>&1`.match(/ClassNotFoundException/)
-      before(:each) do
-        @run_js = :run_js_rhino
-      end
-
+    if `java #{RHINO_JAR} 'foo' 2>&1` !~ /ClassNotFoundException/
       before(:all) do
-        puts "\nTesting mustache.js in Rhino:\n"
+        $stdout.write "Testing in Rhino "
+        @runner = :rhino
+        @boilerplate = MUSTACHE.dup
       end
 
       after(:all) do
-        puts "\nDone\n"
+        puts " Done!"
       end
 
-      it_should_behave_like "Mustache rendering"
+      it_should_behave_like "mustache rendering"
     else
-      puts "\nSkipping tests in Rhino (JAR #{RHINO_JAR} was not found)\n"
+      puts "Skipping tests in Rhino (JAR #{RHINO_JAR} was not found)"
     end
   end
 
   context "suite" do
-    before(:all) do
-      puts "\nVerifying that we ran at the tests in at least one engine\n"
+    before(:each) do
+      $stdout.write "Verifying that we ran at the tests in at least one engine ... "
     end
 
-    after(:all) do
-      puts "\nDone\n"
+    after(:each) do
+      if @exception.nil?
+        puts "OK"
+      else
+        puts "ERROR!"
+      end
     end
 
     it "should have run at least one time" do
-      engines_run.should > 0
+      $engines_run.should > 0
     end
-  end
-
-  def run_js(runner, js)
-    cmd = case runner
-    when :run_js_js
-      JS_PATH
-    when :run_js_jsc
-      JSC_PATH
-    when :run_js_rhino
-      "java #{RHINO_JAR}"
-    end
-
-    runner_file = "runner.js"
-    File.open(runner_file, 'w') {|f| f << js}
-    `#{cmd} #{runner_file}`
-  ensure
-    FileUtils.rm_r(runner_file)
   end
 end
