@@ -35,6 +35,15 @@ var Mustache = function () {
     }
   }
 
+  function escapeHTML(string) {
+    return String(string)
+      .replace(/&(?!\w+;)/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   var regexCache = {};
   var Renderer = function () {};
 
@@ -228,8 +237,6 @@ var Mustache = function () {
       // tit for tat
       var that = this;
 
-
-
       var new_regex = function () {
         return that.getCachedRegex("render_tags", function (otag, ctag) {
           return new RegExp(otag + "(=|!|>|\\{|%)?([^\\/#\\^]+?)\\1?" + ctag + "+", "g");
@@ -250,7 +257,7 @@ var Mustache = function () {
         case "{": // the triple mustache is unescaped
           return that.find(name, context);
         default: // escape the value
-          return that.escape(that.find(name, context));
+          return escapeHTML(that.find(name, context));
         }
       };
       var lines = template.split("\n");
@@ -345,23 +352,6 @@ var Mustache = function () {
     /* includes tag */
     includes: function (needle, haystack) {
       return haystack.indexOf(this.otag + needle) != -1;
-    },
-
-    /*
-      Does away with nasty characters
-    */
-    escape: function (s) {
-      s = String(s === null ? "" : s);
-      return s.replace(/&(?!\w+;)|["'<>\\]/g, function (s) {
-        switch(s) {
-        case "&": return "&amp;";
-        case '"': return '&quot;';
-        case "'": return '&#39;';
-        case "<": return "&lt;";
-        case ">": return "&gt;";
-        default: return s;
-        }
-      });
     },
 
     // by @langalex, support for arrays of strings
