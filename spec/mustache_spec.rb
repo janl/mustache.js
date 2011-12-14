@@ -21,13 +21,13 @@ RHINO_JAR = "org.mozilla.javascript.tools.shell.Main"
 
 def load_test(name, is_partial=false)
   view = File.read(File.join(FILES, "#{name}.js"))
-  template = File.read(File.join(FILES, "#{name}.html")).to_json
+  template = File.read(File.join(FILES, "#{name}.mustache")).to_json
   expect = File.read(File.join(FILES, "#{name}.txt"))
 
   test = [view, template, expect]
 
   if is_partial
-    test << File.read(File.join(FILES, "#{name}.2.html")).to_json
+    test << File.read(File.join(FILES, "#{name}.2.mustache")).to_json
   end
 
   test
@@ -238,7 +238,7 @@ describe "mustache" do
     end
   end
 
-  context "running in Rhino (Mozilla)" do
+  context "running in Rhino (Mozilla, Java)" do
     if `java #{RHINO_JAR} 'foo' 2>&1` !~ /ClassNotFoundException/
       before(:all) do
         $stdout.write "Testing in Rhino "
