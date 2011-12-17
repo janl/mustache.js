@@ -3,7 +3,7 @@
 > What could be more logical awesome than no logic at all?
 
 [mustache.js](http://github.com/janl/mustache.js) is an implementation of the
-[Mustache](http://mustache.github.com/) templating system in JavaScript.
+[Mustache](http://mustache.github.com/) template system in JavaScript.
 
 [Mustache](http://mustache.github.com/) is a logic-less template syntax. It can
 be used for HTML, config files, source code - anything. It works by expanding
@@ -274,10 +274,11 @@ own iteration marker:
 
 ## Plugins for JavaScript Libraries
 
-mustache.js may be built specifically for several different client libraries
-and platforms, including the following:
+By default mustache.js may be used in a browser or any [CommonJS](http://www.commonjs.org/)
+environment, including [node](http://nodejs.org/). Additionally, mustache.js may
+be built specifically for several different client libraries and platforms,
+including the following:
 
-  - [node](http://nodejs.org/) (or other CommonJS platforms)
   - [jQuery](http://jquery.com/)
   - [Dojo](http://www.dojotoolkit.org/)
   - [YUI](http://developer.yahoo.com/yui/)
@@ -287,7 +288,6 @@ and platforms, including the following:
 These may be built using [Rake](http://rake.rubyforge.org/) and one of the
 following commands:
 
-    $ rake commonjs
     $ rake jquery
     $ rake dojo
     $ rake yui

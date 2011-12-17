@@ -3,6 +3,7 @@ var null_string = {
   glytch: true,
   binary: false,
   value: null,
+  undef: undefined,
   numeric: function() {
     return NaN;
   }
