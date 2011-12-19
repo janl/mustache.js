@@ -171,7 +171,7 @@ var Mustache = function () {
           "\\/\\s*\\3\\s*" +        //  /foo (backreference to the opening tag).
           ctag +                    // }}
 
-          "\\s*([\\s\\S]*)$",       // everything else in the string ($4). leading whitespace is dropped.
+          "([\\s\\S]*)$",           // everything else in the string ($4). leading whitespace is NOT dropped.
 
         "g");
       });
