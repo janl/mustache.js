@@ -35,13 +35,18 @@ var Mustache = function () {
     }
   }
 
+  var escapeMap = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': '&quot;',
+    "'": '&#39;'
+  };
+
   function escapeHTML(string) {
-    return String(string)
-      .replace(/&(?!\w+;)/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
+    return String(string).replace(/&(?!\w+;)|[<>"']/g, function (s) {
+      return escapeMap[s] || s;
+    });
   }
 
   var regexCache = {};
