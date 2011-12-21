@@ -11,8 +11,9 @@ TESTS = Dir.glob(File.join(FILES, '*.js')).map do |name|
   File.basename name, '.js'
 end
 
-PARTIALS = TESTS.select {|t| t.include? "partial" }
+PARTIALS = TESTS.select {|t| t.include? "partial" and not t.include? "function" and not t.include? "2" }
 NON_PARTIALS = TESTS.select {|t| not t.include? "partial" }
+FUNCTION_PARTIALS = TESTS.select {|t| t.include? "partial" and t.include? "function" and not t.include? "2" }
 
 NODE_PATH = `which node`.strip
 JS_PATH = `which js`.strip
@@ -126,6 +127,29 @@ describe "mustache" do
           JS
 
           run_js(@runner, js).strip.should == expect.strip
+        end
+      end
+    end
+
+    FUNCTION_PARTIALS.each do |test|
+      describe test do
+        it "should generate the correct html" do
+          view, template, expect = load_test(test)
+          partial_function = File.read(File.join(FILES, "#{test}.2.js"))
+
+          js = <<-JS
+            try {
+              #{@boilerplate}
+              #{view}
+              var template = #{template};
+              var result = Mustache.to_html(template, partial_context, #{partial_function});
+              print(result);
+            } catch(e) {
+              print('ERROR: ' + e.message);
+            }
+          JS
+
+          run_js(@runner, js).should == expect
         end
       end
     end
