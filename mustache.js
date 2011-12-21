@@ -150,6 +150,11 @@ var Mustache = function () {
     */
     render_partial: function (name, context, partials) {
       name = trim(name);
+      if ('function' === typeof partials) {
+        var partial = partials(name);
+        partials = {};
+        partials[name] = partial;
+      }
       if (!partials || partials[name] === undefined) {
         throw({message: "unknown_partial '" + name + "'"});
       }
