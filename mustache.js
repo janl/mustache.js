@@ -244,7 +244,7 @@ var Mustache = function () {
 
       var new_regex = function () {
         return that.getCachedRegex("render_tags", function (otag, ctag) {
-          return new RegExp(otag + "(=|!|>|\\{|%)?([^\\/#\\^]+?)\\1?" + ctag + "+", "g");
+          return new RegExp(otag + "(=|!|>|\\{|%)?([^#\\^]+?)\\1?" + ctag + "+", "g");
         });
       };
 
