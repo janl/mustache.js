@@ -101,9 +101,7 @@ var Mustache = function () {
       Sends parsed lines
     */
     send: function (line) {
-      if (line !== "") {
-        this.buffer.push(line);
-      }
+      this.buffer.push(line);
     },
 
     sendLines: function (text) {
