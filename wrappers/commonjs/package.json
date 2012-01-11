@@ -1,8 +1,0 @@
-{
-    "name": "mustache",
-    "author": "http://mustache.github.com/",
-    "description": "Logic-less {{mustache}} templates with JavaScript",
-    "keywords": ["template", "templates", "mustache"],
-    "version": "{{version}}",
-    "main": "./mustache"
-}

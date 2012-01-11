@@ -11,26 +11,21 @@ TESTS = Dir.glob(File.join(FILES, '*.js')).map do |name|
   File.basename name, '.js'
 end
 
-PARTIALS = TESTS.select {|t| t.include? "partial" }
-NON_PARTIALS = TESTS.select {|t| not t.include? "partial" }
-
 NODE_PATH = `which node`.strip
 JS_PATH = `which js`.strip
 JSC_PATH = "/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc"
 RHINO_JAR = "org.mozilla.javascript.tools.shell.Main"
 
-def load_test(name, is_partial=false)
+def load_test(name)
+  template = File.read(File.join(FILES, "#{name}.mustache"))
   view = File.read(File.join(FILES, "#{name}.js"))
-  template = File.read(File.join(FILES, "#{name}.mustache")).to_json
+  partial_file = File.join(FILES, "#{name}.partial")
+  partial = if File.exist?(partial_file)
+    File.read(partial_file)
+  end
   expect = File.read(File.join(FILES, "#{name}.txt"))
 
-  test = [view, template, expect]
-
-  if is_partial
-    test << File.read(File.join(FILES, "#{name}.2.mustache")).to_json
-  end
-
-  test
+  [template, view, partial, expect]
 end
 
 def run_js(runner, js)
@@ -41,7 +36,7 @@ def run_js(runner, js)
       JSC_PATH
     when :rhino
       "java #{RHINO_JAR}"
-    when :node
+    when :v8
       NODE_PATH
     end
 
@@ -60,11 +55,11 @@ describe "mustache" do
       $engines_run += 1
     end
 
-    it "should return the same when invoked multiple times" do
+    it "should return the same result when invoked multiple times" do
       js = <<-JS
         #{@boilerplate}
-        Mustache.to_html("x")
-        print(Mustache.to_html("x"));
+        Mustache.render("x")
+        print(Mustache.render("x"));
       JS
 
       run_js(@runner, js).should == "x\n"
@@ -73,9 +68,9 @@ describe "mustache" do
     it "should clear the context after each run" do
       js = <<-JS
         #{@boilerplate}
-        Mustache.to_html("{{#list}}{{x}}{{/list}}", {list: [{x: 1}]})
+        Mustache.render("{{#list}}{{x}}{{/list}}", {list: [{x: 1}]})
         try {
-          print(Mustache.to_html("{{#list}}{{x}}{{/list}}", {list: [{}]}));
+          print(Mustache.render("{{#list}}{{x}}{{/list}}", {list: [{}]}));
         } catch(e) {
           print('ERROR: ' + e.message);
         }
@@ -84,111 +79,62 @@ describe "mustache" do
       run_js(@runner, js).should == "\n"
     end
 
-    NON_PARTIALS.each do |test|
+    TESTS.each do |test|
       describe test do
-        it "should generate the correct html" do
-          view, template, expect = load_test(test)
+        it "should render the correct output" do
+          template, view, partial, expect = load_test(test)
 
           js = <<-JS
             try {
               #{@boilerplate}
+              var template = #{template.to_json};
               #{view}
-              var template = #{template};
-              var result = Mustache.to_html(template, #{test});
-              print(result);
+              var partials = {partial: #{partial ? partial.to_json : '""'}};
+              print(Mustache.render(template, #{test}, partials));
             } catch(e) {
               print('ERROR: ' + e.message);
             }
           JS
 
-          run_js(@runner, js).should == expect
+          run_js(@runner, js).chomp.should == expect
         end
 
-        it "should sendFun the correct html" do
-          view, template, expect = load_test(test)
+        it "should send the correct output" do
+          template, view, partial, expect = load_test(test)
 
           js = <<-JS
             try {
               #{@boilerplate}
+              var template = #{template.to_json};
               #{view}
-              var chunks = [];
-              var sendFun = function(chunk) {
-                if (chunk != "") {
-                  chunks.push(chunk);
-                }
-              }
-              var template = #{template};
-              Mustache.to_html(template, #{test}, null, sendFun);
-              print(chunks.join("\\n"));
+              var partials = {
+                "partial": #{(partial || '').to_json}
+              };
+              var buffer = [];
+              var send = function (chunk) {
+                buffer.push(chunk);
+              };
+              Mustache.render(template, #{test}, partials, send);
+              print(buffer.join(""));
             } catch(e) {
               print('ERROR: ' + e.message);
             }
           JS
 
-          run_js(@runner, js).strip.should == expect.strip
-        end
-      end
-    end
-
-    PARTIALS.each do |test|
-      describe test do
-        it "should generate the correct html" do
-          view, template, expect, partial = load_test(test, true)
-
-          js = <<-JS
-            try {
-              #{@boilerplate}
-              #{view}
-              var template = #{template};
-              var partials = {"partial": #{partial}};
-              var result = Mustache.to_html(template, partial_context, partials);
-              print(result);
-            } catch(e) {
-              print('ERROR: ' + e.message);
-            }
-          JS
-
-          run_js(@runner, js).should == expect
-        end
-
-        it "should sendFun the correct html" do
-          view, template, expect, partial = load_test(test, true)
-
-          js = <<-JS
-            try {
-              #{@boilerplate}
-              #{view};
-              var template = #{template};
-              var partials = {"partial": #{partial}};
-              var chunks = [];
-              var sendFun = function(chunk) {
-                if (chunk != "") {
-                  chunks.push(chunk);
-                }
-              }
-              Mustache.to_html(template, partial_context, partials, sendFun);
-              print(chunks.join("\\n"));
-            } catch(e) {
-              print('ERROR: ' + e.message);
-            }
-          JS
-
-          run_js(@runner, js).strip.should == expect.strip
+          run_js(@runner, js).chomp.should == expect
         end
       end
     end
   end
 
-  context "running in node" do
+  context "running in V8 (Chrome, node)" do
     if File.exist?(NODE_PATH)
       before(:all) do
-        $stdout.write "Testing in node "
-        @runner = :node
+        $stdout.write "Testing in V8 "
+        @runner = :v8
         @boilerplate = MUSTACHE.dup
         @boilerplate << <<-JS
-        function print(message) {
-          console.log(message);
-        }
+        var print = console.log;
         JS
       end
 
@@ -198,7 +144,7 @@ describe "mustache" do
 
       it_should_behave_like "mustache rendering"
     else
-      puts "Skipping tests in node (node not found)"
+      puts "Skipping tests in V8 (node not found)"
     end
   end
 
@@ -258,15 +204,11 @@ describe "mustache" do
 
   context "suite" do
     before(:each) do
-      $stdout.write "Verifying that we ran at the tests in at least one engine ... "
+      $stdout.write "Verifying that we ran the tests in at least one engine ... "
     end
 
     after(:each) do
-      if @exception.nil?
-        puts "OK"
-      else
-        puts "ERROR!"
-      end
+      puts @exception.nil? ? "OK" : "ERROR"
     end
 
     it "should have run at least one time" do

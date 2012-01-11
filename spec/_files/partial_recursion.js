@@ -1,4 +1,4 @@
-var partial_context = {
+var partial_recursion = {
   name: '1',
   kids: [
     {
