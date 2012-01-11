@@ -1,4 +1,4 @@
-## Running the mustache.js Test Suite
+## Running the mustache.js test suite
 
 The mustache.js test suite uses the [RSpec](http://rspec.info/) testing
 framework. In order to run the tests you'll need to install [Ruby](http://ruby-lang.org/)
@@ -57,6 +57,6 @@ suite with the following command:
 
 All test files live in the spec/_files directory. To create a new test:
 
-  * Create a template file `somename.mustache`
-  * Create a javascript file with data and functions `somename.js`
-  * Create a file the expected result `somename.txt`
+  * Create a template file called `somename.mustache`
+  * Create a JavaScript file containing the view called `somename.js`
+  * Create a text file with the expected result called `somename.txt`

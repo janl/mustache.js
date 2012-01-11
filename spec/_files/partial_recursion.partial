@@ -1,0 +1,4 @@
+{{name}}
+{{#children}}
+{{>partial}}
+{{/children}}

@@ -13,7 +13,7 @@ task :spec do
 end
 
 def version
-  File.read("mustache.js").match('version: "([^\"]+)",$')[1]
+  File.read("mustache.js").match('version = "([^\"]+)";$')[1]
 end
 
 # Creates a rule that uses the .tmpl.{pre,post} stuff to make a final,
@@ -36,17 +36,10 @@ def templated_build(name, opts={})
     sh "cat #{source}/#{target_js}.tpl.pre mustache.js \
       #{source}/#{target_js}.tpl.post > #{opts[:location] || '.'}/#{target_js}"
 
-    # extra
-    if opts[:extra]
-      sh "sed -e 's/{{version}}/#{version}/' #{source}/#{opts[:extra]} \
-        > #{opts[:location]}/#{opts[:extra]}"
-    end
-
     puts "Done, see #{opts[:location] || '.'}/#{target_js}"
   end
 end
 
-templated_build "CommonJS", :location => "lib", :extra => "package.json"
 templated_build "jQuery"
 templated_build "Dojo", :location => "dojox/string"
 templated_build "YUI3", :location => "yui3/mustache"
