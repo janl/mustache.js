@@ -1,4 +1,4 @@
-# mustache.js — Logic-less {{mustache}} templates with JavaScript
+# mustache.js - Logic-less {{mustache}} templates with JavaScript
 
 > What could be more logical awesome than no logic at all?
 
@@ -39,42 +39,217 @@ Below is quick example how to use mustache.js:
       }
     };
 
-    var html = Mustache.to_html("{{title}} spends {{calc}}", view);
+    var html = Mustache.render("{{title}} spends {{calc}}", view);
 
-In this example, the `Mustache.to_html` function takes two parameters: 1) the
+In this example, the `Mustache.render` function takes two parameters: 1) the
 [mustache](http://mustache.github.com/) template and 2) a `view` object that
 contains the data and code needed to render the template.
 
+## Templates
 
-## Template Tag Types
+A [mustache](http://mustache.github.com/) template is a string that contains
+any number of mustache tags. Tags are indicated by the double mustaches that
+surround them. *{{person}}* is a tag, as is *{{#person}}*. In both examples we
+refer to *person* as the tag's key.
 
-There are several types of tags currently implemented in mustache.js.
+There are several types of tags available in mustache.js.
 
-### Simple Tags
+### Variables
 
-Tags are always surrounded by mustaches like this `{{foobar}}`.
+The most basic tag type is a simple variable. A *{{name}}* tag renders the value
+of the *name* key in the current context. If there is no such key, nothing is
+rendered.
 
-    var view = {name: "Joe", say_hello: function(){ return "hello" }}
+All variables are HTML-escaped by default. If you want to render unescaped HTML,
+use the triple mustache: *{{{name}}}*. You can also use *&* to unescape a
+variable.
 
-    template = "{{say_hello}}, {{name}}"
+Template:
 
-#### Accessing values in nested objects (Dot Notation)
+    * {{name}}
+    * {{age}}
+    * {{company}}
+    * {{{company}}}
+    * {{&company}}
 
-To access data logically grouped into nested objects, specify a '.' delimited
-path to the value.
+View:
 
-    var contact = {
-      name: {first: "Bill", last: "Bobitybob" },
-      age: 37
+    {
+      "name": "Chris",
+      "company": "<b>GitHub</b>"
     }
 
-    template = "Hello, {{name.first}} {{name.last}}. You are {{age}} years old."
+Output:
 
-*NOTICE*: The dot notation feature was recently implemented for the 0.4
-  release, which is not out as of Nov 9 2011. You can find the feature in the
-  current master branch of mustachejs.
+    * Chris
+    *
+    * &lt;b&gt;GitHub&lt;/b&gt;
+    * <b>GitHub</b>
+    * <b>GitHub</b>
 
-### Conditional Sections
+JavaScript's dot notation may be used to access keys that are properties of
+objects in a view.
+
+Template:
+
+    * {{name.first}} {{name.last}}
+    * {{age}}
+
+View:
+
+    {
+      "name": {
+        "first": "Michael",
+        "last": "Jackson"
+      },
+      "age": "RIP"
+    }
+
+Output:
+
+    * Michael Jackson
+    * RIP
+
+### Sections
+
+Sections render blocks of text one or more times, depending on the value of the
+key in the current context.
+
+A section begins with a pound and ends with a slash. That is, *{{#person}}*
+begins a *person* section, while *{{/person}}* ends it. The text between the two
+tags is referred to as that section's "block".
+
+The behavior of the section is determined by the value of the key.
+
+#### False Values or Empty Lists
+
+If the *person* key exists and has a value of `null`, `undefined`, or `false`,
+or is an empty list, the block will not be rendered.
+
+Template:
+
+    Shown.
+    {{#nothin}}
+      Never shown!
+    {{/nothin}}
+
+View:
+
+    {
+      "person": true,
+    }
+
+Output:
+
+    Shown.
+
+#### Non-Empty Lists
+
+If the *person* key exists and is not `null`, `undefined`, or `false`, and is
+not an empty list the block will be rendered one or more times.
+
+When the value is a list, the block is rendered once for each item in the list.
+The context of the block is set to the current item in the list for each
+iteration. In this way we can loop over collections.
+
+Template:
+
+    {{#stooges}}
+    <b>{{name}}</b>
+    {{/stooges}}
+
+View:
+
+    {
+      "stooges": [
+        { "name": "Moe" },
+        { "name": "Larry" },
+        { "name": "Curly" },
+      ]
+    }
+
+Output:
+
+    <b>Moe</b>
+    <b>Larry</b>
+    <b>Curly</b>
+
+When looping over an array of strings, a `.` can be used to refer to the current
+item in the list.
+
+Template:
+
+    {{#musketeers}}
+    * {{.}}
+    {{/musketeers}}
+
+View:
+
+    {
+      "musketeers": ["Athos", "Aramis", "Porthos", "D'Artagnan"]
+    }
+
+Output:
+
+    * Athos
+    * Aramis
+    * Porthos
+    * D'Artagnan
+
+
+#### Functions
+
+If the value of a key is a function, it is called with the section's literal
+block of text, unrendered, as its first argument. The second argument is a
+special rendering function that uses the current view as its view argument. It
+is called in the context of the current view object.
+
+
+Template:
+
+    {{#users}}
+    {{#employee}}
+    * {{email}}
+    {{/employee}}
+    {{/users}}
+
+View:
+
+    {
+      "domain": "example.com",
+      "users": [
+        { "handle": "joe", "employee": true },
+        { "handle": "bob", "employee": false },
+        { "handle": "jim", "employee": true }
+      ],
+      "employee": function () {
+        this.
+      },
+      "email": function () {
+        return function (text, render) {
+          return this.handle + "@" + this.domain;
+        }
+      }
+    }
+
+Output:
+
+    * joe@example.com
+    * bob@example.com
+    * jim@example.com
+    * Porthos
+    * D'Artagnan
+
+
+TODO - pick up here
+
+
+
+
+
+
+
+
 
 Conditional sections begin with `{{#condition}}` and end with
 `{{/condition}}`. When `condition` evaluates to true, the section is rendered,
