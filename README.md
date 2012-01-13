@@ -49,19 +49,19 @@ contains the data and code needed to render the template.
 
 A [mustache](http://mustache.github.com/) template is a string that contains
 any number of mustache tags. Tags are indicated by the double mustaches that
-surround them. *{{person}}* is a tag, as is *{{#person}}*. In both examples we
-refer to *person* as the tag's key.
+surround them. `{{person}}` is a tag, as is `{{#person}}`. In both examples we
+refer to `person` as the tag's key.
 
 There are several types of tags available in mustache.js.
 
 ### Variables
 
-The most basic tag type is a simple variable. A *{{name}}* tag renders the value
-of the *name* key in the current context. If there is no such key, nothing is
+The most basic tag type is a simple variable. A `{{name}}` tag renders the value
+of the `name` key in the current context. If there is no such key, nothing is
 rendered.
 
 All variables are HTML-escaped by default. If you want to render unescaped HTML,
-use the triple mustache: *{{{name}}}*. You can also use *&* to unescape a
+use the triple mustache: `{{{name}}}`. You can also use `&` to unescape a
 variable.
 
 Template:
@@ -115,15 +115,15 @@ Output:
 Sections render blocks of text one or more times, depending on the value of the
 key in the current context.
 
-A section begins with a pound and ends with a slash. That is, *{{#person}}*
-begins a *person* section, while *{{/person}}* ends it. The text between the two
+A section begins with a pound and ends with a slash. That is, `{{#person}}`
+begins a `person` section, while `{{/person}}` ends it. The text between the two
 tags is referred to as that section's "block".
 
 The behavior of the section is determined by the value of the key.
 
 #### False Values or Empty Lists
 
-If the *person* key exists and has a value of `null`, `undefined`, or `false`,
+If the `person` key exists and has a value of `null`, `undefined`, or `false`,
 or is an empty list, the block will not be rendered.
 
 Template:
@@ -145,7 +145,7 @@ Output:
 
 #### Non-Empty Lists
 
-If the *person* key exists and is not `null`, `undefined`, or `false`, and is
+If the `person` key exists and is not `null`, `undefined`, or `false`, and is
 not an empty list the block will be rendered one or more times.
 
 When the value is a list, the block is rendered once for each item in the list.
@@ -298,7 +298,7 @@ They also inherit the calling context. Whereas in ERB you may have this:
 
 Mustache requires only this:
 
-{{> next_more}}
+    {{> next_more}}
 
 Why? Because the `next_more.mustache` file will inherit the `size` and `start`
 variables from the calling context. In this way you may want to think of
