@@ -34,12 +34,12 @@ Below is quick example how to use mustache.js:
 
     var view = {
       title: "Joe",
-      calc: function() {
+      calc: function () {
         return 2 + 4;
       }
     };
 
-    var html = Mustache.render("{{title}} spends {{calc}}", view);
+    var output = Mustache.render("{{title}} spends {{calc}}", view);
 
 In this example, the `Mustache.render` function takes two parameters: 1) the
 [mustache](http://mustache.github.com/) template and 2) a `view` object that
@@ -130,13 +130,13 @@ Template:
 
     Shown.
     {{#nothin}}
-      Never shown!
+    Never shown!
     {{/nothin}}
 
 View:
 
     {
-      "person": true,
+      "person": true
     }
 
 Output:
@@ -164,7 +164,7 @@ View:
       "stooges": [
         { "name": "Moe" },
         { "name": "Larry" },
-        { "name": "Curly" },
+        { "name": "Curly" }
       ]
     }
 
@@ -196,256 +196,170 @@ Output:
     * Porthos
     * D'Artagnan
 
-
-#### Functions
-
-If the value of a key is a function, it is called with the section's literal
-block of text, unrendered, as its first argument. The second argument is a
-special rendering function that uses the current view as its view argument. It
-is called in the context of the current view object.
-
+If the value of a section variable is a function, it will be called in the
+context of the current item in the list on each iteration.
 
 Template:
 
-    {{#users}}
-    {{#employee}}
-    * {{email}}
-    {{/employee}}
-    {{/users}}
+    {{#beatles}}
+    * {{name}}
+    {{/beatles}}
 
 View:
 
     {
-      "domain": "example.com",
-      "users": [
-        { "handle": "joe", "employee": true },
-        { "handle": "bob", "employee": false },
-        { "handle": "jim", "employee": true }
+      "beatles": [
+        { "firstName": "John", "lastName": "Lennon" },
+        { "firstName": "Paul", "lastName": "McCartney" },
+        { "firstName": "George", "lastName": "Harrison" },
+        { "firstName": "Ringo", "lastName": "Starr" }
       ],
-      "employee": function () {
-        this.
-      },
-      "email": function () {
+      "name": function () {
+        return this.firstName + " " + this.lastName;
+      }
+    }
+
+Output:
+
+    * John Lennon
+    * Paul McCartney
+    * George Harrison
+    * Ringo Starr
+
+#### Functions
+
+If the value of a section key is a function, it is called with the section's
+literal block of text, un-rendered, as its first argument. The second argument
+is a special rendering function that uses the current view as its view argument.
+It is called in the context of the current view object.
+
+Template:
+
+    {{#bold}}Hi {{name}}.{{/bold}}
+
+View:
+
+    {
+      "name": "Tater",
+      "bold": function () {
         return function (text, render) {
-          return this.handle + "@" + this.domain;
+          return "<b>" + render(text) + "</b>";
         }
       }
     }
 
 Output:
 
-    * joe@example.com
-    * bob@example.com
-    * jim@example.com
-    * Porthos
-    * D'Artagnan
-
-
-TODO - pick up here
-
-
-
-
-
-
-
-
-
-Conditional sections begin with `{{#condition}}` and end with
-`{{/condition}}`. When `condition` evaluates to true, the section is rendered,
-otherwise the whole block will output nothing at all. `condition` may be a
-function returning true/false or a simple boolean.
-
-    var view = {condition: function() {
-      // [...your code goes here...]
-      return true;
-    }}
-
-    {{#condition}}
-      I will be visible if condition is true
-    {{/condition}}
-
-
-### Enumerable Sections
-
-Enumerable Sections use the same syntax as condition sections do.
-`{{#shopping_items}}` and `{{/shopping_items}}`. Actually the view decides how
-mustache.js renders the section. If the view returns an array, it will
-iterator over the items. Use `{{.}}` to access the current item inside the
-enumeration section.
-
-    var view = {name: "Joe's shopping card",
-                items: ["bananas", "apples"]}
-
-    var template = "{{name}}: <ul> {{#items}}<li>{{.}}</li>{{/items}} </ul>"
-
-    Outputs:
-    Joe's shopping card: <ul><li>bananas</li><li>apples</li></ul>
-
-
-### Higher Order Sections
-
-If a section key returns a function, it will be called and passed both the
-unrendered block of text and a renderer convenience function.
-
-Given this object:
-
-    "name": "Tater",
-    "bolder": function() {
-      return function(text, render) {
-        return "<b>" + render(text) + '</b>'
-      }
-    }
-
-And this template:
-
-    {{#bolder}}Hi {{name}}.{{/bolder}}
-
-We'll get this output:
-
     <b>Hi Tater.</b>
-
-As you can see, we’re pre-processing the text in the block. This can be used
-to implement caching, filters (like syntax highlighting), etc.
-
-You can use `this.name` to access the attribute `name` from your view.
-
-### Dereferencing Sections
-
-If your data has components that are logically grouped into nested objects,
-you may wish to dereference an object to access its values.
-
-Given this object:
-
-    {
-      "name": "Bill",
-      "address": {
-        "street": "801 Streetly street",
-        "city": "Boston",
-        "state": "MA",
-        "zip" "02101"
-      }
-    }
-
-And this template:
-
-    <h1>Contact: {{name}}</h1>
-    {{#address}}
-      <p>{{street}}</p>
-      <p>{{city}}, {{state}} {{zip}}</p>
-    {{/address}}
-
-We'll get this output:
-
-    <h1>Contact: Bill</h1>
-      <p>801 Streetly street</p>
-      <p>Boston, MA 02101</p>
 
 ### Inverted Sections
 
-An inverted section opens with `{{^section}}` instead of `{{#section}}` and
-uses a boolean negative to evaluate. Empty arrays are considered falsy.
-
-View:
-
-    var inverted_section =  {
-      "repo": []
-    }
+An inverted section opens with `{{^section}}` instead of `{{#section}}`. The
+block of an inverted section is rendered only if the value of that section's tag
+is `null`, `undefined`, `false`, or an empty list.
 
 Template:
 
-    {{#repo}}<b>{{name}}</b>{{/repo}}
-    {{^repo}}No repos :({{/repo}}
+    {{#repos}}<b>{{name}}</b>{{/repos}}
+    {{^repos}}No repos :({{/repos}}
 
-Result:
+View:
+
+    {
+      "repos": []
+    }
+
+Output:
 
     No repos :(
 
+### Comments
 
-### View Partials
+Comments begin with a bang and are ignored. The following template:
 
-mustache.js supports a quite powerful but yet simple view partial mechanism.
-Use the following syntax for partials: `{{>partial_name}}`
+    <h1>Today{{! ignore me }}.</h1>
 
-    var view = {
-      name: "Joe",
-      winnings: {
-        value: 1000,
-        taxed_value: function() {
-            return this.value - (this.value * 0.4);
-        }
-      }
-    };
+Will render as follows:
 
-    var template = "Welcome, {{name}}! {{>winnings}}"
-    var partials = {
-      winnings: "You just won ${{value}} (which is ${{taxed_value}} after tax)"};
+    <h1>Today.</h1>
 
-    var output = Mustache.to_html(template, view, partials)
+Comments may contain newlines.
 
-    output will be:
-    Welcome, Joe! You just won $1000 (which is $600 after tax)
+### Partials
 
-You invoke a partial with `{{>winnings}}`. Invoking the partial `winnings`
-will tell mustache.js to look for a object in the context's property
-`winnings`. It will then use that object as the context for the template found
-in `partials` for `winnings`.
+Partials begin with a greater than sign, like {{> box}}.
 
-## Escaping
+Partials are rendered at runtime (as opposed to compile time), so recursive
+partials are possible. Just avoid infinite loops.
 
-mustache.js does escape all values when using the standard double mustache
-syntax. Characters which will be escaped: `& \ " ' < >`. To disable escaping,
-simply use triple mustaches like `{{{unescaped_variable}}}`.
+They also inherit the calling context. Whereas in ERB you may have this:
 
-Example: Using `{{variable}}` inside a template for `5 > 2` will result in `5 &gt; 2`, where as the usage of `{{{variable}}}` will result in `5 > 2`.
+    <%= partial :next_more, :start => start, :size => size %>
 
+Mustache requires only this:
+
+{{> next_more}}
+
+Why? Because the `next_more.mustache` file will inherit the `size` and `start`
+variables from the calling context. In this way you may want to think of
+partials as includes, or template expansion, even though it's not literally true.
+
+For example, this template and partial:
+
+    base.mustache:
+    <h2>Names</h2>
+    {{#names}}
+      {{> user}}
+    {{/names}}
+
+    user.mustache:
+    <strong>{{name}}</strong>
+
+Can be thought of as a single, expanded template:
+
+    <h2>Names</h2>
+    {{#names}}
+      <strong>{{name}}</strong>
+    {{/names}}
+
+In mustache.js an object of partials may be passed as the third argument to
+`Mustache.render`. The object should be keyed by the name of the partial, and
+its value should be the partial text.
+
+### Set Delimiter
+
+Set Delimiter tags start with an equals sign and change the tag delimiters from
+`{{` and `}}` to custom strings.
+
+Consider the following contrived example:
+
+    * {{ default_tags }}
+    {{=<% %>=}}
+    * <% erb_style_tags %>
+    <%={{ }}=%>
+    * {{ default_tags_again }}
+
+Here we have a list with three items. The first item uses the default tag style,
+the second uses ERB style as defined by the Set Delimiter tag, and the third
+returns to the default style after yet another Set Delimiter declaration.
+
+According to [ctemplates](http://google-ctemplate.googlecode.com/svn/trunk/doc/howto.html),
+this "is useful for languages like TeX, where double-braces may occur in the
+text and are awkward to use for markup."
+
+Custom delimiters may not contain whitespace or the equals sign.
 
 ## Streaming
 
-To stream template results out of mustache.js, you can pass an optional
-`send()` callback to the `to_html()` call:
+To stream template results out of mustache.js, you can pass an optional callback
+to the call to `Mustache.render`:
 
-    Mustache.to_html(template, view, partials, function(line) {
-      print(line);
+    Mustache.render(template, view, partials, function (chunk) {
+      print(chunk);
     });
 
-
-## Pragmas
-
-Pragma tags let you alter the behaviour of mustache.js. They have the format
-of
-
-    {{%PRAGMANAME}}
-
-and they accept options:
-
-    {{%PRAGMANAME option=value}}
-
-
-### IMPLICIT-ITERATOR
-
-When using a block to iterate over an enumerable (Array), mustache.js expects
-an objects as enumerable items. The implicit iterator pragma enables optional
-behaviour of allowing literals as enumerable items. Consider this view:
-
-    var view = {
-      foo: [1, 2, 3, 4, 5, "french"]
-    };
-
-The following template can iterate over the member `foo`:
-
-    {{%IMPLICIT-ITERATOR}}
-    {{#foo}}
-      {{.}}
-    {{/foo}}
-
-If you don't like the dot in there, the pragma accepts an option to set your
-own iteration marker:
-
-    {{%IMPLICIT-ITERATOR iterator=bob}}
-    {{#foo}}
-      {{bob}}
-    {{/foo}}
+When the template is finished rendering, the callback will be called with `null`
+after which it won't be called anymore for that rendering.
 
 ## Plugins for JavaScript Libraries
 
