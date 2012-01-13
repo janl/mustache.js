@@ -115,7 +115,11 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   /**
    * Looks up the value of the given `name` in the given context `stack`.
    */
-  function findName(name, stack) {
+  function findName(name, stack, returnNull) {
+    if (name === ".") {
+      return stack[stack.length - 1];
+    }
+
     var names = name.split(".");
     var lastIndex = names.length - 1;
     var target = names[lastIndex];
@@ -147,10 +151,16 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       value = value.call(localStack[localStack.length - 1]);
     }
 
-    return value == null ? "" : value;
+    if (value == null && !returnNull)  {
+      return "";
+    }
+
+    return value;
   }
 
-  function sendSection(send, value, callback, stack, inverted) {
+  function sendSection(send, name, callback, stack, inverted) {
+    var value =  findName(name, stack, true);
+
     if (inverted) {
       // From the spec: inverted sections may render text once based on the
       // inverse value of the key. That is, they will be rendered if the key
@@ -223,11 +233,6 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       nonSpace = false;
     };
 
-    // Returns a bit of code that can be used to find the given `name`.
-    var findFor = function (name) {
-      return name === "." ? "stack[stack.length - 1]" : 'find("' + name + '")';
-    };
-
     var sectionStack = [], updateLine, nextOpenTag, nextCloseTag;
 
     var setTags = function (source) {
@@ -260,7 +265,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       code.push(
         '");',
         updateLine,
-        '\nvar value = ' + findFor(name) + ';',
+        '\nvar name = "' + name + '";',
         '\nvar callback = (function () {',
         '\n  var buffer, send = function (chunk) { buffer.push(chunk); };',
         '\n  return function () {',
@@ -291,9 +296,9 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       );
 
       if (section.inverted) {
-        code.push("\nsendSection(send,value,callback,stack,true);");
+        code.push("\nsendSection(send,name,callback,stack,true);");
       } else {
-        code.push("\nsendSection(send,value,callback,stack);");
+        code.push("\nsendSection(send,name,callback,stack);");
       }
 
       code.push('\nsend("');
@@ -303,7 +308,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       code.push(
         '");',
         updateLine,
-        '\nsend(' + findFor(trim(source)) + ');',
+        '\nsend(findName("' + trim(source) + '", stack));',
         '\nsend("'
       );
     };
@@ -312,7 +317,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       code.push(
         '");',
         updateLine,
-        '\nsend(escapeHTML(' + findFor(trim(source)) + '));',
+        '\nsend(escapeHTML(findName("' + trim(source) + '", stack)));',
         '\nsend("'
       );
     };
@@ -446,7 +451,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    * Used by `compile` to generate a reusable function for the given `template`.
    */
   function _compile(template, options) {
-    var args = "view,partials,send,stack,find,escapeHTML,sendSection,render";
+    var args = "view,partials,send,stack,findName,escapeHTML,sendSection,render";
     var body = parse(template, options);
     var fn = new Function(args, body);
 
@@ -469,12 +474,8 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 
       var stack = [view]; // context stack
 
-      var find = function (name) {
-        return findName(name, stack);
-      };
-
       try {
-        fn(view, partials, send, stack, find, escapeHTML, sendSection, render);
+        fn(view, partials, send, stack, findName, escapeHTML, sendSection, render);
       } catch (e) {
         throw debug(e.error, template, e.line, options.file);
       }
