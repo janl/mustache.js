@@ -1,4 +1,4 @@
 
-  dojox.mustache = dojo.hitch(Mustache, "to_html");
+  dojox.mustache = dojo.hitch(Mustache, "render");
 
 })();
