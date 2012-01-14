@@ -45,6 +45,14 @@ In this example, the `Mustache.render` function takes two parameters: 1) the
 [mustache](http://mustache.github.com/) template and 2) a `view` object that
 contains the data and code needed to render the template.
 
+### CommonJS
+
+mustache.js is usable without any modification in both browsers and [CommonJS](http://www.commonjs.org/)
+environments like [node.js](http://nodejs.org/). To use it as a CommonJS module,
+simply require the file, like this:
+
+    var Mustache = require("mustache");
+
 ## Templates
 
 A [mustache](http://mustache.github.com/) template is a string that contains
