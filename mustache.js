@@ -216,13 +216,14 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       '\nsend("'
     ];
 
-    var spaces = [],      // indices of whitespace in code for the current line
+    var spaces = [],      // indices of whitespace in code on the current line
+        hasTag = false,   // is there a {{tag}} on the current line?
         nonSpace = false; // is there a non-space char on the current line?
 
     // Strips all space characters from the code array for the current line
     // if there was a {{tag}} on it and otherwise only spaces.
     var stripSpace = function () {
-      if (!nonSpace && !options.space) {
+      if (hasTag && !nonSpace && !options.space) {
         while (spaces.length) {
           code.splice(spaces.pop(), 1);
         }
@@ -230,6 +231,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
         spaces = [];
       }
 
+      hasTag = false;
       nonSpace = false;
     };
 
@@ -330,6 +332,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
         updateLine = '\nline = ' + line + ';';
         nextOpenTag = openTag;
         nextCloseTag = closeTag;
+        hasTag = true;
 
         switch (c) {
         case "!": // comment
