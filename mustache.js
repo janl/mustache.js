@@ -14,7 +14,16 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   exports.render = render;
   exports.clearCache = clearCache;
 
-  exports.to_html = render; // keep backwards compatibility
+  // This is here for backwards compatibility with 0.4.x.
+  exports.to_html = function (template, view, partials, send) {
+    var result = render(template, view, partials);
+
+    if (typeof send === "function") {
+      send(result);
+    } else {
+      return result;
+    }
+  };
 
   var _toString = Object.prototype.toString;
   var _isArray = Array.isArray;
@@ -158,7 +167,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     return value;
   }
 
-  function sendSection(send, name, callback, stack, inverted) {
+  function sendSection(stack, buffer, name, callback, inverted) {
     var value =  findName(name, stack, true);
 
     if (inverted) {
@@ -166,26 +175,26 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       // inverse value of the key. That is, they will be rendered if the key
       // doesn't exist, is false, or is an empty list.
       if (value == null || value === false || (isArray(value) && value.length === 0)) {
-        send(callback());
+        buffer.push(callback());
       }
     } else if (isArray(value)) {
       forEach(value, function (value) {
         stack.push(value);
-        send(callback());
+        buffer.push(callback());
         stack.pop();
       });
     } else if (typeof value === "object") {
       stack.push(value);
-      send(callback());
+      buffer.push(callback());
       stack.pop();
     } else if (typeof value === "function") {
       var scope = stack[stack.length - 1];
       var scopedRender = function (template) {
         return render(template, scope);
       };
-      send(value.call(scope, callback(), scopedRender) || "");
+      buffer.push(value.call(scope, callback(), scopedRender) || "");
     } else if (value) {
-      send(callback());
+      buffer.push(callback());
     }
   }
 
@@ -213,7 +222,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     var code = [
       "var line = 1;", // keep track of source line number
       "\ntry {",
-      '\nsend("'
+      '\nbuffer.push("'
     ];
 
     var spaces = [],      // indices of whitespace in code on the current line
@@ -249,9 +258,9 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
         updateLine,
         '\nvar partial = partials["' + trim(source) + '"];',
         '\nif (partial) {',
-        '\n  send(render(partial, stack[stack.length - 1], partials));',
+        '\n  buffer.push(render(partial, stack[stack.length - 1], partials));',
         '\n}',
-        '\nsend("'
+        '\nbuffer.push("'
       );
     };
 
@@ -269,10 +278,10 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
         updateLine,
         '\nvar name = "' + name + '";',
         '\nvar callback = (function () {',
-        '\n  var buffer, send = function (chunk) { buffer.push(chunk); };',
+        '\n  var buffer;',
         '\n  return function () {',
         '\n    buffer = [];',
-        '\nsend("'
+        '\nbuffer.push("'
       );
     };
 
@@ -298,20 +307,20 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       );
 
       if (section.inverted) {
-        code.push("\nsendSection(send,name,callback,stack,true);");
+        code.push("\nsendSection(stack,buffer,name,callback,true);");
       } else {
-        code.push("\nsendSection(send,name,callback,stack);");
+        code.push("\nsendSection(stack,buffer,name,callback);");
       }
 
-      code.push('\nsend("');
+      code.push('\nbuffer.push("');
     };
 
     var sendPlain = function (source) {
       code.push(
         '");',
         updateLine,
-        '\nsend(findName("' + trim(source) + '", stack));',
-        '\nsend("'
+        '\nbuffer.push(findName("' + trim(source) + '",stack));',
+        '\nbuffer.push("'
       );
     };
 
@@ -319,8 +328,8 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       code.push(
         '");',
         updateLine,
-        '\nsend(escapeHTML(findName("' + trim(source) + '", stack)));',
-        '\nsend("'
+        '\nbuffer.push(escapeHTML(findName("' + trim(source) + '",stack)));',
+        '\nbuffer.push("'
       );
     };
 
@@ -435,12 +444,11 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 
     code.push(
       '");',
-      "\nsend(null);", // Send null as the last operation.
       "\n} catch (e) { throw {error: e, line: line}; }"
     );
 
-    // Ignore empty send("") statements.
-    var body = code.join("").replace(/send\(""\);\n/g, "");
+    // Ignore buffer.push("") statements.
+    var body = code.join("").replace(/buffer\.push\(""\);\n/g, "");
 
     if (options.debug) {
       if (typeof console != "undefined" && console.log) {
@@ -457,31 +465,21 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    * Used by `compile` to generate a reusable function for the given `template`.
    */
   function _compile(template, options) {
-    var args = "view,partials,send,stack,findName,escapeHTML,sendSection,render";
+    var args = "view,partials,stack,buffer,findName,escapeHTML,sendSection,render";
     var body = parse(template, options);
     var fn = new Function(args, body);
 
     // This anonymous function wraps the generated function so we can do
     // argument coercion, setup some variables, and handle any errors
     // encountered while executing it.
-    return function (view, partials, callback) {
-      if (typeof partials === "function") {
-        callback = partials;
-        partials = {};
-      }
-
+    return function (view, partials) {
       partials = partials || {};
 
+      var stack = [view]; // context stack
       var buffer = []; // output buffer
 
-      var send = callback || function (chunk) {
-        buffer.push(chunk);
-      };
-
-      var stack = [view]; // context stack
-
       try {
-        fn(view, partials, send, stack, findName, escapeHTML, sendSection, render);
+        fn(view, partials, stack, buffer, findName, escapeHTML, sendSection, render);
       } catch (e) {
         throw debug(e.error, template, e.line, options.file);
       }
@@ -526,18 +524,12 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 
   /**
    * High-level function that renders the given `template` using the given
-   * `view`, `partials`, and `callback`. The `callback` is used to return the
-   * output piece by piece, as it is rendered. When finished, the callback will
-   * receive `null` as its argument, after which it will not be called any more.
-   * If no callback is given, the complete rendered template will be used as the
-   * return value for the function.
-   *
-   * Note: If no partials are needed, the third argument may be the callback.
-   * If you need to use any of the template options (see `compile` above), you
-   * must compile in a separate step, and then call that compiled function.
+   * `view` and `partials`. If you need to use any of the template options (see
+   * `compile` above), you must compile in a separate step, and then call that
+   * compiled function.
    */
-  function render(template, view, partials, callback) {
-    return compile(template)(view, partials, callback);
+  function render(template, view, partials) {
+    return compile(template)(view, partials);
   }
 
 })(Mustache);

@@ -99,30 +99,30 @@ describe "mustache" do
           run_js(@runner, js).chomp.should == expect
         end
 
-        it "should send the correct output" do
-          template, view, partial, expect = load_test(test)
-
-          js = <<-JS
-            try {
-              #{@boilerplate}
-              var template = #{template.to_json};
-              #{view}
-              var partials = {
-                "partial": #{(partial || '').to_json}
-              };
-              var buffer = [];
-              var send = function (chunk) {
-                buffer.push(chunk);
-              };
-              Mustache.render(template, #{test}, partials, send);
-              print(buffer.join(""));
-            } catch(e) {
-              print('ERROR: ' + e.message);
-            }
-          JS
-
-          run_js(@runner, js).chomp.should == expect
-        end
+        # it "should send the correct output" do
+        #   template, view, partial, expect = load_test(test)
+        #
+        #   js = <<-JS
+        #     try {
+        #       #{@boilerplate}
+        #       var template = #{template.to_json};
+        #       #{view}
+        #       var partials = {
+        #         "partial": #{(partial || '').to_json}
+        #       };
+        #       var buffer = [];
+        #       var send = function (chunk) {
+        #         buffer.push(chunk);
+        #       };
+        #       Mustache.render(template, #{test}, partials, send);
+        #       print(buffer.join(""));
+        #     } catch(e) {
+        #       print('ERROR: ' + e.message);
+        #     }
+        #   JS
+        #
+        #   run_js(@runner, js).chomp.should == expect
+        # end
       end
     end
   end
