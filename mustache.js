@@ -124,7 +124,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   /**
    * Looks up the value of the given `name` in the given context `stack`.
    */
-  function findName(name, stack, returnNull) {
+  function lookup(name, stack, defaultValue) {
     if (name === ".") {
       return stack[stack.length - 1];
     }
@@ -160,15 +160,15 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       value = value.call(localStack[localStack.length - 1]);
     }
 
-    if (value == null && !returnNull)  {
-      return "";
+    if (value == null)  {
+      return defaultValue;
     }
 
     return value;
   }
 
-  function sendSection(stack, buffer, name, callback, inverted) {
-    var value =  findName(name, stack, true);
+  function renderSection(name, stack, buffer, callback, inverted) {
+    var value =  lookup(name, stack);
 
     if (inverted) {
       // From the spec: inverted sections may render text once based on the
@@ -307,9 +307,9 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       );
 
       if (section.inverted) {
-        code.push("\nsendSection(stack,buffer,name,callback,true);");
+        code.push("\nrenderSection(name,stack,buffer,callback,true);");
       } else {
-        code.push("\nsendSection(stack,buffer,name,callback);");
+        code.push("\nrenderSection(name,stack,buffer,callback);");
       }
 
       code.push('\nbuffer.push("');
@@ -319,7 +319,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       code.push(
         '");',
         updateLine,
-        '\nbuffer.push(findName("' + trim(source) + '",stack));',
+        '\nbuffer.push(lookup("' + trim(source) + '",stack,""));',
         '\nbuffer.push("'
       );
     };
@@ -328,7 +328,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       code.push(
         '");',
         updateLine,
-        '\nbuffer.push(escapeHTML(findName("' + trim(source) + '",stack)));',
+        '\nbuffer.push(escapeHTML(lookup("' + trim(source) + '",stack,"")));',
         '\nbuffer.push("'
       );
     };
@@ -465,7 +465,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    * Used by `compile` to generate a reusable function for the given `template`.
    */
   function _compile(template, options) {
-    var args = "view,partials,stack,buffer,findName,escapeHTML,sendSection,render";
+    var args = "view,partials,stack,buffer,lookup,escapeHTML,renderSection,render";
     var body = parse(template, options);
     var fn = new Function(args, body);
 
@@ -479,7 +479,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       var buffer = []; // output buffer
 
       try {
-        fn(view, partials, stack, buffer, findName, escapeHTML, sendSection, render);
+        fn(view, partials, stack, buffer, lookup, escapeHTML, renderSection, render);
       } catch (e) {
         throw debug(e.error, template, e.line, options.file);
       }
