@@ -404,6 +404,9 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
           nonSpace = true;
           code.push("\\" + c);
           break;
+        case "\r":
+          // Ignore carriage returns.
+          break;
         case "\n":
           spaces.push(code.length);
           code.push("\\n");
