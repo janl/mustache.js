@@ -167,7 +167,8 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     return value;
   }
 
-  function renderSection(name, stack, buffer, callback, inverted) {
+  function renderSection(name, stack, callback, inverted) {
+    var buffer = "";
     var value =  lookup(name, stack);
 
     if (inverted) {
@@ -175,27 +176,29 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       // inverse value of the key. That is, they will be rendered if the key
       // doesn't exist, is false, or is an empty list.
       if (value == null || value === false || (isArray(value) && value.length === 0)) {
-        buffer.push(callback());
+        buffer += callback();
       }
     } else if (isArray(value)) {
       forEach(value, function (value) {
         stack.push(value);
-        buffer.push(callback());
+        buffer += callback();
         stack.pop();
       });
     } else if (typeof value === "object") {
       stack.push(value);
-      buffer.push(callback());
+      buffer += callback();
       stack.pop();
     } else if (typeof value === "function") {
       var scope = stack[stack.length - 1];
       var scopedRender = function (template) {
         return render(template, scope);
       };
-      buffer.push(value.call(scope, callback(), scopedRender) || "");
+      buffer += value.call(scope, callback(), scopedRender) || "";
     } else if (value) {
-      buffer.push(callback());
+      buffer += callback();
     }
+
+    return buffer;
   }
 
   /**
@@ -220,9 +223,10 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
         closeTag = tags[tags.length - 1];
 
     var code = [
-      "var line = 1;", // keep track of source line number
+      'var buffer = "";', // output buffer
+      "\nvar line = 1;", // keep track of source line number
       "\ntry {",
-      '\nbuffer.push("'
+      '\nbuffer += "'
     ];
 
     var spaces = [],      // indices of whitespace in code on the current line
@@ -254,13 +258,13 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 
     var includePartial = function (source) {
       code.push(
-        '");',
+        '";',
         updateLine,
         '\nvar partial = partials["' + trim(source) + '"];',
         '\nif (partial) {',
-        '\n  buffer.push(render(partial, stack[stack.length - 1], partials));',
+        '\n  buffer += render(partial,stack[stack.length - 1],partials);',
         '\n}',
-        '\nbuffer.push("'
+        '\nbuffer += "'
       );
     };
 
@@ -274,14 +278,13 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       sectionStack.push({name: name, inverted: inverted});
 
       code.push(
-        '");',
+        '";',
         updateLine,
         '\nvar name = "' + name + '";',
         '\nvar callback = (function () {',
-        '\n  var buffer;',
         '\n  return function () {',
-        '\n    buffer = [];',
-        '\nbuffer.push("'
+        '\n    var buffer = "";',
+        '\nbuffer += "'
       );
     };
 
@@ -300,36 +303,36 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       var section = sectionStack.pop();
 
       code.push(
-        '");',
-        '\n    return buffer.join("");',
+        '";',
+        '\n    return buffer;',
         '\n  };',
         '\n})();'
       );
 
       if (section.inverted) {
-        code.push("\nrenderSection(name,stack,buffer,callback,true);");
+        code.push("\nbuffer += renderSection(name,stack,callback,true);");
       } else {
-        code.push("\nrenderSection(name,stack,buffer,callback);");
+        code.push("\nbuffer += renderSection(name,stack,callback);");
       }
 
-      code.push('\nbuffer.push("');
+      code.push('\nbuffer += "');
     };
 
     var sendPlain = function (source) {
       code.push(
-        '");',
+        '";',
         updateLine,
-        '\nbuffer.push(lookup("' + trim(source) + '",stack,""));',
-        '\nbuffer.push("'
+        '\nbuffer += lookup("' + trim(source) + '",stack,"");',
+        '\nbuffer += "'
       );
     };
 
     var sendEscaped = function (source) {
       code.push(
-        '");',
+        '";',
         updateLine,
-        '\nbuffer.push(escapeHTML(lookup("' + trim(source) + '",stack,"")));',
-        '\nbuffer.push("'
+        '\nbuffer += escapeHTML(lookup("' + trim(source) + '",stack,""));',
+        '\nbuffer += "'
       );
     };
 
@@ -443,12 +446,13 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     stripSpace();
 
     code.push(
-      '");',
+      '";',
+      "\nreturn buffer;",
       "\n} catch (e) { throw {error: e, line: line}; }"
     );
 
-    // Ignore buffer.push("") statements.
-    var body = code.join("").replace(/buffer\.push\(""\);\n/g, "");
+    // Ignore `buffer += "";` statements.
+    var body = code.join("").replace(/buffer \+= "";\n/g, "");
 
     if (options.debug) {
       if (typeof console != "undefined" && console.log) {
@@ -465,7 +469,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    * Used by `compile` to generate a reusable function for the given `template`.
    */
   function _compile(template, options) {
-    var args = "view,partials,stack,buffer,lookup,escapeHTML,renderSection,render";
+    var args = "view,partials,stack,lookup,escapeHTML,renderSection,render";
     var body = parse(template, options);
     var fn = new Function(args, body);
 
@@ -476,15 +480,12 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       partials = partials || {};
 
       var stack = [view]; // context stack
-      var buffer = []; // output buffer
 
       try {
-        fn(view, partials, stack, buffer, lookup, escapeHTML, renderSection, render);
+        return fn(view, partials, stack, lookup, escapeHTML, renderSection, render);
       } catch (e) {
         throw debug(e.error, template, e.line, options.file);
       }
-
-      return buffer.join("");
     };
   }
 
