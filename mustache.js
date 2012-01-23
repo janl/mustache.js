@@ -285,7 +285,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       var openName = sectionStack.length != 0 && sectionStack[sectionStack.length - 1].name;
 
       if (!openName || name != openName) {
-        throw debug(new Error('Section named "' + name + '" was never opened'), template, line, file);
+        throw debug(new Error('Section named "' + name + '" was never opened'), template, line, options.file);
       }
 
       var section = sectionStack.pop();
