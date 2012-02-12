@@ -275,7 +275,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
         throw debug(new Error("Section name may not be empty"), template, line, options.file);
       }
 
-      sectionStack.push({name: name, inverted: inverted});
+      sectionStack.push({name: name, inverted: inverted, line: line});
 
       code.push(
         '";',
@@ -438,7 +438,8 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     }
 
     if (sectionStack.length != 0) {
-      throw debug(new Error('Section "' + sectionStack[sectionStack.length - 1].name + '" was not closed properly'), template, line, options.file);
+      var stack = sectionStack[sectionStack.length - 1];
+      throw debug(new Error('Section "' + stack.name + '" was not closed properly'), template, stack.line, options.file);
     }
 
     // Clean up any whitespace from a closing {{tag}} that was at the end
