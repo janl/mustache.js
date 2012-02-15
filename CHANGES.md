@@ -1,8 +1,6 @@
 # mustache.js Changes
 
-## 0.4.1-dev-familywall (2/15/2012)
-
-## 0.4.0-dev-familywall (2/9/2012)
+## 0.4.1-dev (2/15/2012)
 
 * fixed greedy parsing of section name in regexp
 
