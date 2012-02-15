@@ -1,5 +1,11 @@
 # mustache.js Changes
 
+## 0.4.1-dev (2/15/2012)
+
+* fixed greedy parsing of section name in regexp
+
+## 0.4.0 (1/4/2012)
+
 ## 0.3.1-dev-twitter-b (8/23/2011)
 
 * Cached regexes for improved performance

@@ -40,7 +40,7 @@ var Mustache = function () {
     "<": "&lt;",
     ">": "&gt;",
     '"': '&quot;',
-    "'": '&#39;'
+    "'": '&apos;'
   };
 
   function escapeHTML(string) {
@@ -176,7 +176,7 @@ var Mustache = function () {
           "^([\\s\\S]*?)" +         // all the crap at the beginning that is not {{*}} ($1)
 
           otag +                    // {{
-          "(\\^|\\#)\\s*(.+)\\s*" + //  #foo (# == $2, foo == $3)
+          "(\\^|\\#)\\s*(.+?)\\s*" +//  #foo (# == $2, foo == $3), not greedy
           ctag +                    // }}
 
           "\n*([\\s\\S]*?)" +       // between the tag ($2). leading newlines are dropped
@@ -417,7 +417,7 @@ var Mustache = function () {
 
   return({
     name: "mustache.js",
-    version: "0.4.0",
+    version: "0.4.1-dev",
 
     /*
       Turns a template and view into HTML
