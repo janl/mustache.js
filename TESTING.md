@@ -1,5 +1,7 @@
 ## Running the mustache.js Test Suite
 
+Notice: the tests are only expected to run on unixoid systems.
+
 The mustache.js test suite uses the [RSpec](http://rspec.info/) testing
 framework. In order to run the tests you'll need to install [Ruby](http://ruby-lang.org/)
 as well as the `rake`, `rspec` (>=2), and `json` [RubyGems](http://rubygems.org/).
