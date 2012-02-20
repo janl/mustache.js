@@ -40,7 +40,7 @@ var Mustache = function () {
     "<": "&lt;",
     ">": "&gt;",
     '"': '&quot;',
-    "'": '&apos;'
+    "'": '&#39;'
   };
 
   function escapeHTML(string) {
