@@ -55,6 +55,17 @@ It is recommended to install node.js from source instead.
 
     $ sudo apt-get install node
 
+### How to install node.js from source
+
+    $ git clone https://github.com/joyent/node.git
+    $ cd node
+    $ # select the version to install, master is unstable;
+    $ # latest stable version is advertised on http://nodejs.org
+    $ git checkout v0.6.11
+    $ ./configure
+    $ make
+    $ sudo make install
+
 ### How to run the tests
 
 The mustache.js test suite currently uses 4 different JavaScript runtime engines
