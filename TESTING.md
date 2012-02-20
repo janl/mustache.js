@@ -6,18 +6,6 @@ The mustache.js test suite uses the [RSpec](http://rspec.info/) testing
 framework. In order to run the tests you'll need to install [Ruby](http://ruby-lang.org/)
 as well as the `rake`, `rspec` (>=2), and `json` [RubyGems](http://rubygems.org/).
 
-### How to install Ruby, Ruby gems and the required gems with a package manager
-
-Tested on Ubuntu 10.10.
-
-    $ sudo apt-get install ruby1.8-dev
-    $ sudo apt-get install rubygems1.8
-    $ sudo gem install rake rspec
-
-    $ # needed to build native json extension for json gem
-    $ sudo apt-get install build-essential libreadline5-dev
-    $ sudo gem install json
-
 ### How to install Ruby and the required gems from source
 
 Make sure you have the required tools to compile it:
@@ -47,13 +35,6 @@ Install the required gems:
     $ gem install rake rspec json
 
 That's it!
-
-### How to install node.js using a package manager
-
-Notice: the version of node.js included in Ubuntu repositories is quite old.
-It is recommended to install node.js from source instead.
-
-    $ sudo apt-get install node
 
 ### How to install node.js from source
 
