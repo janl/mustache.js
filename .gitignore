@@ -1,3 +1,5 @@
+# ignore temp vim files
+*.swp
 .DS_Store
 .rvmrc
 runner.js
