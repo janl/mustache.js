@@ -48,6 +48,13 @@ Install the required gems:
 
 That's it!
 
+### How to install node.js using a package manager
+
+Notice: the version of node.js included in Ubuntu repositories is quite old.
+It is recommended to install node.js from source instead.
+
+    $ sudo apt-get install node
+
 ### How to run the tests
 
 The mustache.js test suite currently uses 4 different JavaScript runtime engines
