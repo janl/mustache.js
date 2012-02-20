@@ -1,5 +1,7 @@
 ## Running the mustache.js Test Suite
 
+Notice: the tests are only expected to run on unixoid systems.
+
 The mustache.js test suite uses the [RSpec](http://rspec.info/) testing
 framework. In order to run the tests you'll need to install [Ruby](http://ruby-lang.org/)
 as well as the `rake`, `rspec` (>=2), and `json` [RubyGems](http://rubygems.org/).
@@ -33,6 +35,17 @@ Install the required gems:
     $ gem install rake rspec json
 
 That's it!
+
+### How to install node.js from source
+
+    $ git clone https://github.com/joyent/node.git
+    $ cd node
+    $ # select the version to install, master is unstable;
+    $ # latest stable version is advertised on http://nodejs.org
+    $ git checkout v0.6.11
+    $ ./configure
+    $ make
+    $ sudo make install
 
 ### How to run the tests
 
