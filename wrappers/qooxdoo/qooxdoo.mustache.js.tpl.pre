@@ -19,7 +19,7 @@
 
    This class contains code based on the following work:
 
-   * Mustache.js version 0.4.0-dev
+   * Mustache.js version 0.4.1
 
      Code:
        https://github.com/janl/mustache.js
