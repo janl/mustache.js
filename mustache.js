@@ -149,7 +149,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
         localStack.push(context);
       }
 
-      if (context && target in context) {
+      if (context && typeof context === "object" && target in context) {
         value = context[target];
         break;
       }
