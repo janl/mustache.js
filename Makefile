@@ -1,8 +1,7 @@
 # Make mustaches
 
 # make a release
-# TODO depend on test
-release: args tag build-wrappers
+release: test args tag build-wrappers
 	@echo Done!
 
 args:
@@ -30,8 +29,8 @@ build-wrappers:
 	git checkout $(version)
 	build/wrappers.sh $(version)
 	mkdir wrappers/mustache-$(version)
-	cp mustache.js wrappers/mustache-$(version)/
-	cp package.json wrappers/mustache-$(version)/
+	cp mustache.js package.json README.md LICENSE \
+		wrappers/mustache-$(version)/
 
 	git checkout gh-pages
 	mkdir ${version}
