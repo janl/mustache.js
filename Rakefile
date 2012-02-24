@@ -33,14 +33,22 @@ def templated_build(name, opts={})
 
     mkdir_p opts[:location] if opts[:location]
 
-    sh "cat #{source}/#{target_js}.tpl.pre mustache.js \
-      #{source}/#{target_js}.tpl.post > #{opts[:location] || '.'}/#{target_js}"
+    files = [
+      "#{source}/mustache.js.pre",
+      'mustache.js',
+      "#{source}/mustache.js.post"
+    ]
+
+    open("#{opts[:location] || '.'}/#{target_js}", 'w') do |f|
+      files.each {|file| f << File.read(file) }
+    end
 
     puts "Done, see #{opts[:location] || '.'}/#{target_js}"
   end
 end
 
 templated_build "jQuery"
+templated_build "MooTools"
 templated_build "Dojo", :location => "dojox/string"
 templated_build "YUI3", :location => "yui3/mustache"
 templated_build "RequireJS"

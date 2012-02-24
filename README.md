@@ -377,6 +377,7 @@ be built specifically for several different client libraries and platforms,
 including the following:
 
   - [jQuery](http://jquery.com/)
+  - [MooTools](http://mootools.net/)
   - [Dojo](http://www.dojotoolkit.org/)
   - [YUI](http://developer.yahoo.com/yui/)
   - [RequireJS](http://requirejs.org/)
@@ -386,6 +387,7 @@ These may be built using [Rake](http://rake.rubyforge.org/) and one of the
 following commands:
 
     $ rake jquery
+    $ rake mootools
     $ rake dojo
     $ rake yui
     $ rake requirejs
