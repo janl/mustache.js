@@ -39,10 +39,14 @@ build-wrappers:
 	cp wrappers/mustache-$(version)/* $(version)
 	# update gh-pages with release links & travis
 	# TODO: add $(version)/index.html page (from template)
-	# TODO: update index.html to point to $(vesion)
+	# update index.html to point to $(vesion)
+	cat index.html.pre > index.html
+	for release in `ls -p | grep '/$'`; do echo "<li><a href="${release}/">${release}</a></li>"; done >> index.html
+	cat index.html.post >> index.html
 	git add $(version)
 	git commit -m 'Release $(version)' index.html $(version)
 	git clean -fdx
+	git checkout new-build-system
 	#     update npm
 	#     update cdnjs
 
