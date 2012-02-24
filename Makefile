@@ -14,12 +14,13 @@ endif
 tag:
 	# splice in version
 	sed -i.bak -e "s|%version%|${version}|" mustache.js package.json
-	git commit -m 'Released ${version}' mustache.js
+	git commit -m 'Released ${version}' mustache.js package.json
 	#  tag the version
 	git tag ${version}
 	# revert the version
 	sed -i.bak -e 's|exports.version = "${version}"|exports.version = "%version%"|' mustache.js
 	sed -i.bak -e 's|"version": "${version}"|"version": "%version%"|' package.json
+	git commit -m 'Back to non-released version' mustache.js package.json
 
 build-wrappers:
 	#   from that tag:
