@@ -43,7 +43,7 @@ build-wrappers:
 
 	# add $(version)/index.html page (from template)
 	sed -e 's|%version%|$(version)|' \
-		-e 's|%date%|$(shell date)' release-index.html > $(version)/index.html
+		-e 's|%date%|$(strip $(shell date))|' release-index.html > $(version)/index.html
 
 	# update index.html to point to $(vesion)
 	cat index.html.pre > index.html
