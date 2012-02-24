@@ -21,6 +21,7 @@ tag:
 	sed -i.bak -e 's|exports.version = "${version}"|exports.version = "%version%"|' mustache.js
 	sed -i.bak -e 's|"version": "${version}"|"version": "%version%"|' package.json
 	git commit -m 'Back to non-released version' mustache.js package.json
+	rm *.bak
 
 build-wrappers:
 	#   from that tag:
