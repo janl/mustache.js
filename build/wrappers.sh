@@ -6,7 +6,7 @@ fi
 version=$1
 cd wrappers
     for wrapper in *; do
-        target_dir="mustache-${wrapper}-${version}"
+        target_dir="mustache-${wrapper}"
         mkdir -p $target_dir
         target=$target_dir/${wrapper}.mustache.js
         touch $target
