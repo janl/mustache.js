@@ -39,7 +39,10 @@ build-wrappers:
 	cp wrappers/mustache-$(version)/* $(version)
 	rm -rf wrappers
 	# update gh-pages with release links & travis
-	# TODO: add $(version)/index.html page (from template)
+	# add $(version)/index.html page (from template)
+	date=`date`
+	sed -e 's|%version%|$(version)|' \
+		-e 's|%date%|$(date)' release-index.html > $(version)/index.html
 	# update index.html to point to $(vesion)
 	cat index.html.pre > index.html
 	for release in `ls -p | grep '/'`; do relno=`echo $$release | sed -e 's|/||'`; echo "<li><a href=\"$${release}\">$${relno}</a></li>" >> index.html; done
