@@ -28,9 +28,15 @@ build-wrappers:
 	#     build all wrappers / minify
 	git checkout $(version)
 	build/wrappers.sh $(version)
+	`echo "/*! Version: $(version) */" > mustache.min.js`
+	`uglifyjs mustache.js >> mustache.min.js`
 	mkdir wrappers/mustache-$(version)
-	cp mustache.js package.json README.md LICENSE \
+	cp mustache.js mustache.min.js package.json README.md LICENSE \
 		wrappers/mustache-$(version)/
+	cd wrappers; \
+	tar czf mustache-$(version).tar.gz mustache-$(version); \
+	cd ..
+	mv mustache-$(version).tar.gz wrappers/mustache-$(version)/
 
 	git checkout gh-pages
 	mkdir ${version}

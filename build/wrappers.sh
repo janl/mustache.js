@@ -13,6 +13,7 @@ cd wrappers
         cat ${wrapper}/mustache.js.pre >> ${target}
         cat ../mustache.js >> ${target}
         cat ${wrapper}/mustache.js.post >> ${target}
+        uglifyjs ${target} > ${target_dir}/${wrapper}.mustache.min.js
         cp ../README.md ${target_dir}
         cp ../LICENSE ${target_dir}
         tar czf ${target_dir}.tar.gz ${target_dir}
