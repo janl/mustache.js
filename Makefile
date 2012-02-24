@@ -1,6 +1,7 @@
 # Make mustaches
 
 # make a release
+# TODO depend on test
 release: args tag build-wrappers
 	@echo Done!
 
@@ -36,7 +37,12 @@ build-wrappers:
 	mkdir ${version}
 	cp -r wrappers/mustache-* $(version)/
 	cp wrappers/mustache-$(version)/* $(version)
-	#     update gh-pages with release links & travis
+	# update gh-pages with release links & travis
+	# TODO: add $(version)/index.html page (from template)
+	# TODO: update index.html to point to $(vesion)
+	git add $(version)
+	git commit -m 'Release $(version)' index.html $(version)
+	git clean -fdx
 	#     update npm
 	#     update cdnjs
 
