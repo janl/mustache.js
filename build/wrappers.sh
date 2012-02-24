@@ -13,5 +13,9 @@ cd wrappers
         cat ${wrapper}/mustache.js.pre >> ${target}
         cat ../mustache.js >> ${target}
         cat ${wrapper}/mustache.js.post >> ${target}
+        cp ../README.md ${target_dir}
+        cp ../LICENSE ${target_dir}
+        tar czf ${target_dir}.tar.gz ${target_dir}
+        mv ${target_dir}.tar.gz ${target_dir}
     done
 cd ..
