@@ -42,9 +42,8 @@ build-wrappers:
 	# update gh-pages with release links & travis
 
 	# add $(version)/index.html page (from template)
-	reldate=$(shell date)
 	sed -e 's|%version%|$(version)|' \
-		-e 's|%date%|$(reldate)' release-index.html > $(version)/index.html
+		-e 's|%date%|$(shell date)' release-index.html > $(version)/index.html
 
 	# update index.html to point to $(vesion)
 	cat index.html.pre > index.html
