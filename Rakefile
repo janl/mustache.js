@@ -56,7 +56,7 @@ templated_build "qooxdoo"
 task :minify do
   # npm install uglify-js
   mmjs = "mustache.min.js"
-  `echo "/*! Version: 0.4.2-dev */" > #{mmjs}`
+  `echo "/*! Version: 0.4.2 */" > #{mmjs}`
   `uglifyjs mustache.js >> #{mmjs}`
   puts "Created #{mmjs}"
 end
