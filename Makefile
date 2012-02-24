@@ -41,7 +41,7 @@ build-wrappers:
 	# TODO: add $(version)/index.html page (from template)
 	# update index.html to point to $(vesion)
 	cat index.html.pre > index.html
-	for release in `ls -p | grep '/'`; do echo "<li><a href=\"$(version)/\">$(version)</a></li>" >> index.html; done
+	for release in `ls -p | grep '/'`; do echo "<li><a href=\"${release}/\">${release}</a></li>" >> index.html; done
 	cat index.html.post >> index.html
 	git add $(version)
 	git commit -m 'Release $(version)' index.html $(version)
