@@ -37,6 +37,7 @@ build-wrappers:
 	mkdir ${version}
 	cp -r wrappers/mustache-* $(version)/
 	cp wrappers/mustache-$(version)/* $(version)
+	rm -rf wrappers
 	# update gh-pages with release links & travis
 	# TODO: add $(version)/index.html page (from template)
 	# update index.html to point to $(vesion)
