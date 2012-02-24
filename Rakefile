@@ -12,13 +12,9 @@ task :spec do
   end
 end
 
-def version
-  File.read("mustache.js").match('version = "([^\"]+)";$')[1]
-end
-
-# Creates a rule that uses the .tmpl.{pre,post} stuff to make a final,
-# wrapped, output file. There is some extra complexity because Dojo and YUI3
-# use different template files and final locations.
+# Creates a task that uses the various template wrappers to make a wrapped
+# output file. There is some extra complexity because Dojo and YUI use
+# different final locations.
 def templated_build(name, opts={})
   short = name.downcase
   source = File.join("wrappers", short)
