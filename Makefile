@@ -36,7 +36,7 @@ build-wrappers:
 	cd wrappers; \
 	tar czf mustache-$(version).tar.gz mustache-$(version); \
 	cd ..
-	mv mustache-$(version).tar.gz wrappers/mustache-$(version)/
+	mv wrappers/mustache-$(version).tar.gz wrappers/mustache-$(version)/
 
 	git checkout gh-pages
 	mkdir ${version}
