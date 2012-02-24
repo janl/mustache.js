@@ -27,12 +27,14 @@ build-wrappers:
 	#     build all wrappers / minify
 	git checkout $(version)
 	build/wrappers.sh $(version)
+	mkdir wrappers/mustache-$(version)
+	cp mustache.js wrappers/mustache-$(version)/
+	cp package.json wrappers/mustache-$(version)/
 
 	git checkout gh-pages
 	mkdir ${version}
 	cp -r wrappers/mustache-* $(version)/
-	cp mustache.js $(version)/
-	cp package.json $(version)/
+	cp wrappers/mustache-$(version)/* $(version)
 	#     update gh-pages with release links & travis
 	#     update npm
 	#     update cdnjs
