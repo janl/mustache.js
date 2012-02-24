@@ -49,3 +49,11 @@ templated_build "Dojo", :location => "dojox/string"
 templated_build "YUI3", :location => "yui3/mustache"
 templated_build "RequireJS"
 templated_build "qooxdoo"
+
+task :minify do
+  # npm install uglify-js
+  mmjs = "mustache.min.js"
+  `echo "/*! Version: 0.5.1-dev */" > #{mmjs}`
+  `uglifyjs mustache.js >> #{mmjs}`
+  puts "Created #{mmjs}"
+end
