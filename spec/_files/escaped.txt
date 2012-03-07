@@ -1,2 +1,2 @@
 <h1>Bear &gt; Shark</h1>
-But not &quot;.
+But not &amp;quot;.
