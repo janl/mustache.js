@@ -13,6 +13,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   exports.compile = compile;
   exports.render = render;
   exports.clearCache = clearCache;
+  exports.escapeHTML = undefined;
 
   // This is here for backwards compatibility with 0.4.x.
   exports.to_html = function (template, view, partials, send) {
@@ -90,10 +91,18 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     "/": '&#x2F;'
   };
 
-  function escapeHTML(string) {
+  function _escapeHTML(string) {
     return String(string).replace(/&(?!\w+;)|[<>"'\/]/g, function (s) {
       return escapeMap[s] || s;
     });
+  }
+
+  function escapeHTML(string) {
+    if (typeof (exports.escapeHTML) == 'function') {
+      return exports.escapeHTML(string);
+    } else {
+      return _escapeHTML(string);
+    }
   }
 
   /**
