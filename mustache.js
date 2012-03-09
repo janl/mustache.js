@@ -97,9 +97,17 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     });
   }
 
+  function _escapeHTMLStrict(string) {
+    return String(string).replace(/[&<>"'\/]/g, function (s) {
+      return escapeMap[s] || s;
+    });
+  }
+
   function escapeHTML(string) {
     if (typeof (exports.escapeHTML) == 'function') {
       return exports.escapeHTML(string);
+    } else if (exports.escapeHTML === 'strict') {
+      return _escapeHTMLStrict(string);
     } else {
       return _escapeHTML(string);
     }
