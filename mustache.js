@@ -95,6 +95,15 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     });
   }
 
+  // OSWASP Guidlines: escape all non alphanumeric characters in ASCII space.
+  var JAVASCRIPT_CHARACTERS_EXPRESSION =
+      /[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\xFF\u2028\u2029]/gm;
+  function encodeJavaScriptString(text) {
+    return text && '"' + text.replace(JAVASCRIPT_CHARACTERS_EXPRESSION, function (c) {
+      return "\\u" + ('0000' + c.charCodeAt(0).toString(16)).slice(-4);
+    }) + '"';
+  }
+
   /**
    * Adds the `template`, `line`, and `file` properties to the given error
    * object and alters the message to provide more useful debugging information.
@@ -260,7 +269,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       code.push(
         '";',
         updateLine,
-        '\nvar partial = partials["' + trim(source) + '"];',
+        '\nvar partial = partials[' + encodeJavaScriptString(trim(source)) + '];',
         '\nif (partial) {',
         '\n  buffer += render(partial,stack[stack.length - 1],partials);',
         '\n}',
@@ -280,7 +289,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       code.push(
         '";',
         updateLine,
-        '\nvar name = "' + name + '";',
+        '\nvar name = ' + encodeJavaScriptString(name) + ';',
         '\nvar callback = (function () {',
         '\n  return function () {',
         '\n    var buffer = "";',
@@ -322,7 +331,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       code.push(
         '";',
         updateLine,
-        '\nbuffer += lookup("' + trim(source) + '",stack,"");',
+        '\nbuffer += lookup(' + encodeJavaScriptString(trim(source)) + ',stack,"");',
         '\nbuffer += "'
       );
     };
@@ -331,7 +340,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       code.push(
         '";',
         updateLine,
-        '\nbuffer += escapeHTML(lookup("' + trim(source) + '",stack,""));',
+        '\nbuffer += escapeHTML(lookup(' + encodeJavaScriptString(trim(source)) + ',stack,""));',
         '\nbuffer += "'
       );
     };
