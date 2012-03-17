@@ -1,1 +1,0 @@
-var two_sections = {};

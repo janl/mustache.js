@@ -1,20 +1,18 @@
 require 'rake'
 require 'rake/clean'
 
-task :default => :spec
+task :default => 'test:integration'
 
-desc "Run all specs"
-task :spec do
-  require 'rspec/core/rake_task'
-  RSpec::Core::RakeTask.new(:spec) do |t|
-    #t.spec_opts = ['--options', "\"#{File.dirname(__FILE__)}/spec/spec.opts\""]
-    t.pattern = 'spec/*_spec.rb'
+namespace :test do
+  desc "Run all integration tests"
+  task :integration do
+    require File.expand_path('../test/integration', __FILE__)
   end
-end
 
-desc "Run all unit tests"
-task :test do
-  exec "vows test/*_test.js"
+  desc "Run all unit tests"
+  task :unit do
+    require File.expand_path('../test/unit', __FILE__)
+  end
 end
 
 # Creates a task that uses the various template wrappers to make a wrapped
