@@ -12,6 +12,11 @@ task :spec do
   end
 end
 
+desc "Run all unit tests"
+task :test do
+  exec "vows test/*_test.js"
+end
+
 # Creates a task that uses the various template wrappers to make a wrapped
 # output file. There is some extra complexity because Dojo and YUI use
 # different final locations.
