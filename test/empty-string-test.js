@@ -2,11 +2,14 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
 	
+	var Mustache = global.Mustache || require("../mustache");
+
 	buster.testCase('Empty string', {
 	    'should not generate any output for empty strings': function(){
 			var template = '{{description}}{{#child}}{{description}}{{/child}}',
@@ -22,4 +25,4 @@
 	        assert.equals( actualResult, expectedResult );
 	    }
 	});	
-}());
+}(this));

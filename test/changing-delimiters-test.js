@@ -2,10 +2,13 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
+	
+	var Mustache = global.Mustache || require("../mustache");
 	
 	buster.testCase( 'Changing delimiters', {
 	    'should allow alternate set of delimiters': function(){
@@ -20,4 +23,4 @@
 	        assert.equals( actualResult, expectedResult );
 	    }
 	});	
-}());
+}(this));

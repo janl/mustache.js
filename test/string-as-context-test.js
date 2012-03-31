@@ -2,11 +2,14 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
 	
+	var Mustache = global.Mustache || require("../mustache");
+
 	buster.testCase('String as context', {
 	    'should allow a string to be used as context': function(){
 			var template = [
@@ -30,6 +33,4 @@
 	        assert.equals( actualResult, expectedResult );
 	    }
 	});	
-}());
-
-
+}(this));

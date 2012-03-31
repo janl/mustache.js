@@ -2,11 +2,14 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
 	
+	var Mustache = global.Mustache || require("../mustache");
+
 	buster.testCase('Partial - empty', {
 	    'should not generate any output for empty partials': function(){
 			var template = 'hey {{foo}}\n{{>partial}}',
@@ -20,4 +23,4 @@
 	        assert.equals( actualResult, expectedResult );
 	    }
 	});	
-}());
+}(this));

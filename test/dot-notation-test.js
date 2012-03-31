@@ -2,11 +2,14 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
 	
+	var Mustache = global.Mustache || require("../mustache");
+
 	buster.testCase('Dot notation', {
 		'should be able to use dot notation for looking up properties': function(){
 			var template = [
@@ -59,5 +62,4 @@
 			assert.equals( actualResult, expectedResult );
 		}
 	}); 
-}());
-
+}(this));

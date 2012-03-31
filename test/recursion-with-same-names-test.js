@@ -2,11 +2,14 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
 	
+	var Mustache = global.Mustache || require("../mustache");
+
 	buster.testCase('Recursion with same names', {
 	    'should not fail just because the same names appear in output as with recursion': function(){
 			var template = 
@@ -40,4 +43,4 @@
 	        assert.equals( actualResult, expectedResult );
 	    }
 	});	
-}());
+}(this));

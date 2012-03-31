@@ -2,11 +2,14 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
 	
+	var Mustache = global.Mustache || require("../mustache");
+
 	buster.testCase('Nesting same name', {
 	    'should be able to differentiate between same names in different contexts': function(){
 			var template = '{{#items}}{{name}}{{#items}}{{.}}{{/items}}{{/items}}',
@@ -24,4 +27,4 @@
 	        assert.equals( actualResult, expectedResult );
 	    }
 	});	
-}());
+}(this));

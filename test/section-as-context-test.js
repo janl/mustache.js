@@ -2,11 +2,14 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
 	
+	var Mustache = global.Mustache || require("../mustache");
+
 	buster.testCase('Section as context', {
 	    'should allow section as context': function(){
 			var template = 
@@ -43,7 +46,4 @@
 	        assert.equals( actualResult, expectedResult );
 	    }
 	});	
-}());
-
-
-
+}(this));

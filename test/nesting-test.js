@@ -2,11 +2,14 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
 	
+	var Mustache = global.Mustache || require("../mustache");
+
 	buster.testCase('Nesting', {
 		'should be able to process nested data in view': function(){
 			var template = '{{#foo}}{{#a}}{{b}}{{/a}}{{/foo}}',
@@ -23,4 +26,4 @@
 			assert.equals( actualResult, expectedResult );
 		}
 	}); 
-}());
+}(this));

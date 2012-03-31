@@ -2,11 +2,14 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
 	
+	var Mustache = global.Mustache || require("../mustache");
+
 	buster.testCase('Unescaped', {
 		'should allow unescaped output when the unescaped delimiter is used': function(){
 			var template = '<h1>{{{title}}}</h1>',
@@ -21,4 +24,4 @@
 			assert.equals( actualResult, expectedResult );
 		}
 	}); 
-}());
+}(this));

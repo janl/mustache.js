@@ -2,11 +2,14 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
 	
+	var Mustache = global.Mustache || require("../mustache");
+
 	buster.testCase('Escaped', {
 	    'should html escape unsafe characters, but not entities': function(){
 			var template = '<h1>{{title}}</h1>\nBut not {{entities}}.',
@@ -22,4 +25,4 @@
 	        assert.equals( actualResult, expectedResult );
 	    }
 	});	
-}());
+}(this));

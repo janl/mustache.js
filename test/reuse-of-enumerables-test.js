@@ -2,11 +2,14 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
 	
+	var Mustache = global.Mustache || require("../mustache");
+
 	buster.testCase('Re-use of enumerables', {
 		'must not consume data, it should be available to be re-used many times': function(){
 			var template = 
@@ -28,7 +31,4 @@
 			assert.equals( actualResult, expectedResult );
 		}
 	}); 
-}());
-
-
-
+}(this));

@@ -2,10 +2,13 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
+	
+	var Mustache = global.Mustache || require("../mustache");
 	
 	buster.testCase('Partial - array of partials - implicit', {
 	    'should allow the use of partials in sections, also for implicit values': function(){
@@ -31,4 +34,4 @@
 	        assert.equals( actualResult, expectedResult );
 	    }
 	});	
-}());
+}(this));

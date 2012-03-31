@@ -2,11 +2,14 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
 	
+	var Mustache = global.Mustache || require("../mustache");
+
 	buster.testCase('Context lookup', {
 	    'should be able to navigate contexts': function(){
 			var template = '{{#outer}}{{#second}}{{id}}{{/second}}{{/outer}}',
@@ -24,4 +27,4 @@
 	        assert.equals( actualResult, expectedResult );
 	    }
 	});	
-}());
+}(this));

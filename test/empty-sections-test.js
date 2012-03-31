@@ -2,11 +2,14 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
 	
+	var Mustache = global.Mustache || require("../mustache");
+
 	buster.testCase('Empty sections', {
 	    'should empty sections should generate no output': function(){
 			var template = '{{#foo}}{{/foo}}moo{{#bar}}{{/bar}}',
@@ -17,4 +20,4 @@
 	        assert.equals( actualResult, expectedResult );
 	    }
 	});	
-}());
+}(this));

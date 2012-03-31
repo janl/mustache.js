@@ -2,11 +2,14 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
 	
+	var Mustache = global.Mustache || require("../mustache");
+
 	buster.testCase('Disappearing whitespace', {
 	    'should keep whitespace after delimiters': function(){
 			var template = '{{#bedrooms}}{{total}}{{/bedrooms}} BED',
@@ -20,4 +23,4 @@
 	        assert.equals( actualResult, expectedResult );
 	    }
 	});	
-}());
+}(this));

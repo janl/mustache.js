@@ -2,11 +2,14 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
 	
+	var Mustache = global.Mustache || require("../mustache");
+
 	buster.testCase('Nested iterating', {
 		'should be able to iterate nested collections': function(){
 			var template = '{{#inner}}{{foo}}{{#inner}}{{bar}}{{/inner}}{{/inner}}',
@@ -24,4 +27,4 @@
 			assert.equals( actualResult, expectedResult );
 		}
 	}); 
-}());
+}(this));

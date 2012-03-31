@@ -2,10 +2,13 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	"use strict";
+	
+	var Mustache = global.Mustache || require("../mustache");
 	
 	buster.testCase("Bug 11 - Eating whitespace", {
 	    "should do something": function(){
@@ -19,4 +22,4 @@
 	        assert.equals( actualResult, expectedResult );
 	    }
 	});	
-}());
+}(this));

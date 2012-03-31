@@ -4,9 +4,20 @@
 */
 var config = module.exports;
 
-config["mustache.js"] = {
+config["mustache.js - V8"] = {
     rootPath: "../",
-    environment: "browser", // or "node"
+    environment: "node",
+    sources: [
+        "mustache.js"
+    ],
+    tests: [
+        "test/*-test.js"
+    ]
+};
+
+config["mustache.js - Browser"] = {
+    rootPath: "../",
+    environment: "browser",
     sources: [
         "mustache.js"
     ],

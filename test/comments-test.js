@@ -2,11 +2,14 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	"use strict";
 	
+	var Mustache = global.Mustache || require("../mustache");
+
 	buster.testCase("Comments", {
 	    "should be removed in output": function(){
 			var template = '<h1>{{title}}{{! just something interesting... or not... }}</h1>',
@@ -21,4 +24,4 @@
 	        assert.equals( actualResult, expectedResult );
 	    }
 	});	
-}());
+}(this));

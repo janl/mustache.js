@@ -2,10 +2,13 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	"use strict";
+	
+	var Mustache = global.Mustache || require("../mustache");
 	
 	buster.testCase("Ampersand escape", {
 	    "should not html escape when ampersand is used": function(){
@@ -19,4 +22,4 @@
 	        assert.equals( actualResult, expectedResult );
 	    }
 	});	
-}());
+}(this));

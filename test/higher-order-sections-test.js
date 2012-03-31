@@ -2,11 +2,14 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
 	
+	var Mustache = global.Mustache || require("../mustache");
+
 	buster.testCase('Higher order sections', {
 		// FIXME [Morgan Roderick]: this is difficult to describe, perhaps this should be split into two tests?
 	    'should do something': function(){
@@ -26,4 +29,4 @@
 	        assert.equals( actualResult, expectedResult );
 	    }
 	});	
-}());
+}(this));

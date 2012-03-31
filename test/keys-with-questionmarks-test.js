@@ -2,10 +2,13 @@
 /*global
 	buster,
 	assert,
-	Mustache
+	Mustache,
+	require
 */
-(function(){
+(function(global){
 	'use strict';
+
+	var Mustache = global.Mustache || require("../mustache");
 	
 	buster.testCase('Keys with questionmarks', {
 	    'should support keys with qustionmarks in views': function(){
@@ -21,4 +24,4 @@
 	        assert.equals( actualResult, expectedResult );
 	    }
 	});	
-}());
+}(this));
