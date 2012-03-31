@@ -11,7 +11,7 @@ config["mustache.js - V8"] = {
         "mustache.js"
     ],
     tests: [
-        "test/*-test.js"
+        "test/tests/*-test.js"
     ]
 };
 
@@ -22,6 +22,6 @@ config["mustache.js - Browser"] = {
         "mustache.js"
     ],
     tests: [
-        "test/*-test.js"
+        "test/tests/*-test.js"
     ]
 };
