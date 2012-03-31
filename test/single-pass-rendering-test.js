@@ -7,8 +7,8 @@
 (function(){
 	'use strict';
 	
-	buster.testCase('Double render', {
-	    'should only do one pass through the template and not double render': function(){
+	buster.testCase('Single pass rendering', {
+	    'should only do one pass through the template': function(){
 			var template = '{{#foo}}{{bar}}{{/foo}}',
 				view = {
 				  foo: true,
