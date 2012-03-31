@@ -1,0 +1,22 @@
+/*jslint white:true, plusplus:true */
+/*global
+	buster,
+	assert,
+	Mustache
+*/
+(function(){
+	"use strict";
+	
+	buster.testCase("Ampersand escape", {
+	    "should not html escape when ampersand is used": function(){
+			var template = '{{&message}}',
+				view = {
+					message: "Some <code>"
+				},
+				expectedResult = 'Some <code>',
+				actualResult = Mustache.to_html( template, view );
+		
+	        assert.equals( actualResult, expectedResult );
+	    }
+	});	
+}());
