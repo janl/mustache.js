@@ -74,11 +74,11 @@ variable.
 
 Template:
 
-    * {{name}}
-    * {{age}}
-    * {{company}}
-    * {{{company}}}
-    * {{&company}}
+    * {{name}}        /* the varible name */ 
+    * {{age}}         /* the variable age */
+    * {{company}}     /* the variable company */
+    * {{{company}}}   /* company, unescaped html */
+    * {{&company}}    /* company, unescaped html (alternate spelling) */
 
 View:
 
