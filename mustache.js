@@ -476,7 +476,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     // This anonymous function wraps the generated function so we can do
     // argument coercion, setup some variables, and handle any errors
     // encountered while executing it.
-    return function (view, partials) {
+    var template = function (view, partials) {
       partials = partials || {};
 
       var stack = [view]; // context stack
@@ -487,6 +487,8 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
         throw debug(e.error, template, e.line, options.file);
       }
     };
+    template.compiled = true;
+    return template;
   }
 
   // Cache of pre-compiled templates.
@@ -510,6 +512,10 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    */
   function compile(template, options) {
     options = options || {};
+
+    if (typeof template === "function" && template.compiled) {
+      return template;
+    }
 
     // Use a pre-compiled version from the cache if we have one.
     if (options.cache !== false) {
