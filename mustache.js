@@ -7,7 +7,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 (function (exports) {
 
   exports.name = "mustache.js";
-  exports.version = "0.5.0-dev";
+  exports.version = "%version%";
   exports.tags = ["{{", "}}"];
   exports.parse = parse;
   exports.compile = compile;
