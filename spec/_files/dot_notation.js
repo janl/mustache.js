@@ -7,8 +7,8 @@ var dot_notation = {
       return this.value * 0.2;
     },
     currency: {
-      symbol: '&euro;',
-      name: 'Euro'
+      symbol: '$',
+      name: 'USD'
     }
   },
   availability:{
