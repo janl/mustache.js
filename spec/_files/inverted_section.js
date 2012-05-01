@@ -1,3 +1,4 @@
 var inverted_section =  {
-  "repos": []
+  "repos": [],
+  "empty_string": ""
 };
