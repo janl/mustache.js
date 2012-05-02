@@ -1,3 +1,4 @@
 
 No repos :(
 Hello!
+Empty string should be falsey
