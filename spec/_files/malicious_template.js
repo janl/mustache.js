@@ -1,0 +1,2 @@
+var malicious_template = {
+};
