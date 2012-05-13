@@ -179,11 +179,22 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
         buffer += callback();
       }
     } else if (isArray(value)) {
-      forEach(value, function (value) {
-        stack.push(value);
+      var $ = {};
+      $.$ = $;  
+	  stack.push($);      
+	  
+      for (var i=0, len=value.length; i < len; ++i) {
+        $.index = i;
+        $.count = i+1;
+        $.first = i == 0;
+        $.last = i == len-1;
+      		
+        stack.push(value[i]);
         buffer += callback();
         stack.pop();
-      });
+      };
+      
+      stack.pop();
     } else if (typeof value === "object") {
       stack.push(value);
       buffer += callback();
