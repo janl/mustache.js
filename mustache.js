@@ -234,8 +234,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     var code = [
       'var buffer = "";', // output buffer
       "\nvar line = 1;", // keep track of source line number
-      "\ntry {",
-      '\nbuffer += "'
+      "\ntry {"
     ];
 
     var spaces = [],      // indices of whitespace in code on the current line
@@ -267,13 +266,11 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 
     var includePartial = function (source) {
       code.push(
-        '";',
         updateLine,
         '\nvar partial = partials[' + encodeJavaScriptString(trim(source)) + '];',
         '\nif (partial) {',
         '\n  buffer += render(partial,stack[stack.length - 1],partials);',
-        '\n}',
-        '\nbuffer += "'
+        '\n}'
       );
     };
 
@@ -287,13 +284,11 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       sectionStack.push({name: name, inverted: inverted});
 
       code.push(
-        '";',
         updateLine,
         '\nvar name = ' + encodeJavaScriptString(name) + ';',
         '\nvar callback = (function () {',
         '\n  return function () {',
-        '\n    var buffer = "";',
-        '\nbuffer += "'
+        '\n    var buffer = "";'
       );
     };
 
@@ -312,7 +307,6 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       var section = sectionStack.pop();
 
       code.push(
-        '";',
         '\n    return buffer;',
         '\n  };',
         '\n})();'
@@ -323,25 +317,19 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       } else {
         code.push("\nbuffer += renderSection(name,stack,callback);");
       }
-
-      code.push('\nbuffer += "');
     };
 
     var sendPlain = function (source) {
       code.push(
-        '";',
         updateLine,
-        '\nbuffer += lookup(' + encodeJavaScriptString(trim(source)) + ',stack,"");',
-        '\nbuffer += "'
+        '\nbuffer += lookup(' + encodeJavaScriptString(trim(source)) + ',stack,"");'
       );
     };
 
     var sendEscaped = function (source) {
       code.push(
-        '";',
         updateLine,
-        '\nbuffer += escapeHTML(lookup(' + encodeJavaScriptString(trim(source)) + ',stack,""));',
-        '\nbuffer += "'
+        '\nbuffer += escapeHTML(lookup(' + encodeJavaScriptString(trim(source)) + ',stack,""));'
       );
     };
 
@@ -423,14 +411,14 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
         case '"':
         case "\\":
           nonSpace = true;
-          code.push("\\" + c);
+          code.push('\nbuffer += "\\'+c+'";');
           break;
         case "\r":
           // Ignore carriage returns.
           break;
         case "\n":
           spaces.push(code.length);
-          code.push("\\n");
+          code.push('\nbuffer += "\\n";');
           stripSpace(); // Check for whitespace on the current line.
           line++;
           break;
@@ -441,7 +429,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
             nonSpace = true;
           }
 
-          code.push(c);
+          code.push('\nbuffer += "'+c+'";');
         }
       }
     }
@@ -455,13 +443,12 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     stripSpace();
 
     code.push(
-      '";',
       "\nreturn buffer;",
       "\n} catch (e) { throw {error: e, line: line}; }"
     );
 
     // Ignore `buffer += "";` statements.
-    var body = code.join("").replace(/buffer \+= "";\n/g, "");
+    var body = code.join("").replace(/";\nbuffer \+= "/gm, "");
 
     return body;
   }
