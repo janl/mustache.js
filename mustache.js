@@ -407,29 +407,21 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       } else {
         c = template.substr(i, 1);
 
-        switch (c) {
-        case '"':
-        case "\\":
-          nonSpace = true;
-          code.push('\nbuffer += "\\'+c+'";');
-          break;
-        case "\r":
+        if (c == '\r') {
           // Ignore carriage returns.
-          break;
-        case "\n":
-          spaces.push(code.length);
-          code.push('\nbuffer += "\\n";');
-          stripSpace(); // Check for whitespace on the current line.
-          line++;
-          break;
-        default:
+        } else {
           if (isWhitespace(c)) {
             spaces.push(code.length);
           } else {
             nonSpace = true;
           }
 
-          code.push('\nbuffer += "'+c+'";');
+          code.push('\nbuffer += ' + encodeJavaScriptString(c) + ';');
+
+          if (c == '\n') {
+            stripSpace(); // Check for whitespace on the current line.
+            line++;
+          }
         }
       }
     }
