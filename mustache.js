@@ -136,6 +136,14 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       return "\\u" + ('0000' + c.charCodeAt(0).toString(16)).slice(-4);
     }) + '"';
   }
+  // This is not great, but it is useful.
+  var JSON_STRING_LITERAL_EXPRESSION =
+      /"(?:\\.|[^"])*"/gm;
+  function encodeJavaScriptData(object) {
+    return JSON.stringify(object).replace(JSON_STRING_LITERAL_EXPRESSION, function (string) {
+      return encodeJavaScriptString(JSON.parse(string));
+    });
+  }
 
   /**
    * Adds the `template`, `line`, and `file` properties to the given error
@@ -520,7 +528,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    * renders it.
    */
   function __compile(node) {
-    var code = ['var node = ' + JSON.stringify(node) + ';']; // output buffer
+    var code = ['var node = ' + encodeJavaScriptData(node) + ';'];
 
     code.push(_renderNode.toString());
 
