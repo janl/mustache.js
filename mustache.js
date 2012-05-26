@@ -463,14 +463,6 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     // Ignore `buffer += "";` statements.
     var body = code.join("").replace(/buffer \+= "";\n/g, "");
 
-    if (options.debug) {
-      if (typeof console != "undefined" && console.log) {
-        console.log(body);
-      } else if (typeof print === "function") {
-        print(body);
-      }
-    }
-
     return body;
   }
 
@@ -480,6 +472,15 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   function _compile(template, options) {
     var args = "view,partials,stack,lookup,escapeHTML,renderSection,render";
     var body = parse(template, options);
+
+    if (options.debug) {
+      if (typeof console != "undefined" && console.log) {
+        console.log(body);
+      } else if (typeof print === "function") {
+        print(body);
+      }
+    }
+
     var fn = new Function(args, body);
 
     // This anonymous function wraps the generated function so we can do
