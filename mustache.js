@@ -473,71 +473,46 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   }
 
   /**
-   * I do code-generation. Given a node, I generate the JavaScript code that
-   * renders a it.
+   * I can render a node.
    */
-  function _compileNode(node) {
-    var code = []
+  function _renderNode(node, stack, partials) {
+    var buffer = ""; // output buffer
 
     switch (node.type) {
       case NODE_TYPES.TEMPLATE:
-        code = reduce(node.children, function (code, node) {
-          code.push.apply(code, _compileNode(node));
-          return code;
-        }, code);
+        buffer = reduce(node.children, function (code, node) {
+          return code + _renderNode(node, stack, partials);
+        }, buffer);
         break;
       case NODE_TYPES.PARTIAL:
-        code.push(
-          '\nvar partial = partials[' + encodeJavaScriptString(node.key) + '];',
-          '\nif (partial) {',
-          '\n  buffer += render(partial,stack[stack.length - 1],partials);',
-          '\n}'
-        );
+        var partial = partials[node.key];
+        if (partial) {
+          buffer = render(partial,stack[stack.length - 1],partials);
+        }
         break;
       case NODE_TYPES.SECTION:
-        code.push(
-          '\nvar name = ' + encodeJavaScriptString(node.key) + ';',
-          '\nvar callback = (function () {',
-          '\n  return function () {',
-          '\n    var buffer = "";'
-        );
+        var name = node.key;
 
-        code = reduce(node.children, function (code, node) {
-          code.push.apply(code, _compileNode(node));
-          return code;
-        }, code);
+        callback = reduce(node.children, function (code, node) {
+          return function () {return code() + _renderNode(node, stack, partials)};
+        }, function () {return ""});
 
-        code.push(
-          '\n    return buffer;',
-          '\n  };',
-          '\n})();'
-        );
-
-        if (node.inverted) {
-          code.push("\nbuffer += renderSection(name,stack,callback,true);");
-        } else {
-          code.push("\nbuffer += renderSection(name,stack,callback);");
-        }
-
+        buffer = renderSection(name,stack,callback,node.inverted);
         break;
       case NODE_TYPES.PLAIN:
-        code.push(
-          '\nbuffer += lookup(' + encodeJavaScriptString(node.key) + ',stack,"");'
-        );
+        buffer = lookup(node.key,stack,"");
         break;
       case NODE_TYPES.ESCAPED:
-        code.push(
-          '\nbuffer += escapeHTML(lookup(' + encodeJavaScriptString(node.key) + ',stack,""));'
-        );
+        buffer = escapeHTML(lookup(node.key,stack,""));
         break;
       case NODE_TYPES.TEXT:
-        code.push('\nbuffer += ' + encodeJavaScriptString(node.value) + ';');
+        buffer = node.value;
         break;
       default:
         throw new Error("Unexpected node of type: " + node.type);
     }
 
-    return code;
+    return buffer;
   }
 
   /**
@@ -545,14 +520,13 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    * renders it.
    */
   function __compile(node) {
-    var code = ['var buffer = "";']; // output buffer
+    var code = ['var node = ' + JSON.stringify(node) + ';']; // output buffer
 
-    code.push.apply(code, _compileNode(node));
+    code.push(_renderNode.toString());
 
-    code.push("\nreturn buffer;");
+    code.push("\nreturn _renderNode(node, stack, partials);");
 
-    // Ignore `buffer += "";` statements.
-    var body = code.join("").replace(/";\nbuffer \+= "/gm, "");
+    var body = code.join("");
 
     return body;
   }
@@ -561,7 +535,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    * Used by `compile` to generate a reusable function for the given `template`.
    */
   function _compile(template, options) {
-    var args = "view,partials,stack,lookup,escapeHTML,renderSection,render";
+    var args = "view,partials,stack,lookup,escapeHTML,renderSection,render,NODE_TYPES,reduce";
     var body = __compile(parse(template, options));
 
     if (options.debug) {
@@ -582,7 +556,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 
       var stack = [view]; // context stack
 
-      return fn(view, partials, stack, lookup, escapeHTML, renderSection, render);
+      return fn(view, partials, stack, lookup, escapeHTML, renderSection, render, NODE_TYPES, reduce);
     };
   }
 
