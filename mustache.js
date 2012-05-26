@@ -14,6 +14,15 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   exports.render = render;
   exports.clearCache = clearCache;
 
+  var NODE_TYPES = {
+    TEMPLATE: 'tmpl'
+  , PARTIAL: 'par'
+  , SECTION: 'sec'
+  , PLAIN: 'plain'
+  , ESCAPED: 'esc'
+  , TEXT: 'txt'
+  };
+
   // This is here for backwards compatibility with 0.4.x.
   exports.to_html = function (template, view, partials, send) {
     var result = render(template, view, partials);
@@ -28,6 +37,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   var _toString = Object.prototype.toString;
   var _isArray = Array.isArray;
   var _forEach = Array.prototype.forEach;
+  var _reduce = Array.prototype.reduce;
   var _trim = String.prototype.trim;
 
   var isArray;
@@ -79,6 +89,29 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       return string == null ? "" :
         String(string).replace(trimLeft, "").replace(trimRight, "");
     };
+  }
+
+  var reduce;
+  if (_reduce) {
+    reduce = function (array) {
+      var args = Array.prototype.slice.call(arguments, 1);
+      return _reduce.apply(array, args)
+    };
+  } else {
+    reduce = function (array, callback, initialValue) {
+      var i, value;
+      if (arguments.length < 3) {
+        value = array[0];
+        i = 1;
+      } else {
+        value = initialValue;
+        i = 0;
+      }
+      for (i; i < array.length; i++) {
+        value = callback(value, array[i], i, array);
+      }
+      return value;
+    }
   }
 
   var escapeMap = {
@@ -211,16 +244,13 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   }
 
   /**
-   * Parses the given `template` and returns the source of a function that,
-   * with the proper arguments, will render the template. Recognized options
-   * include the following:
+   * Parses the given `template` and returns the abstract syntax tree for it.
+   * Recognized options include the following:
    *
    *   - file     The name of the file the template comes from (displayed in
    *              error messages)
    *   - tags     An array of open and close tags the `template` uses. Defaults
    *              to the value of Mustache.tags
-   *   - debug    Set `true` to log the body of the generated function to the
-   *              console
    *   - space    Set `true` to preserve whitespace from lines that otherwise
    *              contain only a {{tag}}. Defaults to `false`
    */
@@ -231,22 +261,25 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
         openTag = tags[0],
         closeTag = tags[tags.length - 1];
 
-    var code = [
-      'var buffer = "";', // output buffer
-      "\nvar line = 1;", // keep track of source line number
-      "\ntry {"
-    ];
-
     var spaces = [],      // indices of whitespace in code on the current line
         hasTag = false,   // is there a {{tag}} on the current line?
         nonSpace = false; // is there a non-space char on the current line?
 
-    // Strips all space characters from the code array for the current line
-    // if there was a {{tag}} on it and otherwise only spaces.
+    var nodes = [];
+    var node = {
+      type: NODE_TYPES.TEMPLATE
+    , line: 0
+    , file: options.file
+    , children: []
+    };
+
+    // Strips all space characters from the nodes if there was a {{tag}} on it
+    // and otherwise only spaces.
     var stripSpace = function () {
       if (hasTag && !nonSpace && !options.space) {
         while (spaces.length) {
-          code.splice(spaces.pop(), 1);
+          var space = spaces.pop();
+          space[0].children.splice(space[1], 1);
         }
       } else {
         spaces = [];
@@ -256,7 +289,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       nonSpace = false;
     };
 
-    var sectionStack = [], updateLine, nextOpenTag, nextCloseTag;
+    var sectionStack = [], nextOpenTag, nextCloseTag;
 
     var setTags = function (source) {
       tags = trim(source).split(/\s+/);
@@ -265,13 +298,12 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     };
 
     var includePartial = function (source) {
-      code.push(
-        updateLine,
-        '\nvar partial = partials[' + encodeJavaScriptString(trim(source)) + '];',
-        '\nif (partial) {',
-        '\n  buffer += render(partial,stack[stack.length - 1],partials);',
-        '\n}'
-      );
+      var n = {
+        type: NODE_TYPES.PARTIAL
+      , line: line
+      , key: trim(source)
+      };
+      node.children.push(n);
     };
 
     var openSection = function (source, inverted) {
@@ -283,13 +315,17 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 
       sectionStack.push({name: name, inverted: inverted});
 
-      code.push(
-        updateLine,
-        '\nvar name = ' + encodeJavaScriptString(name) + ';',
-        '\nvar callback = (function () {',
-        '\n  return function () {',
-        '\n    var buffer = "";'
-      );
+      var n = {
+        type: NODE_TYPES.SECTION
+      , line: line
+      , key: name
+      , inverted: !!inverted
+      , children: []
+      }
+      node.children.push(n);
+
+      nodes.push(node); // save context
+      node = n;
     };
 
     var openInvertedSection = function (source) {
@@ -306,31 +342,28 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 
       var section = sectionStack.pop();
 
-      code.push(
-        '\n    return buffer;',
-        '\n  };',
-        '\n})();'
-      );
-
-      if (section.inverted) {
-        code.push("\nbuffer += renderSection(name,stack,callback,true);");
-      } else {
-        code.push("\nbuffer += renderSection(name,stack,callback);");
-      }
+      var n = nodes.pop(); // restore context
+      node = n;
     };
 
     var sendPlain = function (source) {
-      code.push(
-        updateLine,
-        '\nbuffer += lookup(' + encodeJavaScriptString(trim(source)) + ',stack,"");'
-      );
+      var n = {
+        type: NODE_TYPES.PLAIN
+      , line: line
+      , key: trim(source)
+      };
+
+      node.children.push(n);
     };
 
     var sendEscaped = function (source) {
-      code.push(
-        updateLine,
-        '\nbuffer += escapeHTML(lookup(' + encodeJavaScriptString(trim(source)) + ',stack,""));'
-      );
+      var n = {
+        type: NODE_TYPES.ESCAPED
+      , line: line
+      , key: trim(source)
+      };
+
+      node.children.push(n);
     };
 
     var line = 1, c, callback;
@@ -338,7 +371,6 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       if (template.slice(i, i + openTag.length) === openTag) {
         i += openTag.length;
         c = template.substr(i, 1);
-        updateLine = '\nline = ' + line + ';';
         nextOpenTag = openTag;
         nextCloseTag = closeTag;
         hasTag = true;
@@ -411,12 +443,16 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
           // Ignore carriage returns.
         } else {
           if (isWhitespace(c)) {
-            spaces.push(code.length);
+            spaces.push([node, node.children.length]);
           } else {
             nonSpace = true;
           }
 
-          code.push('\nbuffer += ' + encodeJavaScriptString(c) + ';');
+          node.children.push({
+            type: NODE_TYPES.TEXT
+          , line: line
+          , value: c
+          });
 
           if (c == '\n') {
             stripSpace(); // Check for whitespace on the current line.
@@ -433,6 +469,91 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     // Clean up any whitespace from a closing {{tag}} that was at the end
     // of the template without a trailing \n.
     stripSpace();
+    return node;
+  }
+
+  /**
+   * I do code-generation. Given a node, I generate the JavaScript code that
+   * renders a it.
+   */
+  function _compileNode(node) {
+    var code = []
+
+    code.push('\nline = ' + node.line + ';');
+
+    switch (node.type) {
+      case NODE_TYPES.TEMPLATE:
+        code = reduce(node.children, function (code, node) {
+          code.push.apply(code, _compileNode(node));
+          return code;
+        }, code);
+        break;
+      case NODE_TYPES.PARTIAL:
+        code.push(
+          '\nvar partial = partials[' + encodeJavaScriptString(node.key) + '];',
+          '\nif (partial) {',
+          '\n  buffer += render(partial,stack[stack.length - 1],partials);',
+          '\n}'
+        );
+        break;
+      case NODE_TYPES.SECTION:
+        code.push(
+          '\nvar name = ' + encodeJavaScriptString(node.key) + ';',
+          '\nvar callback = (function () {',
+          '\n  return function () {',
+          '\n    var buffer = "";'
+        );
+
+        code = reduce(node.children, function (code, node) {
+          code.push.apply(code, _compileNode(node));
+          return code;
+        }, code);
+
+        code.push(
+          '\n    return buffer;',
+          '\n  };',
+          '\n})();'
+        );
+
+        if (node.inverted) {
+          code.push("\nbuffer += renderSection(name,stack,callback,true);");
+        } else {
+          code.push("\nbuffer += renderSection(name,stack,callback);");
+        }
+
+        break;
+      case NODE_TYPES.PLAIN:
+        code.push(
+          '\nbuffer += lookup(' + encodeJavaScriptString(node.key) + ',stack,"");'
+        );
+        break;
+      case NODE_TYPES.ESCAPED:
+        code.push(
+          '\nbuffer += escapeHTML(lookup(' + encodeJavaScriptString(node.key) + ',stack,""));'
+        );
+        break;
+      case NODE_TYPES.TEXT:
+        code.push('\nbuffer += ' + encodeJavaScriptString(node.value) + ';');
+        break;
+      default:
+        throw new Error("Unexpected node of type: " + node.type);
+    }
+
+    return code;
+  }
+
+  /**
+   * I do code-generation. Given a node, I construct a function body that
+   * renders it.
+   */
+  function __compile(node) {
+    var code = [
+      'var buffer = "";', // output buffer
+      "\nvar line = 1;", // keep track of source line number
+      "\ntry {",
+    ];
+
+    code.push.apply(code, _compileNode(node));
 
     code.push(
       "\nreturn buffer;",
@@ -450,7 +571,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    */
   function _compile(template, options) {
     var args = "view,partials,stack,lookup,escapeHTML,renderSection,render";
-    var body = parse(template, options);
+    var body = __compile(parse(template, options));
 
     if (options.debug) {
       if (typeof console != "undefined" && console.log) {
@@ -496,6 +617,8 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    *   - cache    Set `false` to bypass any pre-compiled version of the given
    *              template. Otherwise, a given `template` string will be cached
    *              the first time it is parsed
+   *   - debug    Set `true` to log the body of the generated function to the
+   *              console
    */
   function compile(template, options) {
     options = options || {};
