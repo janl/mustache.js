@@ -524,19 +524,15 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   }
 
   /**
-   * I do code-generation. Given a node, I construct a function body that
-   * renders it.
+   * Mostly `_renderNode`, this generates executable JavaScript code.
    */
-  function __compile(node) {
-    var code = ['var node = ' + encodeJavaScriptData(node) + ';'];
+  function _codeGen(node) {
+    code = '';
+    code += 'var node = ' + encodeJavaScriptData(node) + ';\n';
+    code += _renderNode.toString() + '\n';
+    code += 'return _renderNode(node, stack, partials);\n';
 
-    code.push(_renderNode.toString());
-
-    code.push("\nreturn _renderNode(node, stack, partials);");
-
-    var body = code.join("");
-
-    return body;
+    return code;
   }
 
   /**
@@ -544,17 +540,24 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    */
   function _compile(template, options) {
     var args = "view,partials,stack,lookup,escapeHTML,renderSection,render,NODE_TYPES,reduce";
-    var body = __compile(parse(template, options));
+    var node = parse(template, options);
+    var fn;
 
-    if (options.debug) {
-      if (typeof console != "undefined" && console.log) {
-        console.log(body);
-      } else if (typeof print === "function") {
-        print(body);
+    if (options.codeGen) {
+      var body = _codeGen(node);
+      if (options.debug) {
+        if (typeof console != "undefined" && console.log) {
+          console.log(body);
+        } else if (typeof print === "function") {
+          print(body);
+        }
+      }
+      fn = new Function(args, body);
+    } else {
+      fn = function (view,partials,stack,lookup,escapeHTML,renderSection,render,NODE_TYPES,reduce) {
+        return _renderNode(node, stack, partials);
       }
     }
-
-    var fn = new Function(args, body);
 
     // This anonymous function wraps the generated function so we can do
     // argument coercion, setup some variables, and handle any errors
@@ -586,6 +589,8 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    *   - cache    Set `false` to bypass any pre-compiled version of the given
    *              template. Otherwise, a given `template` string will be cached
    *              the first time it is parsed
+   *   - codeGen  Set `true` and the generated function will be build from
+   *              JavaScript code.
    *   - debug    Set `true` to log the body of the generated function to the
    *              console
    */
