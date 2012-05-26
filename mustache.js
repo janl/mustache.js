@@ -526,10 +526,11 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   /**
    * Mostly `_renderNode`, this generates executable JavaScript code.
    */
+  var _renderNodeSRC = _renderNode.toString();
   function _codeGen(node) {
     code = '';
     code += 'var node = ' + encodeJavaScriptData(node) + ';\n';
-    code += _renderNode.toString() + '\n';
+    code += _renderNodeSRC + '\n';
     code += 'return _renderNode(node, stack, partials);\n';
 
     return code;
