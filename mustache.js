@@ -529,9 +529,13 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   var _renderNodeSRC = _renderNode.toString();
   function _codeGen(node) {
     code = '';
+    code += '(function () {\n'
     code += 'var node = ' + encodeJavaScriptData(node) + ';\n';
     code += _renderNodeSRC + '\n';
-    code += 'return _renderNode(node, stack, partials);\n';
+    code += 'return function (view, partials) {\n';
+    code += '  return _renderNode(node, [view], partials);\n';
+    code += '};\n';
+    code += '}())';
 
     return code;
   }
@@ -540,7 +544,6 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    * Used by `compile` to generate a reusable function for the given `template`.
    */
   function _compile(template, options) {
-    var args = "view,partials,stack,lookup,escapeHTML,renderSection,render,NODE_TYPES,reduce";
     var node = parse(template, options);
     var fn;
 
@@ -553,22 +556,17 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
           print(body);
         }
       }
-      fn = new Function(args, body);
+
+      var args = "lookup,escapeHTML,renderSection,render,NODE_TYPES,reduce";
+      fn = (new Function(args, 'return ' + body))(lookup,escapeHTML,renderSection,render,NODE_TYPES,reduce);
     } else {
-      fn = function (view,partials,stack,lookup,escapeHTML,renderSection,render,NODE_TYPES,reduce) {
-        return _renderNode(node, stack, partials);
+      fn = function (view, partials) {
+        return _renderNode(node, [view], partials);
       }
     }
 
-    // This anonymous function wraps the generated function so we can do
-    // argument coercion, setup some variables, and handle any errors
-    // encountered while executing it.
     return function (view, partials) {
-      partials = partials || {};
-
-      var stack = [view]; // context stack
-
-      return fn(view, partials, stack, lookup, escapeHTML, renderSection, render, NODE_TYPES, reduce);
+      return fn(view, partials || {});
     };
   }
 
