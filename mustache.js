@@ -479,8 +479,6 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   function _compileNode(node) {
     var code = []
 
-    code.push('\nline = ' + node.line + ';');
-
     switch (node.type) {
       case NODE_TYPES.TEMPLATE:
         code = reduce(node.children, function (code, node) {
@@ -547,18 +545,11 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    * renders it.
    */
   function __compile(node) {
-    var code = [
-      'var buffer = "";', // output buffer
-      "\nvar line = 1;", // keep track of source line number
-      "\ntry {",
-    ];
+    var code = ['var buffer = "";']; // output buffer
 
     code.push.apply(code, _compileNode(node));
 
-    code.push(
-      "\nreturn buffer;",
-      "\n} catch (e) { throw {error: e, line: line}; }"
-    );
+    code.push("\nreturn buffer;");
 
     // Ignore `buffer += "";` statements.
     var body = code.join("").replace(/";\nbuffer \+= "/gm, "");
@@ -591,11 +582,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 
       var stack = [view]; // context stack
 
-      try {
-        return fn(view, partials, stack, lookup, escapeHTML, renderSection, render);
-      } catch (e) {
-        throw debug(e.error, template, e.line, options.file);
-      }
+      return fn(view, partials, stack, lookup, escapeHTML, renderSection, render);
     };
   }
 
