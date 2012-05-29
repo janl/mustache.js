@@ -137,9 +137,9 @@ or is an empty list, the block will not be rendered.
 Template:
 
     Shown.
-    {{#nothin}}
+    {{#person}}
     Never shown!
-    {{/nothin}}
+    {{/person}}
 
 View:
 
