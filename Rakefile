@@ -1,18 +1,28 @@
 require 'rake'
 require 'rake/clean'
 
-task :default => 'test:integration'
+task :default => :test
 
-namespace :test do
-  desc "Run all integration tests"
-  task :integration do
-    require File.expand_path('../test/integration', __FILE__)
-  end
+ROOT = File.expand_path('..', __FILE__)
+MUSTACHE_JS = File.read(File.join(ROOT, 'mustache.js'))
 
-  desc "Run all unit tests"
-  task :unit do
-    require File.expand_path('../test/unit', __FILE__)
-  end
+def mustache_version
+  match = MUSTACHE_JS.match(/exports\.version = "([^"]+)";/)
+  match[1]
+end
+
+def minified_file
+  ENV['FILE'] || 'mustache.min.js'
+end
+
+desc "Run all tests, requires vows (see http://vowsjs.org)"
+task :test do
+  sh "vows test/*_test.js"
+end
+
+desc "Minify to #{minified_file}, requires UglifyJS (see http://marijnhaverbeke.nl/uglifyjs)"
+task :minify do
+  sh "uglifyjs mustache.js > #{minified_file}"
 end
 
 # Creates a task that uses the various template wrappers to make a wrapped
@@ -52,11 +62,3 @@ templated_build "Dojo", :location => "dojox/string"
 templated_build "YUI3", :location => "yui3/mustache"
 templated_build "RequireJS"
 templated_build "qooxdoo"
-
-task :minify do
-  # npm install uglify-js
-  mmjs = "mustache.min.js"
-  `echo "/*! Version: 0.5.1-dev */" > #{mmjs}`
-  `uglifyjs mustache.js >> #{mmjs}`
-  puts "Created #{mmjs}"
-end
