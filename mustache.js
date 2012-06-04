@@ -20,7 +20,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   exports.Context = Context;
   exports.Renderer = Renderer;
 
-  // // This is here for backwards compatibility with 0.4.x.
+  // This is here for backwards compatibility with 0.4.x.
   exports.to_html = function (template, view, partials, send) {
     var result = render(template, view, partials);
 
