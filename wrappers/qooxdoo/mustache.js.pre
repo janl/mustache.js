@@ -5,7 +5,7 @@
    http://qooxdoo.org
 
    Copyright:
-     2004-2011 1&1 Internet AG, Germany, http://www.1und1.de
+     2004-2012 1&1 Internet AG, Germany, http://www.1und1.de
 
    License:
      LGPL: http://www.gnu.org/licenses/lgpl.html
@@ -74,7 +74,7 @@
  * For further details, please visit the mustache.js documentation here:
  *   https://github.com/janl/mustache.js/blob/master/README.md
  */
-qx.Class.define("qx.bom.Template", {
+qx.Bootstrap.define("qx.bom.Template", {
   statics : {
     /** Contains the mustache.js version. */
     version: null,
@@ -83,21 +83,21 @@ qx.Class.define("qx.bom.Template", {
      * Original and only template method of mustache.js. For further
      * documentation, please visit https://github.com/janl/mustache.js
      *
-     * @signature function(template, view, partials, send_fun)
+     * @signature function(template, view, partials)
      * @param template {String} The String containing the template.
      * @param view {Object} The object holding the data to render.
      * @param partials {Object} Object holding parts of a template.
-     * @param send_fun {Function?} Callback function for streaming.
      * @return {String} The parsed template.
      */
-    toHtml: null,
+    render: null,
 
 
     /**
      * Helper method which provides you with a direct access to templates 
-     * stored as HTML in the DOM. The DOM node with the given ID will be reated 
+     * stored as HTML in the DOM. The DOM node with the given ID will be used 
      * as a template, parsed and a new DOM node will be returned containing the 
-     * parsed data.
+     * parsed data. Keep in mind to have only one root DOM element in the the 
+     * template.
      *
      * @param id {String} The id of the HTML template in the DOM.
      * @param view {Object} The object holding the data to render.
@@ -105,14 +105,22 @@ qx.Class.define("qx.bom.Template", {
      * @return {DomNode} A DOM element holding the parsed template data.
      */
     get : function(id, view, partials) {
+      // get the content stored in the DOM
       var template = document.getElementById(id);
       var inner = template.innerHTML;
 
+      // apply the view
       inner = this.toHtml(inner, view, partials);
 
+      // special case for text only conversion
+      if (inner.search(/<|>/) === -1) {
+        return inner;
+      }
+
+      // create a helper to convert the string into DOM nodes
       var helper = qx.bom.Element.create("div");
       helper.innerHTML = inner;
-      
+
       return helper.children[0];
     }
   }
@@ -124,4 +132,3 @@ qx.Class.define("qx.bom.Template", {
  * Below is the original mustache.js code. Snapshot date is mentioned in 
  * the head of this file.
  */
- 
