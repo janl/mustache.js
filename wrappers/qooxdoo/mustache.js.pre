@@ -56,7 +56,11 @@
    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ************************************************************************ */
+/* ************************************************************************
 
+#ignore(module)
+
+************************************************************************ */
 /**
  * The is a template class which can be used for HTML templating. In fact, 
  * this is a wrapper for mustache.js which is a "framework-agnostic way to 
@@ -131,4 +135,5 @@ qx.Bootstrap.define("qx.bom.Template", {
 /**
  * Below is the original mustache.js code. Snapshot date is mentioned in 
  * the head of this file.
+ * @lint ignoreUndefined(module)
  */
