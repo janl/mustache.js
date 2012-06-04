@@ -1,0 +1,3 @@
+var backslashes = {
+  value: "\\abc"
+};

@@ -1,348 +1,418 @@
-# mustache.js — Logic-less templates with JavaScript
+# mustache.js - Logic-less {{mustache}} templates with JavaScript
 
 > What could be more logical awesome than no logic at all?
 
-For a list of implementations (other than JavaScript) and editor
-plugins, see <http://mustache.github.com/>.
+[mustache.js](http://github.com/janl/mustache.js) is an implementation of the
+[Mustache](http://mustache.github.com/) template system in JavaScript.
 
+[Mustache](http://mustache.github.com/) is a logic-less template syntax. It can
+be used for HTML, config files, source code - anything. It works by expanding
+tags in a template using values provided in a hash or object.
 
-## Where to Use?
+We call it "logic-less" because there are no if statements, else clauses, or for
+loops. Instead there are only tags. Some tags are replaced with a value, some
+nothing, and others a series of values.
 
-You can use mustache.js rendering stuff in various scenarios. E.g. you can
-render templates in your browser, or rendering server-side stuff with
-[node.js][node.js], use it for rendering stuff in [CouchDB][couchdb]’s views.
+For a language-agnostic overview of Mustache's template syntax, see the
+`mustache(5)` [manpage](http://mustache.github.com/mustache.5.html).
 
+## Where to use mustache.js?
 
-## Who Uses Mustache?
+You can use mustache.js to render templates in many various scenarios where you
+can use JavaScript. For example, you can render templates in a browser,
+server-side using [node](http://nodejs.org/), in [CouchDB](http://couchdb.apache.org/)
+views, or in almost any other environment where you can use JavaScript.
 
-An updated list is kept on the Github wiki. Add yourself, if you use
-mustache.js: <http://wiki.github.com/janl/mustache.js/beard-competition>
+## Who uses mustache.js?
 
+An updated list of mustache.js users is kept [on the Github wiki](http://wiki.github.com/janl/mustache.js/beard-competition).
+Add yourself or your company if you use mustache.js!
 
 ## Usage
 
-A quick example how to use mustache.js:
+Below is quick example how to use mustache.js:
 
     var view = {
       title: "Joe",
-      calc: function() {
+      calc: function () {
         return 2 + 4;
       }
-    }
+    };
 
-    var template = "{{title}} spends {{calc}}";
+    var output = Mustache.render("{{title}} spends {{calc}}", view);
 
-    var html = Mustache.to_html(template, view);
+In this example, the `Mustache.render` function takes two parameters: 1) the
+[mustache](http://mustache.github.com/) template and 2) a `view` object that
+contains the data and code needed to render the template.
 
-`template` is a simple string with mustache tags and `view` is a JavaScript
-object containing the data and any code to render the template.
+### CommonJS
 
+mustache.js is usable without any modification in both browsers and [CommonJS](http://www.commonjs.org/)
+environments like [node.js](http://nodejs.org/). To use it as a CommonJS module,
+simply require the file, like this:
 
-## Template Tag Types
+    var Mustache = require("mustache");
 
-There are several types of tags currently implemented in mustache.js.
+## Templates
 
-For a language-agnostic overview of Mustache’s template syntax, see the
-`mustache(5)` manpage or <http://mustache.github.com/mustache.5.html>.
+A [mustache](http://mustache.github.com/) template is a string that contains
+any number of mustache tags. Tags are indicated by the double mustaches that
+surround them. `{{person}}` is a tag, as is `{{#person}}`. In both examples we
+refer to `person` as the tag's key.
 
-### Simple Tags
+There are several types of tags available in mustache.js.
 
-Tags are always surrounded by mustaches like this `{{foobar}}`.
+### Variables
 
-    var view = {name: "Joe", say_hello: function(){ return "hello" }}
+The most basic tag type is a simple variable. A `{{name}}` tag renders the value
+of the `name` key in the current context. If there is no such key, nothing is
+rendered.
 
-    template = "{{say_hello}}, {{name}}"
-
-#### Accessing values in nested objects (Dot Notation)
-
-To access data logically grouped into nested objects, specify a '.' delimited
-path to the value.
-
-    var contact = {
-      name: {first: "Bill", last: "Bobitybob" },
-      age: 37
-    }
-
-    template = "Hello, {{name.first}} {{name.last}}. You are {{age}} years old."
-
-*NOTICE*: The dot notation feature was recently implemented for the 0.4
-  release, which is not out as of Nov 9 2011. You can find the feature in the
-  current master branch of mustachejs.
-
-### Conditional Sections
-
-Conditional sections begin with `{{#condition}}` and end with
-`{{/condition}}`. When `condition` evaluates to true, the section is rendered,
-otherwise the whole block will output nothing at all. `condition` may be a
-function returning true/false or a simple boolean.
-
-    var view = {condition: function() {
-      // [...your code goes here...]
-      return true;
-    }}
-
-    {{#condition}}
-      I will be visible if condition is true
-    {{/condition}}
-
-
-### Enumerable Sections
-
-Enumerable Sections use the same syntax as condition sections do.
-`{{#shopping_items}}` and `{{/shopping_items}}`. Actually the view decides how
-mustache.js renders the section. If the view returns an array, it will
-iterator over the items. Use `{{.}}` to access the current item inside the
-enumeration section.
-
-    var view = {name: "Joe's shopping card",
-                items: ["bananas", "apples"]}
-
-    var template = "{{name}}: <ul> {{#items}}<li>{{.}}</li>{{/items}} </ul>"
-
-    Outputs:
-    Joe's shopping card: <ul><li>bananas</li><li>apples</li></ul>
-
-
-### Higher Order Sections
-
-If a section key returns a function, it will be called and passed both the
-unrendered block of text and a renderer convenience function.
-
-Given this object:
-
-    "name": "Tater",
-    "bolder": function() {
-      return function(text, render) {
-        return "<b>" + render(text) + '</b>'
-      }
-    }
-
-And this template:
-
-    {{#bolder}}Hi {{name}}.{{/bolder}}
-
-We'll get this output:
-
-    <b>Hi Tater.</b>
-
-As you can see, we’re pre-processing the text in the block. This can be used
-to implement caching, filters (like syntax highlighting), etc.
-
-You can use `this.name` to access the attribute `name` from your view.
-
-### Dereferencing Sections
-
-If your data has components that are logically grouped into nested objects,
-you may wish to dereference an object to access its values.
-
-Given this object:
-
-    {
-      "name": "Bill",
-      "address": {
-        "street": "801 Streetly street",
-        "city": "Boston",
-        "state": "MA",
-        "zip" "02101"
-      }
-    }
-
-And this template:
-
-    <h1>Contact: {{name}}</h1>
-    {{#address}}
-      <p>{{street}}</p>
-      <p>{{city}}, {{state}} {{zip}}</p>
-    {{/address}}
-
-We'll get this output:
-
-    <h1>Contact: Bill</h1>
-      <p>801 Streetly street</p>
-      <p>Boston, MA 02101</p>
-
-### Inverted Sections
-
-An inverted section opens with `{{^section}}` instead of `{{#section}}` and
-uses a boolean negative to evaluate. Empty arrays are considered falsy.
-
-View:
-
-    var inverted_section =  {
-      "repo": []
-    }
+All variables are HTML-escaped by default. If you want to render unescaped HTML,
+use the triple mustache: `{{{name}}}`. You can also use `&` to unescape a
+variable.
 
 Template:
 
-    {{#repo}}<b>{{name}}</b>{{/repo}}
-    {{^repo}}No repos :({{/repo}}
+    * {{name}}
+    * {{age}}
+    * {{company}}
+    * {{{company}}}
+    * {{&company}}
 
-Result:
+View:
+
+    {
+      "name": "Chris",
+      "company": "<b>GitHub</b>"
+    }
+
+Output:
+
+    * Chris
+    *
+    * &lt;b&gt;GitHub&lt;/b&gt;
+    * <b>GitHub</b>
+    * <b>GitHub</b>
+
+JavaScript's dot notation may be used to access keys that are properties of
+objects in a view.
+
+Template:
+
+    * {{name.first}} {{name.last}}
+    * {{age}}
+
+View:
+
+    {
+      "name": {
+        "first": "Michael",
+        "last": "Jackson"
+      },
+      "age": "RIP"
+    }
+
+Output:
+
+    * Michael Jackson
+    * RIP
+
+### Sections
+
+Sections render blocks of text one or more times, depending on the value of the
+key in the current context.
+
+A section begins with a pound and ends with a slash. That is, `{{#person}}`
+begins a `person` section, while `{{/person}}` ends it. The text between the two
+tags is referred to as that section's "block".
+
+The behavior of the section is determined by the value of the key.
+
+#### False Values or Empty Lists
+
+If the `person` key exists and has a value of `null`, `undefined`, or `false`,
+or is an empty list, the block will not be rendered.
+
+Template:
+
+    Shown.
+    {{#person}}
+    Never shown!
+    {{/person}}
+
+View:
+
+    {
+      "person": true
+    }
+
+Output:
+
+    Shown.
+
+#### Non-Empty Lists
+
+If the `person` key exists and is not `null`, `undefined`, or `false`, and is
+not an empty list the block will be rendered one or more times.
+
+When the value is a list, the block is rendered once for each item in the list.
+The context of the block is set to the current item in the list for each
+iteration. In this way we can loop over collections.
+
+Template:
+
+    {{#stooges}}
+    <b>{{name}}</b>
+    {{/stooges}}
+
+View:
+
+    {
+      "stooges": [
+        { "name": "Moe" },
+        { "name": "Larry" },
+        { "name": "Curly" }
+      ]
+    }
+
+Output:
+
+    <b>Moe</b>
+    <b>Larry</b>
+    <b>Curly</b>
+
+When looping over an array of strings, a `.` can be used to refer to the current
+item in the list.
+
+Template:
+
+    {{#musketeers}}
+    * {{.}}
+    {{/musketeers}}
+
+View:
+
+    {
+      "musketeers": ["Athos", "Aramis", "Porthos", "D'Artagnan"]
+    }
+
+Output:
+
+    * Athos
+    * Aramis
+    * Porthos
+    * D'Artagnan
+
+If the value of a section variable is a function, it will be called in the
+context of the current item in the list on each iteration.
+
+Template:
+
+    {{#beatles}}
+    * {{name}}
+    {{/beatles}}
+
+View:
+
+    {
+      "beatles": [
+        { "firstName": "John", "lastName": "Lennon" },
+        { "firstName": "Paul", "lastName": "McCartney" },
+        { "firstName": "George", "lastName": "Harrison" },
+        { "firstName": "Ringo", "lastName": "Starr" }
+      ],
+      "name": function () {
+        return this.firstName + " " + this.lastName;
+      }
+    }
+
+Output:
+
+    * John Lennon
+    * Paul McCartney
+    * George Harrison
+    * Ringo Starr
+
+#### Functions
+
+If the value of a section key is a function, it is called with the section's
+literal block of text, un-rendered, as its first argument. The second argument
+is a special rendering function that uses the current view as its view argument.
+It is called in the context of the current view object.
+
+Template:
+
+    {{#bold}}Hi {{name}}.{{/bold}}
+
+View:
+
+    {
+      "name": "Tater",
+      "bold": function () {
+        return function (text, render) {
+          return "<b>" + render(text) + "</b>";
+        }
+      }
+    }
+
+Output:
+
+    <b>Hi Tater.</b>
+
+### Inverted Sections
+
+An inverted section opens with `{{^section}}` instead of `{{#section}}`. The
+block of an inverted section is rendered only if the value of that section's tag
+is `null`, `undefined`, `false`, or an empty list.
+
+Template:
+
+    {{#repos}}<b>{{name}}</b>{{/repos}}
+    {{^repos}}No repos :({{/repos}}
+
+View:
+
+    {
+      "repos": []
+    }
+
+Output:
 
     No repos :(
 
+### Comments
 
-### View Partials
+Comments begin with a bang and are ignored. The following template:
 
-mustache.js supports a quite powerful but yet simple view partial mechanism.
-Use the following syntax for partials: `{{>partial_name}}`
+    <h1>Today{{! ignore me }}.</h1>
 
-    var view = {
-      name: "Joe",
-      winnings: {
-        value: 1000,
-        taxed_value: function() {
-            return this.value - (this.value * 0.4);
-        }
-      }
-    };
+Will render as follows:
 
-    var template = "Welcome, {{name}}! {{>winnings}}"
-    var partials = {
-      winnings: "You just won ${{value}} (which is ${{taxed_value}} after tax)"};
+    <h1>Today.</h1>
 
-    var output = Mustache.to_html(template, view, partials)
+Comments may contain newlines.
 
-    output will be:
-    Welcome, Joe! You just won $1000 (which is $600 after tax)
+### Partials
 
-You invoke a partial with `{{>winnings}}`. Invoking the partial `winnings`
-will tell mustache.js to look for a object in the context's property
-`winnings`. It will then use that object as the context for the template found
-in `partials` for `winnings`.
+Partials begin with a greater than sign, like {{> box}}.
 
-## Escaping
+Partials are rendered at runtime (as opposed to compile time), so recursive
+partials are possible. Just avoid infinite loops.
 
-mustache.js does escape all values when using the standard double mustache
-syntax. Characters which will be escaped: `& \ " ' < >`. To disable escaping,
-simply use triple mustaches like `{{{unescaped_variable}}}`.
+They also inherit the calling context. Whereas in ERB you may have this:
 
-Example: Using `{{variable}}` inside a template for `5 > 2` will result in `5 &gt; 2`, where as the usage of `{{{variable}}}` will result in `5 > 2`.
+    <%= partial :next_more, :start => start, :size => size %>
 
+Mustache requires only this:
+
+    {{> next_more}}
+
+Why? Because the `next_more.mustache` file will inherit the `size` and `start`
+variables from the calling context. In this way you may want to think of
+partials as includes, or template expansion, even though it's not literally true.
+
+For example, this template and partial:
+
+    base.mustache:
+    <h2>Names</h2>
+    {{#names}}
+      {{> user}}
+    {{/names}}
+
+    user.mustache:
+    <strong>{{name}}</strong>
+
+Can be thought of as a single, expanded template:
+
+    <h2>Names</h2>
+    {{#names}}
+      <strong>{{name}}</strong>
+    {{/names}}
+
+In mustache.js an object of partials may be passed as the third argument to
+`Mustache.render`. The object should be keyed by the name of the partial, and
+its value should be the partial text.
+
+### Set Delimiter
+
+Set Delimiter tags start with an equals sign and change the tag delimiters from
+`{{` and `}}` to custom strings.
+
+Consider the following contrived example:
+
+    * {{ default_tags }}
+    {{=<% %>=}}
+    * <% erb_style_tags %>
+    <%={{ }}=%>
+    * {{ default_tags_again }}
+
+Here we have a list with three items. The first item uses the default tag style,
+the second uses ERB style as defined by the Set Delimiter tag, and the third
+returns to the default style after yet another Set Delimiter declaration.
+
+According to [ctemplates](http://google-ctemplate.googlecode.com/svn/trunk/doc/howto.html),
+this "is useful for languages like TeX, where double-braces may occur in the
+text and are awkward to use for markup."
+
+Custom delimiters may not contain whitespace or the equals sign.
 
 ## Streaming
 
-To stream template results out of mustache.js, you can pass an optional
-`send()` callback to the `to_html()` call:
+To stream template results out of mustache.js, you can pass an optional callback
+to the call to `Mustache.render`:
 
-    Mustache.to_html(template, view, partials, function(line) {
-      print(line);
+    Mustache.render(template, view, partials, function (chunk) {
+      print(chunk);
     });
 
+When the template is finished rendering, the callback will be called with `null`
+after which it won't be called anymore for that rendering.
 
-## Pragmas
+## Plugins for JavaScript Libraries
 
-Pragma tags let you alter the behaviour of mustache.js. They have the format
-of
+By default mustache.js may be used in a browser or any [CommonJS](http://www.commonjs.org/)
+environment, including [node](http://nodejs.org/). Additionally, mustache.js may
+be built specifically for several different client libraries and platforms,
+including the following:
 
-    {{%PRAGMANAME}}
+  - [jQuery](http://jquery.com/)
+  - [MooTools](http://mootools.net/)
+  - [Dojo](http://www.dojotoolkit.org/)
+  - [YUI](http://developer.yahoo.com/yui/)
+  - [RequireJS](http://requirejs.org/)
+  - [qooxdoo](http://qooxdoo.org/)
 
-and they accept options:
+These may be built using [Rake](http://rake.rubyforge.org/) and one of the
+following commands:
 
-    {{%PRAGMANAME option=value}}
+    $ rake jquery
+    $ rake mootools
+    $ rake dojo
+    $ rake yui
+    $ rake requirejs
+    $ rake qooxdoo
 
+## Thanks
 
-### IMPLICIT-ITERATOR
+Mustache.js wouldn't kick ass if it weren't for these fine souls:
 
-When using a block to iterate over an enumerable (Array), mustache.js expects
-an objects as enumerable items. The implicit iterator pragma enables optional
-behaviour of allowing literals as enumerable items. Consider this view:
-
-    var view = {
-      foo: [1, 2, 3, 4, 5, "french"]
-    };
-
-The following template can iterate over the member `foo`:
-
-    {{%IMPLICIT-ITERATOR}}
-    {{#foo}}
-      {{.}}
-    {{/foo}}
-
-If you don't like the dot in there, the pragma accepts an option to set your
-own iteration marker:
-
-    {{%IMPLICIT-ITERATOR iterator=bob}}
-    {{#foo}}
-      {{bob}}
-    {{/foo}}
-
-## More Examples and Documentation
-
-See `examples/` for more goodies and read the [original mustache docs][m]
-
-## Command Line
-
-See `mustache(1)` man page or
-<http://defunkt.github.com/mustache/mustache.1.html>
-for command line docs.
-
-Or just install it as a RubyGem:
-
-    $ gem install mustache
-    $ mustache -h
-
-[m]: http://github.com/defunkt/mustache/#readme
-[node.js]: http://nodejs.org
-[couchdb]: http://couchdb.apache.org
-
-
-## Plugins for jQuery, Dojo, Yui, CommonJS, qooxdoo
-
-This repository lets you build modules for [jQuery][], [Dojo][], [Yui][] and
-[CommonJS][] / [Node.js][] with the help of `rake`.
-
-NOTE: The default `rake` task is only used for testing and require rspec to be
-installed (see below).
-
-Run `rake jquery` to get a jQuery compatible plugin file in the
-`mustache-jquery/` directory.
-
-Run `rake dojo` to get a Dojo compatible plugin file in the `mustache-dojo/`
-directory.
-
-Run `rake yui` to get a Yui compatible plugin file in the `mustache-yui/`
-directory.
-
-Run `rake commonjs` to get a CommonJS compatible plugin file in the
-`mustache-commonjs/` directory which you can also use with [Node.js][].
-
-Run `rake qooxdoo` to get a qooxdoo compatible file named `qooxdoo.mustache.js`.
-
-## Testing
-
-NOTE: You will need to install rspec first by running `gem install rspec`.
-
-To run the mustache.js test suite, run `rake spec`.  All specs will be run first with JavaScriptCore (using `jsc`)
-and again with Rhino, using `java org.mozilla.javascript.tools.shell.Main`.
-
-JavaScriptCore is used from the OSX default location:
-
-    /System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Resources/jsc
-
-To install Rhino on OSX, follow [these instructions](Rhino Install).
-
-### Adding Tests
-
-Tests are located in the `examples/` directory.  Adding a new test requires three files.  Here's an example to add a test named "foo":
-
-`examples/foo.html` (the template):
-
-    foo {{bar}}
-
-`examples/foo.js` (the view context):
-
-    var foo = {
-      bar: "baz"
-    };
-
-`examples/foo.txt` (the expected output):
-
-    foo baz
-
-[jQuery]: http://jquery.com/
-[Dojo]: http://www.dojotoolkit.org/
-[Yui]: http://developer.yahoo.com/yui/
-[CommonJS]: http://www.commonjs.org/
-[Node.js]: http://nodejs.org/
-[Rhino Install]: http://michaux.ca/articles/installing-rhino-on-os-x
+  * Chris Wanstrath / defunkt
+  * Alexander Lang / langalex
+  * Sebastian Cohnen / tisba
+  * J Chris Anderson / jchris
+  * Tom Robinson / tlrobinson
+  * Aaron Quint / quirkey
+  * Douglas Crockford
+  * Nikita Vasilyev / NV
+  * Elise Wood / glytch
+  * Damien Mathieu / dmathieu
+  * Jakub Kuźma / qoobaa
+  * Will Leinweber / will
+  * dpree
+  * Jason Smith / jhs
+  * Aaron Gibralter / agibralter
+  * Ross Boucher / boucher
+  * Matt Sanford / mzsanford
+  * Ben Cherry / bcherry
+  * Michael Jackson / mjijackson

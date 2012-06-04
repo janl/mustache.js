@@ -1,0 +1,8 @@
+{
+  "name": "mustache",
+  "version": "0.5.0-dev",
+  "description": "Logic-less {{mustache}} templates with JavaScript",
+  "author": "mustache.js Authors <http://github.com/janl/mustache.js>",
+  "keywords": ["mustache", "template", "templates", "ejs"],
+  "main": "./mustache"
+}

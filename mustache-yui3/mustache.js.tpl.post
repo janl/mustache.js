@@ -1,4 +1,0 @@
-
-    Y.mustache = Mustache.to_html;
-
-}, "0");
