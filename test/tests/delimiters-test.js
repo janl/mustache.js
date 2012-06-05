@@ -8,6 +8,7 @@
 (function(global){
 	'use strict';
 	
+	var buster = global.buster || require('buster');	
 	var Mustache = global.Mustache || require("../../mustache");
 
 	buster.testCase('Delimiters', {
