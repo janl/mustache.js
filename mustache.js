@@ -12,6 +12,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   exports.parse = parse;
   exports.compile = compile;
   exports.render = render;
+  exports.renderWithOptions = renderWithOptions;
   exports.clearCache = clearCache;
 
   // This is here for backwards compatibility with 0.4.x.
@@ -531,6 +532,14 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    */
   function render(template, view, partials) {
     return compile(template)(view, partials);
+  }
+
+  /**
+   * High-level function that renders the given `template` using the given
+   * `view` and `partials` and `options`.
+   */
+  function renderWithOptions(template, options, view, partials) {
+    return compile(template, options)(view, partials);
   }
 
 })(Mustache);
