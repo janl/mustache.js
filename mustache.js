@@ -239,9 +239,9 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       break;
     case "function":
       var sectionText = callback(context, this), self = this;
-      function scopedRender(template) {
+      var scopedRender = function (template) {
         return self.render(template, context);
-      }
+      };
       return value.call(context.view, sectionText, scopedRender) || "";
       break;
     default:
