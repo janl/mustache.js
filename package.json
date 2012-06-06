@@ -1,8 +1,12 @@
 {
   "name": "mustache",
-  "version": "0.5.0-dev",
+  "version": "0.5.1-dev",
   "description": "Logic-less {{mustache}} templates with JavaScript",
   "author": "mustache.js Authors <http://github.com/janl/mustache.js>",
   "keywords": ["mustache", "template", "templates", "ejs"],
-  "main": "./mustache"
+  "main": "./mustache",
+  "devDependencies": {
+    "vows": "0.6.x",
+    "uglify-js": "1.3.0"
+  }
 }

@@ -357,21 +357,9 @@ text and are awkward to use for markup."
 
 Custom delimiters may not contain whitespace or the equals sign.
 
-## Streaming
-
-To stream template results out of mustache.js, you can pass an optional callback
-to the call to `Mustache.render`:
-
-    Mustache.render(template, view, partials, function (chunk) {
-      print(chunk);
-    });
-
-When the template is finished rendering, the callback will be called with `null`
-after which it won't be called anymore for that rendering.
-
 ## Plugins for JavaScript Libraries
 
-By default mustache.js may be used in a browser or any [CommonJS](http://www.commonjs.org/)
+By default mustache.js may be used in any browser or [CommonJS](http://www.commonjs.org/)
 environment, including [node](http://nodejs.org/). Additionally, mustache.js may
 be built specifically for several different client libraries and platforms,
 including the following:
@@ -392,6 +380,33 @@ following commands:
     $ rake yui
     $ rake requirejs
     $ rake qooxdoo
+
+## Testing
+
+The mustache.js test suite uses the [vows](http://vowsjs.org/) testing
+framework. In order to run the tests you'll need to install [node](http://nodejs.org/)
+first. Once it's installed, you can install vows using [npm](http://npmjs.org/).
+
+    $ npm install -g vows
+
+Then, run the tests.
+
+    $ vows test/*_test.js
+
+The test suite consists of both unit and integration tests. If a template isn't
+rendering correctly for you, you can make a test for it by doing the following:
+
+  1. Create a template file named `mytest.mustache` in the `test/_files`
+     directory. Replace `mytest` with the name of your test.
+  2. Create a corresponding view file named `mytest.js` in the same directory.
+     This file should contain a JavaScript object literal enclosed in
+     parentheses. See any of the other view files for an example.
+  3. Create a file with the expected output in `mytest.txt` in the same
+     directory.
+
+Then, you can run the test with:
+
+    $ TEST=mytest vows test/render_test.js
 
 ## Thanks
 

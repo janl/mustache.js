@@ -1,1 +1,0 @@
-var multiline_comment = {};
