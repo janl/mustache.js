@@ -14,6 +14,15 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   exports.render = render;
   exports.clearCache = clearCache;
 
+  var NODE_TYPES = {
+    TEMPLATE: 'tmpl'
+  , PARTIAL: 'par'
+  , SECTION: 'sec'
+  , PLAIN: 'plain'
+  , ESCAPED: 'esc'
+  , TEXT: 'txt'
+  };
+
   // This is here for backwards compatibility with 0.4.x.
   exports.to_html = function (template, view, partials, send) {
     var result = render(template, view, partials);
@@ -28,6 +37,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   var _toString = Object.prototype.toString;
   var _isArray = Array.isArray;
   var _forEach = Array.prototype.forEach;
+  var _reduce = Array.prototype.reduce;
   var _trim = String.prototype.trim;
 
   var isArray;
@@ -81,6 +91,29 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     };
   }
 
+  var reduce;
+  if (_reduce) {
+    reduce = function (array) {
+      var args = Array.prototype.slice.call(arguments, 1);
+      return _reduce.apply(array, args)
+    };
+  } else {
+    reduce = function (array, callback, initialValue) {
+      var i, value;
+      if (arguments.length < 3) {
+        value = array[0];
+        i = 1;
+      } else {
+        value = initialValue;
+        i = 0;
+      }
+      for (i; i < array.length; i++) {
+        value = callback(value, array[i], i, array);
+      }
+      return value;
+    }
+  }
+
   var escapeMap = {
     "&": "&amp;",
     "<": "&lt;",
@@ -92,6 +125,23 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   function escapeHTML(string) {
     return String(string).replace(/&(?!\w+;)|[<>"']/g, function (s) {
       return escapeMap[s] || s;
+    });
+  }
+
+  // OSWASP Guidlines: escape all non alphanumeric characters in ASCII space.
+  var JAVASCRIPT_CHARACTERS_EXPRESSION =
+      /[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\xFF\u2028\u2029]/gm;
+  function encodeJavaScriptString(text) {
+    return text && '"' + text.replace(JAVASCRIPT_CHARACTERS_EXPRESSION, function (c) {
+      return "\\u" + ('0000' + c.charCodeAt(0).toString(16)).slice(-4);
+    }) + '"';
+  }
+  // This is not great, but it is useful.
+  var JSON_STRING_LITERAL_EXPRESSION =
+      /"(?:\\.|[^"])*"/gm;
+  function encodeJavaScriptData(object) {
+    return JSON.stringify(object).replace(JSON_STRING_LITERAL_EXPRESSION, function (string) {
+      return encodeJavaScriptString(JSON.parse(string));
     });
   }
 
@@ -202,16 +252,13 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   }
 
   /**
-   * Parses the given `template` and returns the source of a function that,
-   * with the proper arguments, will render the template. Recognized options
-   * include the following:
+   * Parses the given `template` and returns the abstract syntax tree for it.
+   * Recognized options include the following:
    *
    *   - file     The name of the file the template comes from (displayed in
    *              error messages)
    *   - tags     An array of open and close tags the `template` uses. Defaults
    *              to the value of Mustache.tags
-   *   - debug    Set `true` to log the body of the generated function to the
-   *              console
    *   - space    Set `true` to preserve whitespace from lines that otherwise
    *              contain only a {{tag}}. Defaults to `false`
    */
@@ -222,23 +269,25 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
         openTag = tags[0],
         closeTag = tags[tags.length - 1];
 
-    var code = [
-      'var buffer = "";', // output buffer
-      "\nvar line = 1;", // keep track of source line number
-      "\ntry {",
-      '\nbuffer += "'
-    ];
-
     var spaces = [],      // indices of whitespace in code on the current line
         hasTag = false,   // is there a {{tag}} on the current line?
         nonSpace = false; // is there a non-space char on the current line?
 
-    // Strips all space characters from the code array for the current line
-    // if there was a {{tag}} on it and otherwise only spaces.
+    var nodes = [];
+    var node = {
+      type: NODE_TYPES.TEMPLATE
+    , line: 0
+    , file: options.file
+    , children: []
+    };
+
+    // Strips all space characters from the nodes if there was a {{tag}} on it
+    // and otherwise only spaces.
     var stripSpace = function () {
       if (hasTag && !nonSpace && !options.space) {
         while (spaces.length) {
-          code.splice(spaces.pop(), 1);
+          var space = spaces.pop();
+          space[0].children.splice(space[1], 1);
         }
       } else {
         spaces = [];
@@ -248,7 +297,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       nonSpace = false;
     };
 
-    var sectionStack = [], updateLine, nextOpenTag, nextCloseTag;
+    var sectionStack = [], nextOpenTag, nextCloseTag;
 
     var setTags = function (source) {
       tags = trim(source).split(/\s+/);
@@ -257,15 +306,12 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     };
 
     var includePartial = function (source) {
-      code.push(
-        '";',
-        updateLine,
-        '\nvar partial = partials["' + trim(source) + '"];',
-        '\nif (partial) {',
-        '\n  buffer += render(partial,stack[stack.length - 1],partials);',
-        '\n}',
-        '\nbuffer += "'
-      );
+      var n = {
+        type: NODE_TYPES.PARTIAL
+      , line: line
+      , key: trim(source)
+      };
+      node.children.push(n);
     };
 
     var openSection = function (source, inverted) {
@@ -277,15 +323,17 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 
       sectionStack.push({name: name, inverted: inverted});
 
-      code.push(
-        '";',
-        updateLine,
-        '\nvar name = "' + name + '";',
-        '\nvar callback = (function () {',
-        '\n  return function () {',
-        '\n    var buffer = "";',
-        '\nbuffer += "'
-      );
+      var n = {
+        type: NODE_TYPES.SECTION
+      , line: line
+      , key: name
+      , inverted: !!inverted
+      , children: []
+      }
+      node.children.push(n);
+
+      nodes.push(node); // save context
+      node = n;
     };
 
     var openInvertedSection = function (source) {
@@ -302,38 +350,28 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 
       var section = sectionStack.pop();
 
-      code.push(
-        '";',
-        '\n    return buffer;',
-        '\n  };',
-        '\n})();'
-      );
-
-      if (section.inverted) {
-        code.push("\nbuffer += renderSection(name,stack,callback,true);");
-      } else {
-        code.push("\nbuffer += renderSection(name,stack,callback);");
-      }
-
-      code.push('\nbuffer += "');
+      var n = nodes.pop(); // restore context
+      node = n;
     };
 
     var sendPlain = function (source) {
-      code.push(
-        '";',
-        updateLine,
-        '\nbuffer += lookup("' + trim(source) + '",stack,"");',
-        '\nbuffer += "'
-      );
+      var n = {
+        type: NODE_TYPES.PLAIN
+      , line: line
+      , key: trim(source)
+      };
+
+      node.children.push(n);
     };
 
     var sendEscaped = function (source) {
-      code.push(
-        '";',
-        updateLine,
-        '\nbuffer += escapeHTML(lookup("' + trim(source) + '",stack,""));',
-        '\nbuffer += "'
-      );
+      var n = {
+        type: NODE_TYPES.ESCAPED
+      , line: line
+      , key: trim(source)
+      };
+
+      node.children.push(n);
     };
 
     var line = 1, c, callback;
@@ -341,7 +379,6 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       if (template.slice(i, i + openTag.length) === openTag) {
         i += openTag.length;
         c = template.substr(i, 1);
-        updateLine = '\nline = ' + line + ';';
         nextOpenTag = openTag;
         nextCloseTag = closeTag;
         hasTag = true;
@@ -410,29 +447,25 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       } else {
         c = template.substr(i, 1);
 
-        switch (c) {
-        case '"':
-        case "\\":
-          nonSpace = true;
-          code.push("\\" + c);
-          break;
-        case "\r":
+        if (c == '\r') {
           // Ignore carriage returns.
-          break;
-        case "\n":
-          spaces.push(code.length);
-          code.push("\\n");
-          stripSpace(); // Check for whitespace on the current line.
-          line++;
-          break;
-        default:
+        } else {
           if (isWhitespace(c)) {
-            spaces.push(code.length);
+            spaces.push([node, node.children.length]);
           } else {
             nonSpace = true;
           }
 
-          code.push(c);
+          node.children.push({
+            type: NODE_TYPES.TEXT
+          , line: line
+          , value: c
+          });
+
+          if (c == '\n') {
+            stripSpace(); // Check for whitespace on the current line.
+            line++;
+          }
         }
       }
     }
@@ -444,48 +477,96 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     // Clean up any whitespace from a closing {{tag}} that was at the end
     // of the template without a trailing \n.
     stripSpace();
+    return node;
+  }
 
-    code.push(
-      '";',
-      "\nreturn buffer;",
-      "\n} catch (e) { throw {error: e, line: line}; }"
-    );
+  /**
+   * I can render a node.
+   */
+  function _renderNode(node, stack, partials) {
+    var buffer = ""; // output buffer
 
-    // Ignore `buffer += "";` statements.
-    var body = code.join("").replace(/buffer \+= "";\n/g, "");
+    switch (node.type) {
+      case NODE_TYPES.TEMPLATE:
+        buffer = reduce(node.children, function (code, node) {
+          return code + _renderNode(node, stack, partials);
+        }, buffer);
+        break;
+      case NODE_TYPES.PARTIAL:
+        var partial = partials[node.key];
+        if (partial) {
+          buffer = render(partial,stack[stack.length - 1],partials);
+        }
+        break;
+      case NODE_TYPES.SECTION:
+        var name = node.key;
 
-    if (options.debug) {
-      if (typeof console != "undefined" && console.log) {
-        console.log(body);
-      } else if (typeof print === "function") {
-        print(body);
-      }
+        callback = reduce(node.children, function (code, node) {
+          return function () {return code() + _renderNode(node, stack, partials)};
+        }, function () {return ""});
+
+        buffer = renderSection(name,stack,callback,node.inverted);
+        break;
+      case NODE_TYPES.PLAIN:
+        buffer = lookup(node.key,stack,"");
+        break;
+      case NODE_TYPES.ESCAPED:
+        buffer = escapeHTML(lookup(node.key,stack,""));
+        break;
+      case NODE_TYPES.TEXT:
+        buffer = node.value;
+        break;
+      default:
+        throw new Error("Unexpected node of type: " + node.type);
     }
 
-    return body;
+    return buffer;
+  }
+
+  /**
+   * Mostly `_renderNode`, this generates executable JavaScript code.
+   */
+  var _renderNodeSRC = _renderNode.toString();
+  function _codeGen(node) {
+    code = '';
+    code += '(function () {\n'
+    code += 'var node = ' + encodeJavaScriptData(node) + ';\n';
+    code += _renderNodeSRC + '\n';
+    code += 'return function (view, partials) {\n';
+    code += '  return _renderNode(node, [view], partials);\n';
+    code += '};\n';
+    code += '}())';
+
+    return code;
   }
 
   /**
    * Used by `compile` to generate a reusable function for the given `template`.
    */
   function _compile(template, options) {
-    var args = "view,partials,stack,lookup,escapeHTML,renderSection,render";
-    var body = parse(template, options);
-    var fn = new Function(args, body);
+    var node = parse(template, options);
+    var fn;
 
-    // This anonymous function wraps the generated function so we can do
-    // argument coercion, setup some variables, and handle any errors
-    // encountered while executing it.
-    return function (view, partials) {
-      partials = partials || {};
-
-      var stack = [view]; // context stack
-
-      try {
-        return fn(view, partials, stack, lookup, escapeHTML, renderSection, render);
-      } catch (e) {
-        throw debug(e.error, template, e.line, options.file);
+    if (options.codeGen) {
+      var body = _codeGen(node);
+      if (options.debug) {
+        if (typeof console != "undefined" && console.log) {
+          console.log(body);
+        } else if (typeof print === "function") {
+          print(body);
+        }
       }
+
+      var args = "lookup,escapeHTML,renderSection,render,NODE_TYPES,reduce";
+      fn = (new Function(args, 'return ' + body))(lookup,escapeHTML,renderSection,render,NODE_TYPES,reduce);
+    } else {
+      fn = function (view, partials) {
+        return _renderNode(node, [view], partials);
+      }
+    }
+
+    return function (view, partials) {
+      return fn(view, partials || {});
     };
   }
 
@@ -507,6 +588,10 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    *   - cache    Set `false` to bypass any pre-compiled version of the given
    *              template. Otherwise, a given `template` string will be cached
    *              the first time it is parsed
+   *   - codeGen  Set `true` and the generated function will be build from
+   *              JavaScript code.
+   *   - debug    Set `true` to log the body of the generated function to the
+   *              console
    */
   function compile(template, options) {
     options = options || {};
