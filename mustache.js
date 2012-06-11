@@ -86,11 +86,12 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     "<": "&lt;",
     ">": "&gt;",
     '"': '&quot;',
-    "'": '&#39;'
+    "'": '&#39;',
+    "/": '&#x2F;'
   };
 
   function escapeHTML(string) {
-    return String(string).replace(/&(?!\w+;)|[<>"']/g, function (s) {
+    return String(string).replace(/[&<>"'\/]/g, function (s) {
       return escapeMap[s] || s;
     });
   }
