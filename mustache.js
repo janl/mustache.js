@@ -13,6 +13,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   exports.compile = compile;
   exports.render = render;
   exports.clearCache = clearCache;
+  exports.escapeHTML = undefined;
 
   // This is here for backwards compatibility with 0.4.x.
   exports.to_html = function (template, view, partials, send) {
@@ -86,13 +87,45 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     "<": "&lt;",
     ">": "&gt;",
     '"': '&quot;',
-    "'": '&#39;'
+    "'": '&#39;',
+    "/": '&#x2F;'
   };
 
-  function escapeHTML(string) {
-    return String(string).replace(/&(?!\w+;)|[<>"']/g, function (s) {
+  function _escapeHTML(string) {
+    return String(string).replace(/&(?!\w+;)|[<>"'\/]/g, function (s) {
       return escapeMap[s] || s;
     });
+  }
+
+  function _escapeHTMLStrict(string) {
+    return String(string).replace(/[&<>"'\/]/g, function (s) {
+      return escapeMap[s] || s;
+    });
+  }
+
+  // OSWASP Guidlines: escape all non alphanumeric characters in ASCII space.
+  var HTML_ATTRIBUTE_CHARACTERS_EXPRESSION =
+      /[\x00-\x2F\x39-\x40\x5B-\x60\x7B-\xFF]/g;
+  function _escapeHTMLFanatic(string) {
+    return String(string).replace(HTML_ATTRIBUTE_CHARACTERS_EXPRESSION, function (s) {
+      if (escapeMap[s]) {
+        return escapeMap[s];
+      } else {
+        return "&#x" + ('00' + s.charCodeAt(0).toString(16)).slice(-2) + ";";
+      }
+    });
+  }
+
+  function escapeHTML(string) {
+    if (typeof (exports.escapeHTML) == 'function') {
+      return exports.escapeHTML(string);
+    } else if (exports.escapeHTML === 'strict') {
+      return _escapeHTMLStrict(string);
+    } else if (exports.escapeHTML === 'fanatic') {
+      return _escapeHTMLFanatic(string);
+    } else {
+      return _escapeHTML(string);
+    }
   }
 
   /**
