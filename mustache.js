@@ -448,7 +448,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 
     // Strips all whitespace tokens array for the current line
     // if there was a {{#tag}} on it and otherwise only space.
-    function stripSpace() {
+    var stripSpace = function () {
       if (hasTag && !nonSpace) {
         while (spaces.length) {
           tokens.splice(spaces.pop(), 1);
@@ -459,7 +459,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 
       hasTag = false;
       nonSpace = false;
-    }
+    };
 
     var type, value, chr;
 
