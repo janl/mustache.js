@@ -1,0 +1,10 @@
+Loop '{{title}}':
+{{#listA}}
+{{$.index}} = {{.}}
+{{/listA}}
+
+{{#listA}}
+{{$.count}}
+{{/listA}}
+
+{{#listB}}{{^ $.first}},{{/$.first}}{{.}}{{# $.last}}*{{/$.last}}{{/listB}}
