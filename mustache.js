@@ -63,7 +63,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   };
 
   function escapeHtml(string) {
-    return String(string).replace(/&(?!\w+;)|[<>"']/g, function (s) {
+    return String(string).replace(/[&<>"']/g, function (s) {
       return entityMap[s];
     });
   }
