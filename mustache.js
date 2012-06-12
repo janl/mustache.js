@@ -47,7 +47,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   };
 
   var quote = (typeof JSON !== "undefined" && JSON.stringify) || function (string) {
-    return '"' + String(string).replace(/(^|[^\\])"/g, '\\"') + '"';
+    return '"' + String(string).replace(/([\\"])/g, '\\$1') + '"';
   };
 
   function escapeRe(string) {
