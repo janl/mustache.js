@@ -1,5 +1,6 @@
-rvm:
-  - 1.9.2
-before_script:
-  - sudo apt-get -y install xulrunner-2.0
-  - gem install rspec
+language: node_js
+node_js:
+  - 0.4
+  - 0.6
+  - 0.7
+
