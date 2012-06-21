@@ -52,9 +52,16 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     return Object.prototype.toString.call(obj) === "[object Array]";
   };
 
-  var quote = (typeof JSON !== "undefined" && JSON.stringify) || function (string) {
-    return '"' + String(string).replace(/([\\"])/g, '\\$1') + '"';
-  };
+  // OSWASP Guidlines: escape all non alphanumeric characters in ASCII space.
+  var jsCharsRe = /[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\xFF\u2028\u2029]/gm;
+
+  function quote(text) {
+    var escaped = text.replace(jsCharsRe, function (c) {
+      return "\\u" + ('0000' + c.charCodeAt(0).toString(16)).slice(-4);
+    });
+
+    return '"' + escaped + '"';
+  }
 
   function escapeRe(string) {
     return string.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
@@ -444,7 +451,8 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    * course, the default is to use mustaches (i.e. Mustache.tags).
    */
   function parse(template, tags) {
-    tags = escapeTags(tags || exports.tags);
+    tags = tags || exports.tags;
+    tagRes = escapeTags(tags);
 
     var scanner = new Scanner(template);
 
@@ -471,7 +479,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     var type, value, chr;
 
     while (!scanner.eos()) {
-      value = scanner.scanUntil(tags[0]);
+      value = scanner.scanUntil(tagRes[0]);
 
       if (value) {
         for (var i = 0, len = value.length; i < len; ++i) {
@@ -492,7 +500,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       }
 
       // Match the opening tag.
-      if (!scanner.scan(tags[0])) {
+      if (!scanner.scan(tagRes[0])) {
         break;
       }
 
@@ -506,17 +514,18 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
       if (type === "=") {
         value = scanner.scanUntil(eqRe);
         scanner.scan(eqRe);
-        scanner.scanUntil(tags[1]);
+        scanner.scanUntil(tagRes[1]);
       } else if (type === "{") {
-        value = scanner.scanUntil(curlyRe);
+        var closeRe = new RegExp("\\s*" + escapeRe("}" + tags[1]));
+        value = scanner.scanUntil(closeRe);
         scanner.scan(curlyRe);
-        scanner.scanUntil(tags[1]);
+        scanner.scanUntil(tagRes[1]);
       } else {
-        value = scanner.scanUntil(tags[1]);
+        value = scanner.scanUntil(tagRes[1]);
       }
 
       // Match the closing tag.
-      if (!scanner.scan(tags[1])) {
+      if (!scanner.scan(tagRes[1])) {
         throw new Error("Unclosed tag at " + scanner.pos);
       }
 
@@ -528,7 +537,8 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 
       // Set the tags for the next time around.
       if (type === "=") {
-        tags = escapeTags(value.split(spaceRe));
+        tags = value.split(spaceRe);
+        tagRes = escapeTags(tags);
       }
     }
 
