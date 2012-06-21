@@ -59,11 +59,12 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     "<": "&lt;",
     ">": "&gt;",
     '"': '&quot;',
-    "'": '&#39;'
+    "'": '&#39;',
+    "/": '&#x2F;'
   };
 
   function escapeHtml(string) {
-    return String(string).replace(/[&<>"']/g, function (s) {
+    return String(string).replace(/[&<>"'\/]/g, function (s) {
       return entityMap[s];
     });
   }
