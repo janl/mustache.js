@@ -17,7 +17,7 @@ end
 
 desc "Run all tests, requires vows (see http://vowsjs.org)"
 task :test do
-  sh "vows test/*_test.js"
+  sh "vows --spec"
 end
 
 desc "Minify to #{minified_file}, requires UglifyJS (see http://marijnhaverbeke.nl/uglifyjs)"

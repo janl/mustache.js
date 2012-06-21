@@ -391,7 +391,7 @@ first. Once it's installed, you can install vows using [npm](http://npmjs.org/).
 
 Then, run the tests.
 
-    $ vows test/*_test.js
+    $ vows --spec
 
 The test suite consists of both unit and integration tests. If a template isn't
 rendering correctly for you, you can make a test for it by doing the following:
