@@ -25,6 +25,11 @@ task :minify do
   sh "uglifyjs mustache.js > #{minified_file}"
 end
 
+desc "Run JSHint, requires jshint (see http://www.jshint.com)"
+task :lint do
+  sh "jshint mustache.js"
+end
+
 # Creates a task that uses the various template wrappers to make a wrapped
 # output file. There is some extra complexity because Dojo and YUI use
 # different final locations.

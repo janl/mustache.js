@@ -64,7 +64,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
   }
 
   function escapeRe(string) {
-    return string.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+    return string.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
   }
 
   var entityMap = {
@@ -243,21 +243,25 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     case "object":
       if (isArray(value)) {
         var buffer = "";
+
         for (var i = 0, len = value.length; i < len; ++i) {
           buffer += callback(context.push(value[i]), this);
         }
+
         return buffer;
-      } else {
-        return callback(context.push(value), this);
       }
-      break;
+
+      return callback(context.push(value), this);
     case "function":
-      var sectionText = callback(context, this), self = this;
+      // TODO: The text should be passed to the callback plain, not rendered.
+      var sectionText = callback(context, this),
+          self = this;
+
       var scopedRender = function (template) {
         return self.render(template, context);
       };
+
       return value.call(context.view, sectionText, scopedRender) || "";
-      break;
     default:
       if (value) {
         return callback(context, this);
@@ -549,7 +553,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 
   // The high-level clearCache, compile, compilePartial, and render functions
   // use this default renderer.
-  var _renderer = new Renderer;
+  var _renderer = new Renderer();
 
   /**
    * Clears all cached templates and partials.
