@@ -433,7 +433,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     var lastToken;
 
     for (var i = 0; i < tokens.length; ++i) {
-      token = tokens[i];
+      var token = tokens[i];
 
       if (lastToken && lastToken.type === "text" && token.type === "text") {
         lastToken.value += token.value;
@@ -452,7 +452,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
    */
   function parse(template, tags) {
     tags = tags || exports.tags;
-    tagRes = escapeTags(tags);
+    var tagRes = escapeTags(tags);
 
     var scanner = new Scanner(template);
 
