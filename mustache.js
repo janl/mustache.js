@@ -164,8 +164,9 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 
   Context.prototype.lookup = function (name) {
     var value = this._cache[name];
+    var valueFound;
 
-    if (!value) {
+    if ( !(name in this._cache) ) {
       if (name === ".") {
         value = this.view;
       } else {
@@ -173,18 +174,20 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
 
         while (context) {
           if (name.indexOf(".") > 0) {
-            var names = name.split("."), i = 0;
+            var names = name.split("."), i = 0, len = names.length;
 
             value = context.view;
 
-            while (value && i < names.length) {
+            while (value && i < len) {
+              valueFound = names[i++] in value;
               value = value[names[i++]];
             }
           } else {
+            valueFound = name in context.view;
             value = context.view[name];
           }
 
-          if (value != null) {
+          if (valueFound) {
             break;
           }
 
@@ -247,7 +250,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
           buffer += callback(context.push(value[i]), this);
         }
         return buffer;
-      } else {
+      } else if (value) {
         return callback(context.push(value), this);
       }
       break;
@@ -273,7 +276,7 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     // From the spec: inverted sections may render text once based on the
     // inverse value of the key. That is, they will be rendered if the key
     // doesn't exist, is false, or is an empty list.
-    if (value == null || value === false || (isArray(value) && value.length === 0)) {
+    if (!value || (isArray(value) && value.length === 0)) {
       return callback(context, this);
     }
 
