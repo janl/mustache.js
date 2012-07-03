@@ -144,7 +144,7 @@ Template:
 View:
 
     {
-      "person": true
+      "person": false
     }
 
 Output:
