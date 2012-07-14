@@ -62,7 +62,7 @@ var Mustache;
     return Object.prototype.toString.call(obj) === "[object Array]";
   };
 
-  // OSWASP Guidlines: escape all non alphanumeric characters in ASCII space.
+  // OSWASP Guidelines: escape all non alphanumeric characters in ASCII space.
   var jsCharsRe = /[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\xFF\u2028\u2029]/gm;
 
   function quote(text) {
