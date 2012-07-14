@@ -261,7 +261,7 @@ var Mustache;
         return buffer;
       }
 
-      return callback(context.push(value), this);
+      return value ? callback(context.push(value), this) : "";
     case "function":
       // TODO: The text should be passed to the callback plain, not rendered.
       var sectionText = callback(context, this),
