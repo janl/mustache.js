@@ -497,7 +497,7 @@ var Mustache;
 
       if (value) {
         for (var i = 0, len = value.length; i < len; ++i) {
-          chr = value[i];
+          chr = value.charAt(i);
 
           if (isWhitespace(chr)) {
             spaces.push(tokens.length);
