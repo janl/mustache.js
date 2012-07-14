@@ -3,7 +3,7 @@
 > What could be more logical awesome than no logic at all?
 
 [mustache.js](http://github.com/janl/mustache.js) is an implementation of the
-[Mustache](http://mustache.github.com/) template system in JavaScript.
+[mustache](http://mustache.github.com/) template system in JavaScript.
 
 [Mustache](http://mustache.github.com/) is a logic-less template syntax. It can
 be used for HTML, config files, source code - anything. It works by expanding
@@ -13,15 +13,17 @@ We call it "logic-less" because there are no if statements, else clauses, or for
 loops. Instead there are only tags. Some tags are replaced with a value, some
 nothing, and others a series of values.
 
-For a language-agnostic overview of Mustache's template syntax, see the
+For a language-agnostic overview of mustache's template syntax, see the
 `mustache(5)` [manpage](http://mustache.github.com/mustache.5.html).
 
 ## Where to use mustache.js?
 
-You can use mustache.js to render templates in many various scenarios where you
-can use JavaScript. For example, you can render templates in a browser,
-server-side using [node](http://nodejs.org/), in [CouchDB](http://couchdb.apache.org/)
-views, or in almost any other environment where you can use JavaScript.
+You can use mustache.js to render mustache templates anywhere you can use
+JavaScript. This includes web browsers, server-side environments such as [node](http://nodejs.org/), and [CouchDB](http://couchdb.apache.org/)
+views.
+
+mustache.js ships with support for both the [CommonJS](http://www.commonjs.org/)
+module API and the [Asynchronous Module Definition](https://github.com/amdjs/amdjs-api/wiki/AMD) API, or AMD.
 
 ## Who uses mustache.js?
 
@@ -44,14 +46,6 @@ Below is quick example how to use mustache.js:
 In this example, the `Mustache.render` function takes two parameters: 1) the
 [mustache](http://mustache.github.com/) template and 2) a `view` object that
 contains the data and code needed to render the template.
-
-### CommonJS
-
-mustache.js is usable without any modification in both browsers and [CommonJS](http://www.commonjs.org/)
-environments like [node.js](http://nodejs.org/). To use it as a CommonJS module,
-simply require the file, like this:
-
-    var Mustache = require("mustache");
 
 ## Templates
 
@@ -359,16 +353,13 @@ Custom delimiters may not contain whitespace or the equals sign.
 
 ## Plugins for JavaScript Libraries
 
-By default mustache.js may be used in any browser or [CommonJS](http://www.commonjs.org/)
-environment, including [node](http://nodejs.org/). Additionally, mustache.js may
-be built specifically for several different client libraries and platforms,
+mustache.js may be built specifically for several different client libraries,
 including the following:
 
   - [jQuery](http://jquery.com/)
   - [MooTools](http://mootools.net/)
   - [Dojo](http://www.dojotoolkit.org/)
   - [YUI](http://developer.yahoo.com/yui/)
-  - [RequireJS](http://requirejs.org/)
   - [qooxdoo](http://qooxdoo.org/)
 
 These may be built using [Rake](http://rake.rubyforge.org/) and one of the
@@ -378,18 +369,17 @@ following commands:
     $ rake mootools
     $ rake dojo
     $ rake yui
-    $ rake requirejs
     $ rake qooxdoo
 
 ## Testing
 
 The mustache.js test suite uses the [vows](http://vowsjs.org/) testing
-framework. In order to run the tests you'll need to install [node](http://nodejs.org/)
-first. Once it's installed, you can install vows using [npm](http://npmjs.org/).
+framework. In order to run the tests you'll need to install [node](http://nodejs.org/).
+Once that's done you can install vows using [npm](http://npmjs.org/).
 
     $ npm install -g vows
 
-Then, run the tests.
+Then run the tests.
 
     $ vows --spec
 
@@ -410,7 +400,7 @@ Then, you can run the test with:
 
 ## Thanks
 
-Mustache.js wouldn't kick ass if it weren't for these fine souls:
+mustache.js wouldn't kick ass if it weren't for these fine souls:
 
   * Chris Wanstrath / defunkt
   * Alexander Lang / langalex
