@@ -222,6 +222,10 @@ var Mustache;
   };
 
   Renderer.prototype.compile = function (tokens, tags) {
+    if (typeof tokens === "string") {
+      tokens = parse(tokens, tags);
+    }
+
     var fn = compileTokens(tokens),
         self = this;
 
@@ -327,10 +331,6 @@ var Mustache;
    * `returnBody` is true.
    */
   function compileTokens(tokens, returnBody) {
-    if (typeof tokens === "string") {
-      tokens = parse(tokens);
-    }
-
     var body = ['""'];
     var token, method, escape;
 
@@ -466,8 +466,8 @@ var Mustache;
    */
   function parse(template, tags) {
     tags = tags || exports.tags;
-    var tagRes = escapeTags(tags);
 
+    var tagRes = escapeTags(tags);
     var scanner = new Scanner(template);
 
     var tokens = [],      // Buffer to hold the tokens
