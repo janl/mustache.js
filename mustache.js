@@ -2,9 +2,19 @@
  * mustache.js - Logic-less {{mustache}} templates with JavaScript
  * http://github.com/janl/mustache.js
  */
-var Mustache = (typeof module !== "undefined" && module.exports) || {};
+
+var Mustache;
 
 (function (exports) {
+  if (typeof module !== "undefined") {
+    module.exports = exports; // CommonJS
+  } else if (typeof define === "function") {
+    define(exports); // AMD
+  } else {
+    Mustache = exports; // <script>
+  }
+}(function () {
+  var exports = {};
 
   exports.name = "mustache.js";
   exports.version = "0.5.1-dev";
@@ -598,4 +608,6 @@ var Mustache = (typeof module !== "undefined" && module.exports) || {};
     return _renderer.render(template, view);
   }
 
-})(Mustache);
+  return exports;
+
+}()));

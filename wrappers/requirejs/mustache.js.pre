@@ -1,6 +1,0 @@
-/*
-Shameless port of a shameless port ^ 2
-@defunkt => @janl => @aq => @voodootikigod => @timruffles
- 
-*/
-define(function(){
