@@ -229,13 +229,18 @@ var Mustache;
     var fn = compileTokens(tokens),
         self = this;
 
-    return function (view) {
+    return function (view, partials) {
+      if (partials) {
+        for (var name in partials) {
+          self.compilePartial(name, partials[name]);
+        }
+      }
       return fn(Context.make(view), self);
     };
   };
 
   Renderer.prototype.compilePartial = function (name, tokens, tags) {
-    this._partialCache[name] = this.compile(tokens, tags);
+    this._partialCache[name] = this._partialCache[name]||this.compile(tokens, tags);
     return this._partialCache[name];
   };
 
@@ -302,7 +307,7 @@ var Mustache;
     var fn = this._partialCache[name];
 
     if (fn) {
-      return fn(context, this);
+      return fn(context);
     }
 
     return "";
