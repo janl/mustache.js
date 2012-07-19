@@ -240,7 +240,8 @@ var Mustache;
   };
 
   Renderer.prototype.compilePartial = function (name, tokens, tags) {
-    this._partialCache[name] = this._partialCache[name]||this.compile(tokens, tags);
+    this._partialCache[name] = this._partialCache[name] || typeof tokens==='function' ? 
+      tokens : this.compile(tokens, tags);
     return this._partialCache[name];
   };
 
