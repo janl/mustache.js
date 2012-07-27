@@ -114,7 +114,7 @@ var Mustache;
 
   /**
    * Tries to match the given regular expression at the current position.
-   * Returns the matched text if it can match, `null` otherwise.
+   * Returns the matched text if it can match, the empty string otherwise.
    */
   Scanner.prototype.scan = function (re) {
     var match = this.tail.match(re);
@@ -125,13 +125,12 @@ var Mustache;
       return match[0];
     }
 
-    return null;
+    return "";
   };
 
   /**
    * Skips all text until the given regular expression can be matched. Returns
-   * the skipped string, which is the entire tail of this scanner if no match
-   * can be made.
+   * the skipped string, which is the entire tail if no match can be made.
    */
   Scanner.prototype.scanUntil = function (re) {
     var match, pos = this.tail.search(re);
@@ -143,7 +142,7 @@ var Mustache;
       this.tail = "";
       break;
     case 0:
-      match = null;
+      match = "";
       break;
     default:
       match = this.tail.substring(0, pos);
