@@ -303,7 +303,7 @@ var Mustache;
     var fn = this._partialCache[name];
 
     if (fn) {
-      return fn(context, this);
+      return fn(context);
     }
 
     return "";
