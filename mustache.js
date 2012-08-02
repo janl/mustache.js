@@ -221,6 +221,10 @@ var Mustache;
   };
 
   Renderer.prototype.compile = function (tokens, tags) {
+    if (typeof tokens === "string") {
+      tokens = parse(tokens, tags);
+    }
+
     var fn = compileTokens(tokens),
         self = this;
 
@@ -260,7 +264,7 @@ var Mustache;
         return buffer;
       }
 
-      return callback(context.push(value), this);
+      return value ? callback(context.push(value), this) : "";
     case "function":
       // TODO: The text should be passed to the callback plain, not rendered.
       var sectionText = callback(context, this),
@@ -326,10 +330,6 @@ var Mustache;
    * `returnBody` is true.
    */
   function compileTokens(tokens, returnBody) {
-    if (typeof tokens === "string") {
-      tokens = parse(tokens);
-    }
-
     var body = ['""'];
     var token, method, escape;
 
@@ -465,8 +465,8 @@ var Mustache;
    */
   function parse(template, tags) {
     tags = tags || exports.tags;
-    var tagRes = escapeTags(tags);
 
+    var tagRes = escapeTags(tags);
     var scanner = new Scanner(template);
 
     var tokens = [],      // Buffer to hold the tokens
@@ -496,7 +496,7 @@ var Mustache;
 
       if (value) {
         for (var i = 0, len = value.length; i < len; ++i) {
-          chr = value[i];
+          chr = value.charAt(i);
 
           if (isWhitespace(chr)) {
             spaces.push(tokens.length);
