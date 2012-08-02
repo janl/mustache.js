@@ -3,6 +3,8 @@
  * http://github.com/janl/mustache.js
  */
 
+/*global define: false*/
+
 var Mustache;
 
 (function (exports) {
@@ -13,7 +15,7 @@ var Mustache;
   } else {
     Mustache = exports; // <script>
   }
-}(function () {
+}((function () {
   var exports = {};
 
   exports.name = "mustache.js";
@@ -609,4 +611,4 @@ var Mustache;
 
   return exports;
 
-}()));
+}())));
