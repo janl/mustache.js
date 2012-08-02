@@ -66,6 +66,13 @@ All variables are HTML-escaped by default. If you want to render unescaped HTML,
 use the triple mustache: `{{{name}}}`. You can also use `&` to unescape a
 variable.
 
+View:
+
+    {
+      "name": "Chris",
+      "company": "<b>GitHub</b>"
+    }
+
 Template:
 
     * {{name}}
@@ -73,13 +80,6 @@ Template:
     * {{company}}
     * {{{company}}}
     * {{&company}}
-
-View:
-
-    {
-      "name": "Chris",
-      "company": "<b>GitHub</b>"
-    }
 
 Output:
 
@@ -92,11 +92,6 @@ Output:
 JavaScript's dot notation may be used to access keys that are properties of
 objects in a view.
 
-Template:
-
-    * {{name.first}} {{name.last}}
-    * {{age}}
-
 View:
 
     {
@@ -106,6 +101,11 @@ View:
       },
       "age": "RIP"
     }
+
+Template:
+
+    * {{name.first}} {{name.last}}
+    * {{age}}
 
 Output:
 
@@ -128,18 +128,18 @@ The behavior of the section is determined by the value of the key.
 If the `person` key exists and has a value of `null`, `undefined`, or `false`,
 or is an empty list, the block will not be rendered.
 
+View:
+
+    {
+      "person": false
+    }
+
 Template:
 
     Shown.
     {{#person}}
     Never shown!
     {{/person}}
-
-View:
-
-    {
-      "person": false
-    }
 
 Output:
 
@@ -154,12 +154,6 @@ When the value is a list, the block is rendered once for each item in the list.
 The context of the block is set to the current item in the list for each
 iteration. In this way we can loop over collections.
 
-Template:
-
-    {{#stooges}}
-    <b>{{name}}</b>
-    {{/stooges}}
-
 View:
 
     {
@@ -170,6 +164,12 @@ View:
       ]
     }
 
+Template:
+
+    {{#stooges}}
+    <b>{{name}}</b>
+    {{/stooges}}
+
 Output:
 
     <b>Moe</b>
@@ -179,17 +179,17 @@ Output:
 When looping over an array of strings, a `.` can be used to refer to the current
 item in the list.
 
-Template:
-
-    {{#musketeers}}
-    * {{.}}
-    {{/musketeers}}
-
 View:
 
     {
       "musketeers": ["Athos", "Aramis", "Porthos", "D'Artagnan"]
     }
+
+Template:
+
+    {{#musketeers}}
+    * {{.}}
+    {{/musketeers}}
 
 Output:
 
@@ -200,12 +200,6 @@ Output:
 
 If the value of a section variable is a function, it will be called in the
 context of the current item in the list on each iteration.
-
-Template:
-
-    {{#beatles}}
-    * {{name}}
-    {{/beatles}}
 
 View:
 
@@ -221,6 +215,12 @@ View:
       }
     }
 
+Template:
+
+    {{#beatles}}
+    * {{name}}
+    {{/beatles}}
+
 Output:
 
     * John Lennon
@@ -235,10 +235,6 @@ literal block of text, un-rendered, as its first argument. The second argument
 is a special rendering function that uses the current view as its view argument.
 It is called in the context of the current view object.
 
-Template:
-
-    {{#bold}}Hi {{name}}.{{/bold}}
-
 View:
 
     {
@@ -250,6 +246,10 @@ View:
       }
     }
 
+Template:
+
+    {{#bold}}Hi {{name}}.{{/bold}}
+
 Output:
 
     <b>Hi Tater.</b>
@@ -260,16 +260,16 @@ An inverted section opens with `{{^section}}` instead of `{{#section}}`. The
 block of an inverted section is rendered only if the value of that section's tag
 is `null`, `undefined`, `false`, or an empty list.
 
-Template:
-
-    {{#repos}}<b>{{name}}</b>{{/repos}}
-    {{^repos}}No repos :({{/repos}}
-
 View:
 
     {
       "repos": []
     }
+
+Template:
+
+    {{#repos}}<b>{{name}}</b>{{/repos}}
+    {{^repos}}No repos :({{/repos}}
 
 Output:
 
