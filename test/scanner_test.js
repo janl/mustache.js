@@ -47,8 +47,8 @@ vows.describe("Mustache.Scanner").addBatch({
               var match = scanner.scan(/b/);
               this.callback(scanner, match);
             },
-            "it should return null": function (scanner, match) {
-              assert.equal(match, null);
+            "it should return the empty string": function (scanner, match) {
+              assert.equal(match, "");
             },
             "it should not advance the internal pointer": function (scanner, match) {
               assert.equal(scanner.pos, 0);
@@ -61,8 +61,8 @@ vows.describe("Mustache.Scanner").addBatch({
             var match = scanner.scan(/z/);
             this.callback(scanner, match);
           },
-          "it should return null": function (scanner, match) {
-            assert.equal(match, null);
+          "it should return the empty string": function (scanner, match) {
+            assert.equal(match, "");
           },
           "it should not advance the internal pointer": function (scanner, match) {
             assert.equal(scanner.pos, 0);
@@ -77,8 +77,8 @@ vows.describe("Mustache.Scanner").addBatch({
               var match = scanner.scanUntil(/a/);
               this.callback(scanner, match);
             },
-            "it should return null": function (scanner, match) {
-              assert.equal(match, null)
+            "it should return the empty string": function (scanner, match) {
+              assert.equal(match, "")
             },
             "it should not advance the internal pointer": function (scanner, match) {
               assert.equal(scanner.pos, 0);

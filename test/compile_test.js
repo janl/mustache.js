@@ -58,6 +58,6 @@ testNames.forEach(function (testName) {
   };
 });
 
-vows.describe("Mustache.render").addBatch({
+vows.describe("Mustache.compile").addBatch({
   "compile": spec
 }).export(module);

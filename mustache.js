@@ -3,6 +3,8 @@
  * http://github.com/janl/mustache.js
  */
 
+/*global define: false*/
+
 var Mustache;
 
 (function (exports) {
@@ -13,11 +15,11 @@ var Mustache;
   } else {
     Mustache = exports; // <script>
   }
-}(function () {
+}((function () {
   var exports = {};
 
   exports.name = "mustache.js";
-  exports.version = "0.5.1-dev";
+  exports.version = "0.5.2";
   exports.tags = ["{{", "}}"];
 
   exports.parse = parse;
@@ -114,7 +116,7 @@ var Mustache;
 
   /**
    * Tries to match the given regular expression at the current position.
-   * Returns the matched text if it can match, `null` otherwise.
+   * Returns the matched text if it can match, the empty string otherwise.
    */
   Scanner.prototype.scan = function (re) {
     var match = this.tail.match(re);
@@ -125,13 +127,12 @@ var Mustache;
       return match[0];
     }
 
-    return null;
+    return "";
   };
 
   /**
    * Skips all text until the given regular expression can be matched. Returns
-   * the skipped string, which is the entire tail of this scanner if no match
-   * can be made.
+   * the skipped string, which is the entire tail if no match can be made.
    */
   Scanner.prototype.scanUntil = function (re) {
     var match, pos = this.tail.search(re);
@@ -143,7 +144,7 @@ var Mustache;
       this.tail = "";
       break;
     case 0:
-      match = null;
+      match = "";
       break;
     default:
       match = this.tail.substring(0, pos);
@@ -232,7 +233,9 @@ var Mustache;
     return function (view, partials) {
       if (partials) {
         for (var name in partials) {
-          self.compilePartial(name, partials[name]);
+          if(!(name in self._partialCache)){
+            self.compilePartial(name, partials[name]);
+          }
         }
       }
       return fn(Context.make(view), self);
@@ -240,9 +243,8 @@ var Mustache;
   };
 
   Renderer.prototype.compilePartial = function (name, tokens, tags) {
-    this._partialCache[name] = this._partialCache[name] || typeof tokens==='function' ? 
+    return this._partialCache[name]= typeof tokens==='function' ? 
       tokens : this.compile(tokens, tags);
-    return this._partialCache[name];
   };
 
   Renderer.prototype.render = function (template, view) {
@@ -615,5 +617,4 @@ var Mustache;
   }
 
   return exports;
-
-}()));
+}())));
