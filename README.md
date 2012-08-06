@@ -328,6 +328,82 @@ In mustache.js an object of partials may be passed as the third argument to
 `Mustache.render`. The object should be keyed by the name of the partial, and
 its value should be the partial text.
 
+### Dynamic Partials
+
+It is quite common to want to render a partial for each item in a collection.
+Sometimes this will be a common partial but often it will be dependent on each
+item in the collection.
+
+The implicit partial notation of `{{>.}}` renders a partial who's name comes
+from the `partial` key of the current item. The current item becomes the
+context of the partial.
+
+View:
+
+    {
+      "beatles": [
+        { "name": "John", "partial": "dead" },
+        { "name": "Paul", "partial": "alive" },
+        { "name": "George", "partial": "dead" },
+        { "name": "Ringo", "partial": "alive" }
+      ]
+    }
+
+Template:
+
+    base.mustache
+    {{#beatles}}
+    {{>.}}
+    {{/beatles}}
+    
+    alive.mustache
+    * Keep it up {{name}}
+    
+    dead.mustache
+    * Rest in peace {{name}}
+
+Output:
+
+    * Rest in peace John
+    * Keep it up Paul
+    * Rest in peace George
+    * Keep it up Ringo
+
+#### Partial Collections
+    
+As this is such a common pattern, there is a shortcut that renders the named
+partial for each item in a collection. The same example can therefore also be
+accomplished with the following:
+
+View:
+
+    {
+      "beatles": [
+        { "name": "John", "partial": "dead" },
+        { "name": "Paul", "partial": "alive" },
+        { "name": "George", "partial": "dead" },
+        { "name": "Ringo", "partial": "alive" }
+      ]
+    }
+
+Template:
+
+    base.mustache
+    {{@beatles}}
+    
+    alive.mustache
+    * Keep it up {{name}}
+    
+    dead.mustache
+    * Rest in peace {{name}}
+
+Output:
+
+    * Rest in peace John
+    * Keep it up Paul
+    * Rest in peace George
+    * Keep it up Ringo
+
 ### Set Delimiter
 
 Set Delimiter tags start with an equals sign and change the tag delimiters from

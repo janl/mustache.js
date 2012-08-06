@@ -1,0 +1,2 @@
+I am partial 1
+I am partial 2
