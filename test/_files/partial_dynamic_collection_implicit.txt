@@ -1,0 +1,8 @@
+Header
+Before
+I am partial 1
+After
+Before
+I am partial 2
+After
+Footer

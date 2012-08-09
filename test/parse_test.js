@@ -49,7 +49,9 @@ var expectations = {
   "{{#a}}{{/a}}hi{{#b}}{{/b}}\n"            : [ { type: '#', value: 'a', tokens: [] }, { type: 'text', value: 'hi' }, { type: '#', value: 'b', tokens: [] }, { type: 'text', value: '\n' } ],
   "{{a}}\n{{b}}\n\n{{#c}}\n{{/c}}\n"        : [ { type: 'name', value: 'a' }, { type: 'text', value: '\n' }, { type: 'name', value: 'b' }, { type: 'text', value: '\n\n' }, { type: '#', value: 'c', tokens: [] } ],
   "{{#foo}}\n  {{#a}}\n    {{b}}\n  {{/a}}\n{{/foo}}\n"
-                                            : [ { type: "#", value: "foo", tokens: [ { type: "#", value: "a", tokens: [ { type: "text", value: "    " }, { type: "name", value: "b" }, { type: "text", value: "\n" } ] } ] } ]
+                                            : [ { type: "#", value: "foo", tokens: [ { type: "#", value: "a", tokens: [ { type: "text", value: "    " }, { type: "name", value: "b" }, { type: "text", value: "\n" } ] } ] } ],
+  "{{>.}}"                                  : [ { type: '>', value: '.' } ],
+  "{{@collection}}"                         : [ { type: '@', value: 'collection' } ]
 };
 
 var spec = {};

@@ -43,13 +43,18 @@ testNames.forEach(function (testName) {
   var template = getContents(testName, "mustache");
   var expect = getContents(testName, "txt");
   var partial = getContents(testName, "partial");
+  var partial2 = getContents(testName, "partial2");
 
   spec["knows how to render " + testName] = function () {
     Mustache.clearCache();
 
-    var output;
-    if (partial) {
-      output = Mustache.render(template, view, {partial: partial});
+    var output, partials = {};
+  
+    if (partial) { partials['partial'] = partial; }
+    if (partial2) { partials['partial2'] = partial2; }
+
+    if (partial || partial2) {
+      output = Mustache.render(template, view, partials);
     } else {
       output = Mustache.render(template, view);
     }

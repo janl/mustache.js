@@ -48,7 +48,7 @@ var Mustache;
   var nonSpaceRe = /\S/;
   var eqRe = /\s*=/;
   var curlyRe = /\s*\}/;
-  var tagRe = /#|\^|\/|>|\{|&|=|!/;
+  var tagRe = /@|#|\^|\/|>|\{|&|=|!/;
 
   // Workaround for https://issues.apache.org/jira/browse/COUCHDB-577
   // See https://github.com/janl/mustache.js/issues/189
@@ -300,13 +300,30 @@ var Mustache;
   };
 
   Renderer.prototype._partial = function (name, context) {
-    var fn = this._partialCache[name];
+    // If the partial name is a dot, render based on the 'partial' key of
+    // the current context, otherwise use default behaviour.
+    var cache = this._partialCache,
+        fn = (name === '.' ? cache[context.lookup("partial")] : cache[name]);
 
     if (fn) {
       return fn(context);
     }
 
     return "";
+  };
+
+  Renderer.prototype._partialCollection = function (name, context) {
+    var value = context.lookup(name), buffer = "";
+
+    // If we have an array, render the partial defined by the 'partial'
+    // key for each item in the array.
+    if (isArray(value)) {
+      for (var i = 0, len = value.length; i < len; ++i) {
+        buffer += this._partial('.', context.push(value[i]));
+      }
+    }
+
+    return buffer;
   };
 
   Renderer.prototype._name = function (name, context, escape) {
@@ -354,6 +371,9 @@ var Mustache;
         break;
       case ">":
         body.push("r._partial(" + quote(token.value) + ", c)");
+        break;
+      case "@":
+        body.push("r._partialCollection(" + quote(token.value) + ", c)");
         break;
       case "text":
         body.push(quote(token.value));
