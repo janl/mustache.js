@@ -181,11 +181,18 @@ var Mustache;
         value = this.view;
       } else {
         var context = this;
-
+        //support current context only search: ".children"
+        var noBubble = name && name[0] === ".";
+        
         while (context) {
-          if (name.indexOf(".") > 0) {
+          if (name.indexOf(".") > -1) {
             var names = name.split("."), i = 0;
-
+            
+            if(noBubble)
+            {
+              names.shift();
+            }
+            
             value = context.view;
 
             while (value && i < names.length) {
@@ -195,7 +202,7 @@ var Mustache;
             value = context.view[name];
           }
 
-          if (value != null) {
+          if (value != null || noBubble) {
             break;
           }
 
