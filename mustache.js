@@ -376,14 +376,14 @@ var Mustache;
   }
 
   function escapeTags(tags) {
-    if (tags.length === 2) {
-      return [
-        new RegExp(escapeRe(tags[0]) + "\\s*"),
-        new RegExp("\\s*" + escapeRe(tags[1]))
-      ];
+    if (tags.length !== 2) {
+      throw new Error("Invalid tags: " + tags.join(" "));
     }
 
-    throw new Error("Invalid tags: " + tags.join(" "));
+    return [
+      new RegExp(escapeRe(tags[0]) + "\\s*"),
+      new RegExp("\\s*" + escapeRe(tags[1]))
+    ];
   }
 
   /**
