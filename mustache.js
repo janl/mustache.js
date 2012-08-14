@@ -43,12 +43,12 @@ var Mustache;
     }
   };
 
-  var whiteRe = /\s*/;
-  var spaceRe = /\s+/;
-  var nonSpaceRe = /\S/;
-  var eqRe = /\s*=/;
-  var curlyRe = /\s*\}/;
-  var tagRe = /#|\^|\/|>|\{|&|=|!/;
+  var whiteRe = /\s*/,
+      spaceRe = /\s+/,
+      nonSpaceRe = /\S/,
+      eqRe = /\s*=/,
+      curlyRe = /\s*\}/,
+      tagRe = /#|\^|\/|>|\{|&|=|!/;
 
   // Workaround for https://issues.apache.org/jira/browse/COUCHDB-577
   // See https://github.com/janl/mustache.js/issues/189
@@ -332,8 +332,8 @@ var Mustache;
    * `returnBody` is true.
    */
   function compileTokens(tokens, returnBody) {
-    var body = ['""'];
-    var token, method, escape;
+    var body = ['""'],
+        token, method, escape;
 
     for (var i = 0, len = tokens.length; i < len; ++i) {
       token = tokens[i];
@@ -392,10 +392,10 @@ var Mustache;
    * that contains all tokens that are in that section.
    */
   function nestTokens(tokens) {
-    var tree = [];
-    var collector = tree;
-    var sections = [];
-    var token, section;
+    var tree = [],
+        collector = tree,
+        sections = [],
+        token, section;
 
     for (var i = 0; i < tokens.length; ++i) {
       token = tokens[i];
@@ -468,8 +468,8 @@ var Mustache;
   function parse(template, tags) {
     tags = tags || exports.tags;
 
-    var tagRes = escapeTags(tags);
-    var scanner = new Scanner(template);
+    var tagRes = escapeTags(tags),
+        scanner = new Scanner(template);
 
     var tokens = [],      // Buffer to hold the tokens
         spaces = [],      // Indices of whitespace tokens on the current line
