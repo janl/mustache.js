@@ -304,6 +304,12 @@ var Mustache;
 
     if (fn) {
       return fn(context);
+    } else if (this.partialLoader) {
+      this.partialLoader(name);
+      fn = this._partialCache[name];
+      if (fn) {
+        return fn(context);
+      }
     }
 
     return "";
@@ -597,12 +603,19 @@ var Mustache;
    * it will cause all partials to be re-compiled, thus hurting performance. Of
    * course, this only matters if you're going to render the same template more
    * than once. If so, it is best to call `compilePartial` before calling this
-   * function and to leave the `partials` argument blank.
+   * function and to leave the `partials` argument blank. It is also possible to
+   * pass in a callback as the third argument which will be called when an uncached
+   * partial is requested. This function will be called with the name of the 
+   * partial as it's only parameter.
    */
   function render(template, view, partials) {
     if (partials) {
-      for (var name in partials) {
-        compilePartial(name, partials[name]);
+      if (partials instanceof Function) {
+        _renderer.partialLoader = partials;
+      } else {
+        for (var name in partials) {
+          compilePartial(name, partials[name]);
+        }
       }
     }
 
