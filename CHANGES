@@ -1,0 +1,7 @@
+= HEAD
+
+  * Use JavaScript's definition of falsy when determining whether to render an
+    inverted section or not. Issue #186.
+  * Use Mustache.escape to escape values inside {{}}. This function may be
+    reassigned to alter the default escaping behavior. Issue #244.
+  * Fixed a bug that clashed with QUnit. Thanks @kannix.
