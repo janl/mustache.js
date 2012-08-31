@@ -6,8 +6,10 @@
   "keywords": ["mustache", "template", "templates", "ejs"],
   "main": "./mustache.js",
   "devDependencies": {
-    "vows": "0.6.x",
-    "uglify-js": "1.3.0"
+    "vows": "0.6.x"
+  },
+  "volo": {
+    "url": "https://raw.github.com/janl/mustache.js/0.5.2/mustache.js"
   },
   "scripts": {
     "test": "vows --spec"
