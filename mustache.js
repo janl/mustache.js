@@ -64,7 +64,7 @@ var Mustache;
     return Object.prototype.toString.call(obj) === "[object Array]";
   };
 
-  // OSWASP Guidelines: escape all non alphanumeric characters in ASCII space.
+  // OSWASP Guidelines: Escape all non alphanumeric characters in ASCII space.
   var jsCharsRe = /[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\xFF\u2028\u2029]/gm;
 
   function quote(text) {
@@ -94,12 +94,9 @@ var Mustache;
     });
   }
 
-  // Export these utility functions.
-  exports.isWhitespace = isWhitespace;
-  exports.isArray = isArray;
-  exports.quote = quote;
-  exports.escapeRe = escapeRe;
-  exports.escapeHtml = escapeHtml;
+  // Export the escaping function so that the user may override it.
+  // See https://github.com/janl/mustache.js/issues/244
+  exports.escape = escapeHtml;
 
   function Scanner(string) {
     this.string = string;
@@ -319,7 +316,7 @@ var Mustache;
     var string = (value == null) ? "" : String(value);
 
     if (escape) {
-      return escapeHtml(string);
+      return exports.escape(string);
     }
 
     return string;
