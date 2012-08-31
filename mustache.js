@@ -19,7 +19,7 @@ var Mustache;
   var exports = {};
 
   exports.name = "mustache.js";
-  exports.version = "0.5.2";
+  exports.version = "0.6.0";
   exports.tags = ["{{", "}}"];
 
   exports.parse = parse;

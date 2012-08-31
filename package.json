@@ -1,6 +1,6 @@
 {
   "name": "mustache",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": "Logic-less {{mustache}} templates with JavaScript",
   "author": "mustache.js Authors <http://github.com/janl/mustache.js>",
   "keywords": ["mustache", "template", "templates", "ejs"],
@@ -9,7 +9,7 @@
     "vows": "0.6.x"
   },
   "volo": {
-    "url": "https://raw.github.com/janl/mustache.js/0.5.2/mustache.js"
+    "url": "https://raw.github.com/janl/mustache.js/0.6.0/mustache.js"
   },
   "scripts": {
     "test": "vows --spec"
