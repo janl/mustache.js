@@ -227,14 +227,21 @@ var Mustache;
     var fn = compileTokens(tokens),
         self = this;
 
-    return function (view) {
+    return function (view, partials) {
+      if (partials) {
+        for (var name in partials) {
+          if(!(name in self._partialCache)){
+            self.compilePartial(name, partials[name]);
+          }
+        }
+      }
       return fn(Context.make(view), self);
     };
   };
 
   Renderer.prototype.compilePartial = function (name, tokens, tags) {
-    this._partialCache[name] = this.compile(tokens, tags);
-    return this._partialCache[name];
+    return this._partialCache[name]= typeof tokens==='function' ? 
+      tokens : this.compile(tokens, tags);
   };
 
   Renderer.prototype.render = function (template, view) {
