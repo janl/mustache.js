@@ -1,6 +1,6 @@
-var assert = require("assert"),
-    vows = require("vows"),
-    Context = require("./../mustache").Context;
+var assert = require("assert");
+var vows = require("vows");
+var Context = require("./../mustache").Context;
 
 vows.describe("Mustache.Context").addBatch({
   "A Context": {

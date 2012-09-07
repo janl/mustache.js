@@ -1,7 +1,7 @@
-var fs = require("fs"),
-    path = require("path"),
-    assert = require("assert"),
-    vows = require("vows");
+var fs = require("fs");
+var path = require("path");
+var assert = require("assert");
+var vows = require("vows");
 
 var Mustache = require(path.join(__dirname, "..", "mustache"));
 var _files = path.join(__dirname, "_files");

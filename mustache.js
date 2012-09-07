@@ -219,24 +219,6 @@ var Mustache;
     this._partialCache = {};
   };
 
-  Renderer.prototype.compile = function (tokens, tags) {
-    if (typeof tokens === "string") {
-      tokens = parse(tokens, tags);
-    }
-
-    var fn = compileTokens(tokens),
-        self = this;
-
-    return function (view) {
-      return fn(Context.make(view), self);
-    };
-  };
-
-  Renderer.prototype.compilePartial = function (name, tokens, tags) {
-    this._partialCache[name] = this.compile(tokens, tags);
-    return this._partialCache[name];
-  };
-
   Renderer.prototype.render = function (template, view) {
     var fn = this._cache[template];
 
@@ -248,7 +230,22 @@ var Mustache;
     return fn(view);
   };
 
-  Renderer.prototype._section = function (name, context, callback) {
+  Renderer.prototype.compile = function (template, tags) {
+    var tokens = parse(template, tags);
+    var render = compileTokens(tokens);
+
+    var self = this;
+    return function (view) {
+      return render(Context.make(view), self, template);
+    };
+  };
+
+  Renderer.prototype.compilePartial = function (name, template, tags) {
+    this._partialCache[name] = this.compile(template, tags);
+    return this._partialCache[name];
+  };
+
+  Renderer.prototype._section = function (name, context, text, callback) {
     var value = context.lookup(name);
 
     switch (typeof value) {
@@ -265,15 +262,12 @@ var Mustache;
 
       return value ? callback(context.push(value), this) : "";
     case "function":
-      // TODO: The text should be passed to the callback plain, not rendered.
-      var sectionText = callback(context, this),
-          self = this;
-
+      var self = this;
       var scopedRender = function (template) {
         return self.render(template, context);
       };
 
-      return value.call(context.view, sectionText, scopedRender) || "";
+      return value.call(context.view, text, scopedRender) || "";
     default:
       if (value) {
         return callback(context, this);
@@ -322,6 +316,24 @@ var Mustache;
   };
 
   /**
+   * Calculates the bounds of the section represented by the given `token` in
+   * the original template by drilling down into nested sections to find the
+   * last token that is part of that section. Returns an array of [start, end].
+   */
+  function sectionBounds(token) {
+    var start = token.end;
+    var end = start;
+
+    var tokens;
+    while ((tokens = token.tokens) && tokens.length) {
+      token = tokens[tokens.length - 1];
+      end = token.end;
+    }
+
+    return [start, end];
+  }
+
+  /**
    * Low-level function that compiles the given `tokens` into a
    * function that accepts two arguments: a Context and a
    * Renderer. Returns the body of the function as a string if
@@ -329,23 +341,28 @@ var Mustache;
    */
   function compileTokens(tokens, returnBody) {
     var body = ['""'];
-    var token, method, escape;
+    var token, escape, bounds, text;
 
     for (var i = 0, len = tokens.length; i < len; ++i) {
       token = tokens[i];
 
       switch (token.type) {
       case "#":
+        bounds = sectionBounds(token);
+        text = "t.slice(" + bounds[0] + ", " + bounds[1] + ")";
+        body.push("r._section(" + quote(token.value) + ", c, " + text + ", function (c, r) {\n" +
+          "  " + compileTokens(token.tokens, true) + "\n" +
+          "})");
+        break;
       case "^":
-        method = (token.type === "#") ? "_section" : "_inverted";
-        body.push("r." + method + "(" + quote(token.value) + ", c, function (c, r) {\n" +
+        body.push("r._inverted(" + quote(token.value) + ", c, function (c, r) {\n" +
           "  " + compileTokens(token.tokens, true) + "\n" +
           "})");
         break;
       case "{":
       case "&":
       case "name":
-        escape = token.type === "name" ? "true" : "false";
+        escape = String(token.type === "name");
         body.push("r._name(" + quote(token.value) + ", c, " + escape + ")");
         break;
       case ">":
@@ -368,7 +385,7 @@ var Mustache;
     }
 
     // For great evil!
-    return new Function("c, r", body);
+    return new Function("c, r, t", body);
   }
 
   function escapeTags(tags) {
@@ -487,9 +504,10 @@ var Mustache;
       nonSpace = false;
     };
 
-    var type, value, chr;
+    var start, type, value, chr;
 
     while (!scanner.eos()) {
+      start = scanner.pos;
       value = scanner.scanUntil(tagRes[0]);
 
       if (value) {
@@ -502,13 +520,15 @@ var Mustache;
             nonSpace = true;
           }
 
-          tokens.push({type: "text", value: chr});
+          tokens.push({type: "text", value: chr, start: start, end: scanner.pos});
 
           if (chr === "\n") {
             stripSpace(); // Check for whitespace on the current line.
           }
         }
       }
+
+      start = scanner.pos;
 
       // Match the opening tag.
       if (!scanner.scan(tagRes[0])) {
@@ -540,7 +560,7 @@ var Mustache;
         throw new Error("Unclosed tag at " + scanner.pos);
       }
 
-      tokens.push({type: type, value: value});
+      tokens.push({type: type, value: value, start: start, end: scanner.pos});
 
       if (type === "name" || type === "{" || type === "&") {
         nonSpace = true;

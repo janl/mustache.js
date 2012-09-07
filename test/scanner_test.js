@@ -1,6 +1,6 @@
-var assert = require("assert"),
-    vows = require("vows"),
-    Scanner = require("./../mustache").Scanner;
+var assert = require("assert");
+var vows = require("vows");
+var Scanner = require("./../mustache").Scanner;
 
 vows.describe("Mustache.Scanner").addBatch({
   "A Scanner": {
