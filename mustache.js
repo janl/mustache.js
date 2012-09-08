@@ -219,30 +219,36 @@ var Mustache;
     this._partialCache = {};
   };
 
-  Renderer.prototype.render = function (template, view) {
-    var fn = this._cache[template];
+  Renderer.prototype._compile = function (cache, key, template, tags) {
+    if (!cache[key]) {
+      var tokens = parse(template, tags);
+      var fn = compileTokens(tokens);
 
-    if (!fn) {
-      fn = this.compile(template);
-      this._cache[template] = fn;
+      var self = this;
+      cache[key] = function (view, partials) {
+        if (partials) {
+          for (var name in partials) {
+            self.compilePartial(name, partials[name]);
+          }
+        }
+
+        return fn(Context.make(view), self, template);
+      };
     }
 
-    return fn(view);
+    return cache[key];
   };
 
   Renderer.prototype.compile = function (template, tags) {
-    var tokens = parse(template, tags);
-    var render = compileTokens(tokens);
-
-    var self = this;
-    return function (view) {
-      return render(Context.make(view), self, template);
-    };
+    return this._compile(this._cache, template, template, tags);
   };
 
   Renderer.prototype.compilePartial = function (name, template, tags) {
-    this._partialCache[name] = this.compile(template, tags);
-    return this._partialCache[name];
+    return this._compile(this._partialCache, name, template, tags);
+  };
+
+  Renderer.prototype.render = function (template, view, partials) {
+    return this.compile(template)(view, partials);
   };
 
   Renderer.prototype._section = function (name, context, text, callback) {
@@ -577,46 +583,34 @@ var Mustache;
   var _renderer = new Renderer();
 
   /**
-   * Clears all cached templates and partials.
+   * Clears all cached templates and partials in the default renderer.
    */
   function clearCache() {
     _renderer.clearCache();
   }
 
   /**
-   * High-level API for compiling the given `tokens` down to a reusable
-   * function. If `tokens` is a string it will be parsed using the given `tags`
-   * before it is compiled.
+   * Compiles the given `template` to a reusable function using the default
+   * renderer.
    */
-  function compile(tokens, tags) {
-    return _renderer.compile(tokens, tags);
+  function compile(template, tags) {
+    return _renderer.compile(template, tags);
   }
 
   /**
-   * High-level API for compiling the `tokens` for the partial with the given
-   * `name` down to a reusable function. If `tokens` is a string it will be
-   * parsed using the given `tags` before it is compiled.
+   * Compiles the partial with the given `name` and `template` to a reusable
+   * function using the default renderer.
    */
-  function compilePartial(name, tokens, tags) {
-    return _renderer.compilePartial(name, tokens, tags);
+  function compilePartial(name, template, tags) {
+    return _renderer.compilePartial(name, template, tags);
   }
 
   /**
-   * High-level API for rendering the `template` using the given `view`. The
-   * optional `partials` object may be given here for convenience, but note that
-   * it will cause all partials to be re-compiled, thus hurting performance. Of
-   * course, this only matters if you're going to render the same template more
-   * than once. If so, it is best to call `compilePartial` before calling this
-   * function and to leave the `partials` argument blank.
+   * Renders the `template` with the given `view` and `partials` using the
+   * default renderer.
    */
   function render(template, view, partials) {
-    if (partials) {
-      for (var name in partials) {
-        compilePartial(name, partials[name]);
-      }
-    }
-
-    return _renderer.render(template, view);
+    return _renderer.render(template, view, partials);
   }
 
   return exports;
