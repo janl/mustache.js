@@ -291,28 +291,21 @@ var Mustache;
 
   Renderer.prototype._partial = function (name, context) {
     var fn = this._partialCache[name];
-
-    if (fn) {
-      return fn(context);
-    }
-
-    return "";
+    return fn ? fn(context) : "";
   };
 
-  Renderer.prototype._name = function (name, context, escape) {
+  Renderer.prototype._name = function (name, context) {
     var value = context.lookup(name);
 
     if (typeof value === "function") {
       value = value.call(context.view);
     }
 
-    var string = (value == null) ? "" : String(value);
+    return (value == null) ? "" : String(value);
+  };
 
-    if (escape) {
-      return exports.escape(string);
-    }
-
-    return string;
+  Renderer.prototype._escaped = function (name, context) {
+    return exports.escape(this._name(name, context));
   };
 
   /**
@@ -340,36 +333,36 @@ var Mustache;
    * `returnBody` is true.
    */
   function compileTokens(tokens, returnBody) {
-    var body = ['""'];
-    var token, escape, bounds, text;
+    var body = ['""'], token, quotedValue, bounds, text;
 
     for (var i = 0, len = tokens.length; i < len; ++i) {
       token = tokens[i];
+      quotedValue = quote(token[1]);
 
       switch (token[0]) {
       case "#":
         bounds = sectionBounds(token);
         text = "t.slice(" + bounds[0] + ", " + bounds[1] + ")";
-        body.push("r._section(" + quote(token[1]) + ", c, " + text + ", function (c, r) {\n" +
+        body.push("r._section(" + quotedValue + ", c, " + text + ", function (c, r) {\n" +
           "  " + compileTokens(token[4], true) + "\n" +
           "})");
         break;
       case "^":
-        body.push("r._inverted(" + quote(token[1]) + ", c, function (c, r) {\n" +
+        body.push("r._inverted(" + quotedValue + ", c, function (c, r) {\n" +
           "  " + compileTokens(token[4], true) + "\n" +
           "})");
         break;
-      case "{":
-      case "&":
-      case "name":
-        escape = String(token[0] === "name");
-        body.push("r._name(" + quote(token[1]) + ", c, " + escape + ")");
-        break;
       case ">":
-        body.push("r._partial(" + quote(token[1]) + ", c)");
+        body.push("r._partial(" + quotedValue + ", c)");
+        break;
+      case "&":
+        body.push("r._name(" + quotedValue + ", c)");
+        break;
+      case "name":
+        body.push("r._escaped(" + quotedValue + ", c)");
         break;
       case "text":
-        body.push(quote(token[1]));
+        body.push(quotedValue);
         break;
       }
     }
@@ -401,8 +394,8 @@ var Mustache;
 
   /**
    * Forms the given linear array of `tokens` into a nested tree structure
-   * where tokens that represent a section have a "tokens" array property
-   * that contains all tokens that are in that section.
+   * where tokens that represent a section have a fifth item: an array that
+   * contains all tokens in that section.
    */
   function nestTokens(tokens) {
     var tree = [];
@@ -551,6 +544,7 @@ var Mustache;
         value = scanner.scanUntil(closeRe);
         scanner.scan(curlyRe);
         scanner.scanUntil(tagRes[1]);
+        type = "&";
       } else {
         value = scanner.scanUntil(tagRes[1]);
       }
