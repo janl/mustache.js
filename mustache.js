@@ -321,13 +321,13 @@ var Mustache;
    * last token that is part of that section. Returns an array of [start, end].
    */
   function sectionBounds(token) {
-    var start = token.end;
+    var start = token[3];
     var end = start;
 
     var tokens;
-    while ((tokens = token.tokens) && tokens.length) {
+    while ((tokens = token[4]) && tokens.length) {
       token = tokens[tokens.length - 1];
-      end = token.end;
+      end = token[3];
     }
 
     return [start, end];
@@ -346,30 +346,30 @@ var Mustache;
     for (var i = 0, len = tokens.length; i < len; ++i) {
       token = tokens[i];
 
-      switch (token.type) {
+      switch (token[0]) {
       case "#":
         bounds = sectionBounds(token);
         text = "t.slice(" + bounds[0] + ", " + bounds[1] + ")";
-        body.push("r._section(" + quote(token.value) + ", c, " + text + ", function (c, r) {\n" +
-          "  " + compileTokens(token.tokens, true) + "\n" +
+        body.push("r._section(" + quote(token[1]) + ", c, " + text + ", function (c, r) {\n" +
+          "  " + compileTokens(token[4], true) + "\n" +
           "})");
         break;
       case "^":
-        body.push("r._inverted(" + quote(token.value) + ", c, function (c, r) {\n" +
-          "  " + compileTokens(token.tokens, true) + "\n" +
+        body.push("r._inverted(" + quote(token[1]) + ", c, function (c, r) {\n" +
+          "  " + compileTokens(token[4], true) + "\n" +
           "})");
         break;
       case "{":
       case "&":
       case "name":
-        escape = String(token.type === "name");
-        body.push("r._name(" + quote(token.value) + ", c, " + escape + ")");
+        escape = String(token[0] === "name");
+        body.push("r._name(" + quote(token[1]) + ", c, " + escape + ")");
         break;
       case ">":
-        body.push("r._partial(" + quote(token.value) + ", c)");
+        body.push("r._partial(" + quote(token[1]) + ", c)");
         break;
       case "text":
-        body.push(quote(token.value));
+        body.push(quote(token[1]));
         break;
       }
     }
@@ -413,27 +413,27 @@ var Mustache;
     for (var i = 0; i < tokens.length; ++i) {
       token = tokens[i];
 
-      switch (token.type) {
+      switch (token[0]) {
       case "#":
       case "^":
-        token.tokens = [];
+        token[4] = [];
         sections.push(token);
         collector.push(token);
-        collector = token.tokens;
+        collector = token[4];
         break;
       case "/":
         if (sections.length === 0) {
-          throw new Error("Unopened section: " + token.value);
+          throw new Error("Unopened section: " + token[1]);
         }
 
         section = sections.pop();
 
-        if (section.value !== token.value) {
-          throw new Error("Unclosed section: " + section.value);
+        if (section[1] !== token[1]) {
+          throw new Error("Unclosed section: " + section[1]);
         }
 
         if (sections.length > 0) {
-          collector = sections[sections.length - 1].tokens;
+          collector = sections[sections.length - 1][4];
         } else {
           collector = tree;
         }
@@ -447,7 +447,7 @@ var Mustache;
     section = sections.pop();
 
     if (section) {
-      throw new Error("Unclosed section: " + section.value);
+      throw new Error("Unclosed section: " + section[1]);
     }
 
     return tree;
@@ -458,13 +458,13 @@ var Mustache;
    * to a single token.
    */
   function squashTokens(tokens) {
-    var lastToken;
+    var token, lastToken;
 
     for (var i = 0; i < tokens.length; ++i) {
-      var token = tokens[i];
+      token = tokens[i];
 
-      if (lastToken && lastToken.type === "text" && token.type === "text") {
-        lastToken.value += token.value;
+      if (lastToken && lastToken[0] === "text" && token[0] === "text") {
+        lastToken[1] += token[1];
         tokens.splice(i--, 1); // Remove this token from the array.
       } else {
         lastToken = token;
@@ -520,7 +520,7 @@ var Mustache;
             nonSpace = true;
           }
 
-          tokens.push({type: "text", value: chr, start: start, end: scanner.pos});
+          tokens.push(["text", chr, start, scanner.pos]);
 
           if (chr === "\n") {
             stripSpace(); // Check for whitespace on the current line.
@@ -560,7 +560,7 @@ var Mustache;
         throw new Error("Unclosed tag at " + scanner.pos);
       }
 
-      tokens.push({type: type, value: value, start: start, end: scanner.pos});
+      tokens.push([type, value, start, scanner.pos]);
 
       if (type === "name" || type === "{" || type === "&") {
         nonSpace = true;

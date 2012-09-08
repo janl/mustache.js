@@ -2,6 +2,7 @@
 
   * Fixed a bug with higher-order sections that prevented them from being
     passed the raw text of the section from the original template.
+  * More concise token format.
 
 = 0.6.0 / 31 Aug 2012
 
