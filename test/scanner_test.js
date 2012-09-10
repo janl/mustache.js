@@ -6,7 +6,7 @@ vows.describe("Mustache.Scanner").addBatch({
   "A Scanner": {
     "for an empty string": {
       topic: new Scanner(""),
-      "should be at the end of the string": function () {
+      "is at the end of the string": function () {
         var scanner = new Scanner("");
         assert(scanner.eos());
       }
@@ -20,10 +20,10 @@ vows.describe("Mustache.Scanner").addBatch({
             var match = scanner.scan(/a b c/);
             this.callback(scanner, match);
           },
-          "it should return the entire string": function (scanner, match) {
+          "returns the entire string": function (scanner, match) {
             assert.equal(match, scanner.string);
           },
-          "it should be at the end of the string": function (scanner, match) {
+          "is at the end of the string": function (scanner, match) {
             assert(scanner.eos());
           }
         }, // when the regexp matches the entire string
@@ -34,10 +34,10 @@ vows.describe("Mustache.Scanner").addBatch({
               var match = scanner.scan(/a/);
               this.callback(scanner, match);
             },
-            "it should return the portion of the string that was matched": function (scanner, match) {
+            "returns the portion of the string that was matched": function (scanner, match) {
               assert.equal(match, "a");
             },
-            "it should advance the internal pointer the length of the match": function (scanner, match) {
+            "advances the internal pointer the length of the match": function (scanner, match) {
               assert.equal(scanner.pos, 1);
             }
           }, // at the 0th index
@@ -47,10 +47,10 @@ vows.describe("Mustache.Scanner").addBatch({
               var match = scanner.scan(/b/);
               this.callback(scanner, match);
             },
-            "it should return the empty string": function (scanner, match) {
+            "returns the empty string": function (scanner, match) {
               assert.equal(match, "");
             },
-            "it should not advance the internal pointer": function (scanner, match) {
+            "does not advance the internal pointer": function (scanner, match) {
               assert.equal(scanner.pos, 0);
             }
           } // at some index other than 0
@@ -61,10 +61,10 @@ vows.describe("Mustache.Scanner").addBatch({
             var match = scanner.scan(/z/);
             this.callback(scanner, match);
           },
-          "it should return the empty string": function (scanner, match) {
+          "returns the empty string": function (scanner, match) {
             assert.equal(match, "");
           },
-          "it should not advance the internal pointer": function (scanner, match) {
+          "does not advance the internal pointer": function (scanner, match) {
             assert.equal(scanner.pos, 0);
           }
         }
@@ -77,10 +77,10 @@ vows.describe("Mustache.Scanner").addBatch({
               var match = scanner.scanUntil(/a/);
               this.callback(scanner, match);
             },
-            "it should return the empty string": function (scanner, match) {
+            "returns the empty string": function (scanner, match) {
               assert.equal(match, "")
             },
-            "it should not advance the internal pointer": function (scanner, match) {
+            "does not advance the internal pointer": function (scanner, match) {
               assert.equal(scanner.pos, 0);
             }
           },
@@ -90,10 +90,10 @@ vows.describe("Mustache.Scanner").addBatch({
               var match = scanner.scanUntil(/b/);
               this.callback(scanner, match);
             },
-            "it should return the portion of the string it scanned": function (scanner, match) {
+            "returns the portion of the string it scanned": function (scanner, match) {
               assert.equal(match, "a ");
             },
-            "it should advance the internal pointer the length of the match": function (scanner, match) {
+            "advances the internal pointer the length of the match": function (scanner, match) {
               assert.equal(scanner.pos, 2);
             }
           }
@@ -104,10 +104,10 @@ vows.describe("Mustache.Scanner").addBatch({
             var match = scanner.scanUntil(/z/);
             this.callback(scanner, match);
           },
-          "it should return the entire string": function (scanner, match) {
+          "returns the entire string": function (scanner, match) {
             assert.equal(match, scanner.string);
           },
-          "it should be at the end of the string": function (scanner, match) {
+          "is at the end of the string": function (scanner, match) {
             assert(scanner.eos());
           }
         } // when the regexp doesn't match
