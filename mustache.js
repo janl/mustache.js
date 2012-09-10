@@ -229,7 +229,7 @@ var Mustache;
           }
         }
 
-        return fn(Context.make(view), self, template);
+        return fn(self, Context.make(view), template);
       };
     }
 
@@ -245,13 +245,13 @@ var Mustache;
         var buffer = "";
 
         for (var i = 0, len = value.length; i < len; ++i) {
-          buffer += callback(context.push(value[i]), this);
+          buffer += callback(this, context.push(value[i]));
         }
 
         return buffer;
       }
 
-      return value ? callback(context.push(value), this) : "";
+      return value ? callback(this, context.push(value)) : "";
     case "function":
       var self = this;
       var scopedRender = function (template) {
@@ -261,7 +261,7 @@ var Mustache;
       return value.call(context.view, text, scopedRender) || "";
     default:
       if (value) {
-        return callback(context, this);
+        return callback(this, context);
       }
     }
 
@@ -274,7 +274,7 @@ var Mustache;
     // Use JavaScript's definition of falsy. Include empty arrays.
     // See https://github.com/janl/mustache.js/issues/186
     if (!value || (isArray(value) && value.length === 0)) {
-      return callback(context, this);
+      return callback(this, context);
     }
 
     return "";
@@ -328,16 +328,17 @@ var Mustache;
     function subRender(i, tokens, template) {
       if (!subRenders[i]) {
         var render = compileTokens(tokens);
-        subRenders[i] = function (context, writer) {
-          return render(context, writer, template);
+        subRenders[i] = function (writer, context) {
+          return render(writer, context, template);
         };
       }
 
       return subRenders[i];
     }
 
-    function renderFunction(context, writer, template) {
-      var buffer = [], text;
+    function renderFunction(writer, context, template) {
+      var buffer = [];
+      var token, text;
 
       for (var i = 0, len = tokens.length; i < len; ++i) {
         token = tokens[i];
