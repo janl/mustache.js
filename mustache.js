@@ -16,6 +16,7 @@ var Mustache;
     Mustache = exports; // <script>
   }
 }((function () {
+
   var exports = {};
 
   exports.name = "mustache.js";
@@ -23,14 +24,9 @@ var Mustache;
   exports.tags = ["{{", "}}"];
 
   exports.parse = parse;
-  exports.clearCache = clearCache;
-  exports.compile = compile;
-  exports.compilePartial = compilePartial;
-  exports.render = render;
-
   exports.Scanner = Scanner;
   exports.Context = Context;
-  exports.Renderer = Renderer;
+  exports.Writer = Writer;
 
   // This is here for backwards compatibility with 0.4.x.
   exports.to_html = function (template, view, partials, send) {
@@ -199,16 +195,28 @@ var Mustache;
     return value;
   };
 
-  function Renderer() {
+  function Writer() {
     this.clearCache();
   }
 
-  Renderer.prototype.clearCache = function () {
+  Writer.prototype.clearCache = function () {
     this._cache = {};
     this._partialCache = {};
   };
 
-  Renderer.prototype._compile = function (cache, key, template, tags) {
+  Writer.prototype.compile = function (template, tags) {
+    return this._compile(this._cache, template, template, tags);
+  };
+
+  Writer.prototype.compilePartial = function (name, template, tags) {
+    return this._compile(this._partialCache, name, template, tags);
+  };
+
+  Writer.prototype.render = function (template, view, partials) {
+    return this.compile(template)(view, partials);
+  };
+
+  Writer.prototype._compile = function (cache, key, template, tags) {
     if (!cache[key]) {
       var tokens = parse(template, tags);
       var fn = compileTokens(tokens);
@@ -228,19 +236,7 @@ var Mustache;
     return cache[key];
   };
 
-  Renderer.prototype.compile = function (template, tags) {
-    return this._compile(this._cache, template, template, tags);
-  };
-
-  Renderer.prototype.compilePartial = function (name, template, tags) {
-    return this._compile(this._partialCache, name, template, tags);
-  };
-
-  Renderer.prototype.render = function (template, view, partials) {
-    return this.compile(template)(view, partials);
-  };
-
-  Renderer.prototype._section = function (name, context, text, callback) {
+  Writer.prototype._section = function (name, context, text, callback) {
     var value = context.lookup(name);
 
     switch (typeof value) {
@@ -272,7 +268,7 @@ var Mustache;
     return "";
   };
 
-  Renderer.prototype._inverted = function (name, context, callback) {
+  Writer.prototype._inverted = function (name, context, callback) {
     var value = context.lookup(name);
 
     // Use JavaScript's definition of falsy. Include empty arrays.
@@ -284,12 +280,12 @@ var Mustache;
     return "";
   };
 
-  Renderer.prototype._partial = function (name, context) {
+  Writer.prototype._partial = function (name, context) {
     var fn = this._partialCache[name];
     return fn ? fn(context) : "";
   };
 
-  Renderer.prototype._name = function (name, context) {
+  Writer.prototype._name = function (name, context) {
     var value = context.lookup(name);
 
     if (typeof value === "function") {
@@ -299,7 +295,7 @@ var Mustache;
     return (value == null) ? "" : String(value);
   };
 
-  Renderer.prototype._escaped = function (name, context) {
+  Writer.prototype._escaped = function (name, context) {
     return exports.escape(this._name(name, context));
   };
 
@@ -324,7 +320,7 @@ var Mustache;
   /**
    * Low-level function that compiles the given `tokens` into a
    * function that accepts two arguments: a Context and a
-   * Renderer.
+   * Writer.
    */
   function compileTokens(tokens) {
     var subproceedures = [];
@@ -479,7 +475,7 @@ var Mustache;
 
     // Strips all whitespace tokens array for the current line
     // if there was a {{#tag}} on it and otherwise only space.
-    var stripSpace = function () {
+    function stripSpace() {
       if (hasTag && !nonSpace) {
         while (spaces.length) {
           tokens.splice(spaces.pop(), 1);
@@ -490,7 +486,7 @@ var Mustache;
 
       hasTag = false;
       nonSpace = false;
-    };
+    }
 
     var start, type, value, chr;
 
@@ -568,39 +564,40 @@ var Mustache;
   }
 
   // The high-level clearCache, compile, compilePartial, and render functions
-  // use this default renderer.
-  var _renderer = new Renderer();
+  // use this default writer.
+  var _writer = new Writer();
 
   /**
-   * Clears all cached templates and partials in the default renderer.
+   * Clears all cached templates and partials in the default writer.
    */
-  function clearCache() {
-    _renderer.clearCache();
-  }
+  exports.clearCache = function () {
+    return _writer.clearCache();
+  };
 
   /**
    * Compiles the given `template` to a reusable function using the default
-   * renderer.
+   * writer.
    */
-  function compile(template, tags) {
-    return _renderer.compile(template, tags);
-  }
+  exports.compile = function (template, tags) {
+    return _writer.compile(template, tags);
+  };
 
   /**
    * Compiles the partial with the given `name` and `template` to a reusable
-   * function using the default renderer.
+   * function using the default writer.
    */
-  function compilePartial(name, template, tags) {
-    return _renderer.compilePartial(name, template, tags);
-  }
+  exports.compilePartial = function (name, template, tags) {
+    return _writer.compilePartial(name, template, tags);
+  };
 
   /**
    * Renders the `template` with the given `view` and `partials` using the
-   * default renderer.
+   * default writer.
    */
-  function render(template, view, partials) {
-    return _renderer.render(template, view, partials);
-  }
+  exports.render = function (template, view, partials) {
+    return _writer.render(template, view, partials);
+  };
 
   return exports;
+
 }())));
