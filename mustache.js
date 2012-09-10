@@ -336,36 +336,36 @@ var Mustache;
     }
 
     function renderFunction(writer, context, template) {
-      var buffer = [];
-      var token, text;
+      var buffer = "";
+      var token, sectionText;
 
       for (var i = 0, len = tokens.length; i < len; ++i) {
         token = tokens[i];
 
         switch (token[0]) {
         case "#":
-          text = template.slice.apply(template, sectionBounds(token));
-          buffer.push(writer._section(token[1], context, text, subRender(i, token[4], template)));
+          sectionText = template.slice.apply(template, sectionBounds(token));
+          buffer += writer._section(token[1], context, sectionText, subRender(i, token[4], template));
           break;
         case "^":
-          buffer.push(writer._inverted(token[1], context, subRender(i, token[4], template)));
+          buffer += writer._inverted(token[1], context, subRender(i, token[4], template));
           break;
         case ">":
-          buffer.push(writer._partial(token[1], context));
+          buffer += writer._partial(token[1], context);
           break;
         case "&":
-          buffer.push(writer._name(token[1], context));
+          buffer += writer._name(token[1], context);
           break;
         case "name":
-          buffer.push(writer._escaped(token[1], context));
+          buffer += writer._escaped(token[1], context);
           break;
         case "text":
-          buffer.push(token[1]);
+          buffer += token[1];
           break;
         }
       }
 
-      return buffer.join('');
+      return buffer;
     }
 
     return renderFunction;
