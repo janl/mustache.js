@@ -20,7 +20,7 @@ var Mustache;
   var exports = {};
 
   exports.name = "mustache.js";
-  exports.version = "0.6.0";
+  exports.version = "0.7.0";
   exports.tags = ["{{", "}}"];
 
   exports.Scanner = Scanner;

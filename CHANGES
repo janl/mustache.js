@@ -1,4 +1,4 @@
-= HEAD
+= 0.7.0 / 10 Sep 2012
 
   * Rename Renderer => Writer.
   * Allow partials to be loaded dynamically using a callback (thanks @TiddoLangerak
