@@ -8,7 +8,7 @@
 var Mustache;
 
 (function (exports) {
-  if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+  if (typeof module !== "undefined" && module.exports) {
     module.exports = exports; // CommonJS
   } else if (typeof define === "function") {
     define(exports); // AMD
