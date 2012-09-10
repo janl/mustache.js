@@ -5,6 +5,7 @@
   * More concise token format.
   * High-level API is consistent with the Renderer API.
   * Allow partials to be passed to the pre-compiled function (thanks @fallenice).
+  * Don't use eval (thanks @cweider).
 
 = 0.6.0 / 31 Aug 2012
 
