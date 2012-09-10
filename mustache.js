@@ -27,17 +27,6 @@ var Mustache;
   exports.Context = Context;
   exports.Writer = Writer;
 
-  // This is here for backwards compatibility with 0.4.x.
-  exports.to_html = function (template, view, partials, send) {
-    var result = render(template, view, partials);
-
-    if (typeof send === "function") {
-      send(result);
-    } else {
-      return result;
-    }
-  };
-
   var whiteRe = /\s*/;
   var spaceRe = /\s+/;
   var nonSpaceRe = /\S/;
@@ -595,6 +584,17 @@ var Mustache;
    */
   exports.render = function (template, view, partials) {
     return _writer.render(template, view, partials);
+  };
+
+  // This is here for backwards compatibility with 0.4.x.
+  exports.to_html = function (template, view, partials, send) {
+    var result = exports.render(template, view, partials);
+
+    if (typeof send === "function") {
+      send(result);
+    } else {
+      return result;
+    }
   };
 
   return exports;
