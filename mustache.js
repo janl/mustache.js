@@ -212,8 +212,12 @@ var Mustache;
       var self = this;
       cache[key] = function (view, partials) {
         if (partials) {
-          for (var name in partials) {
-            self.compilePartial(name, partials[name]);
+          if (typeof partials === "function") {
+            self._loadPartial = partials;
+          } else {
+            for (var name in partials) {
+              self.compilePartial(name, partials[name]);
+            }
           }
         }
 
@@ -269,7 +273,12 @@ var Mustache;
   };
 
   Writer.prototype._partial = function (name, context) {
+    if (!(name in this._partialCache) && this._loadPartial) {
+      this.compilePartial(name, this._loadPartial(name));
+    }
+
     var fn = this._partialCache[name];
+
     return fn ? fn(context) : "";
   };
 
@@ -306,9 +315,8 @@ var Mustache;
   }
 
   /**
-   * Low-level function that compiles the given `tokens` into a
-   * function that accepts two arguments: a Context and a
-   * Writer.
+   * Low-level function that compiles the given `tokens` into a function
+   * that accepts two arguments: a Context and a Writer.
    */
   function compileTokens(tokens) {
     var subRenders = {};

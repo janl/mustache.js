@@ -1,6 +1,8 @@
 = HEAD
 
   * Rename Renderer => Writer.
+  * Allow partials to be loaded dynamically using a callback (thanks @TiddoLangerak
+    for the suggestion).
   * Fixed a bug with higher-order sections that prevented them from being
     passed the raw text of the section from the original template.
   * More concise token format. Tokens also include start/end indices in the

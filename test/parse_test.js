@@ -1,6 +1,6 @@
 var assert = require('assert');
 var vows = require('vows');
-var parse = require('./../mustache').parse;
+var Mustache = require('./../mustache');
 
 // A map of templates to their expected token output. Tokens are in the format:
 // [type, value, startIndex, endIndex].
@@ -59,7 +59,7 @@ var spec = {};
 for (var template in expectations) {
   (function (template, tokens) {
     spec['knows how to parse ' + JSON.stringify(template)] = function () {
-      assert.deepEqual(parse(template), tokens);
+      assert.deepEqual(Mustache.parse(template), tokens);
     };
   })(template, expectations[template]);
 }

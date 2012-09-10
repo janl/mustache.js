@@ -2,15 +2,12 @@ var fs = require("fs");
 var path = require("path");
 var assert = require("assert");
 var vows = require("vows");
+var Mustache = require("./../mustache");
 
-var Mustache = require(path.join(__dirname, "..", "mustache"));
 var _files = path.join(__dirname, "_files");
 
 function getContents(testName, ext) {
-  var file = path.join(_files, testName + "." + ext);
-  try {
-    return fs.readFileSync(file, "utf8");
-  } catch (e) {}
+  return fs.readFileSync(path.join(_files, testName + "." + ext), "utf8");
 }
 
 // You can put the name of a specific test to run in the TEST environment
@@ -42,7 +39,13 @@ testNames.forEach(function (testName) {
 
   var template = getContents(testName, "mustache");
   var expect = getContents(testName, "txt");
-  var partial = getContents(testName, "partial");
+
+  var partial;
+  try {
+    partial = getContents(testName, "partial");
+  } catch (e) {
+    // No big deal.
+  }
 
   spec["knows how to render " + testName] = function () {
     Mustache.clearCache();
