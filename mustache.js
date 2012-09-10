@@ -23,7 +23,6 @@ var Mustache;
   exports.version = "0.6.0";
   exports.tags = ["{{", "}}"];
 
-  exports.parse = parse;
   exports.Scanner = Scanner;
   exports.Context = Context;
   exports.Writer = Writer;
@@ -218,7 +217,7 @@ var Mustache;
 
   Writer.prototype._compile = function (cache, key, template, tags) {
     if (!cache[key]) {
-      var tokens = parse(template, tags);
+      var tokens = exports.parse(template, tags);
       var fn = compileTokens(tokens);
 
       var self = this;
@@ -462,7 +461,7 @@ var Mustache;
    * opening and closing tags used in the template (e.g. ["<%", "%>"]). Of
    * course, the default is to use mustaches (i.e. Mustache.tags).
    */
-  function parse(template, tags) {
+  exports.parse = function (template, tags) {
     tags = tags || exports.tags;
 
     var tagRes = escapeTags(tags);
@@ -561,7 +560,7 @@ var Mustache;
     squashTokens(tokens);
 
     return nestTokens(tokens);
-  }
+  };
 
   // The high-level clearCache, compile, compilePartial, and render functions
   // use this default writer.
