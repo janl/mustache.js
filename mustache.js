@@ -323,52 +323,51 @@ var Mustache;
    * Writer.
    */
   function compileTokens(tokens) {
-    var subproceedures = [];
-    for (var i = 0, len = tokens.length; i < len; ++i) {
-      token = tokens[i];
+    var subRenders = {};
 
-      switch (token[0]) {
-      case "#":
-      case "^":
-        subproceedures[i] = compileTokens(token[4]);
+    function subRender(i, tokens, template) {
+      if (!subRenders[i]) {
+        var render = compileTokens(tokens);
+        subRenders[i] = function (context, writer) {
+          return render(context, writer, template);
+        };
       }
+
+      return subRenders[i];
     }
 
-    function renderFunction(c, r, t) {
-      var body = [];
+    function renderFunction(context, writer, template) {
+      var buffer = [], text;
+
       for (var i = 0, len = tokens.length; i < len; ++i) {
         token = tokens[i];
 
         switch (token[0]) {
         case "#":
-          bounds = sectionBounds(token);
-          text = t.slice(bounds[0], bounds[1]);
-          body.push(r._section(token[1], c, text, function (c, r) {
-            return subproceedures[i](c, r, t);
-          }));
+          text = template.slice.apply(template, sectionBounds(token));
+          buffer.push(writer._section(token[1], context, text, subRender(i, token[4], template)));
           break;
         case "^":
-          body.push(r._inverted(token[1], c, function (c, r) {
-            return subproceedures[i](c, r, t);
-          }));
+          buffer.push(writer._inverted(token[1], context, subRender(i, token[4], template)));
           break;
         case ">":
-          body.push(r._partial(token[1], c));
+          buffer.push(writer._partial(token[1], context));
           break;
         case "&":
-          body.push(r._name(token[1], c));
+          buffer.push(writer._name(token[1], context));
           break;
         case "name":
-          body.push(r._escaped(token[1], c));
+          buffer.push(writer._escaped(token[1], context));
           break;
         case "text":
-          body.push(token[1]);
+          buffer.push(token[1]);
           break;
         }
       }
 
-      return body.join('');
+      return buffer.join('');
     }
+
     return renderFunction;
   }
 
