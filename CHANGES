@@ -3,7 +3,8 @@
   * Rename Renderer => Writer.
   * Fixed a bug with higher-order sections that prevented them from being
     passed the raw text of the section from the original template.
-  * More concise token format.
+  * More concise token format. Tokens also include start/end indices in the
+    original template.
   * High-level API is consistent with the Writer API.
   * Allow partials to be passed to the pre-compiled function (thanks @fallenice).
   * Don't use eval (thanks @cweider).

@@ -315,9 +315,9 @@ var Mustache;
 
     function subRender(i, tokens, template) {
       if (!subRenders[i]) {
-        var render = compileTokens(tokens);
+        var fn = compileTokens(tokens);
         subRenders[i] = function (writer, context) {
-          return render(writer, context, template);
+          return fn(writer, context, template);
         };
       }
 
@@ -360,21 +360,10 @@ var Mustache;
     return renderFunction;
   }
 
-  function escapeTags(tags) {
-    if (tags.length !== 2) {
-      throw new Error("Invalid tags: " + tags.join(" "));
-    }
-
-    return [
-      new RegExp(escapeRe(tags[0]) + "\\s*"),
-      new RegExp("\\s*" + escapeRe(tags[1]))
-    ];
-  }
-
   /**
-   * Forms the given linear array of `tokens` into a nested tree structure
-   * where tokens that represent a section have a fifth item: an array that
-   * contains all tokens in that section.
+   * Forms the given array of `tokens` into a nested tree structure where
+   * tokens that represent a section have a fifth item: an array that contains
+   * all tokens in that section.
    */
   function nestTokens(tokens) {
     var tree = [];
@@ -437,11 +426,23 @@ var Mustache;
 
       if (lastToken && lastToken[0] === "text" && token[0] === "text") {
         lastToken[1] += token[1];
+        lastToken[3] = token[3];
         tokens.splice(i--, 1); // Remove this token from the array.
       } else {
         lastToken = token;
       }
     }
+  }
+
+  function escapeTags(tags) {
+    if (tags.length !== 2) {
+      throw new Error("Invalid tags: " + tags.join(" "));
+    }
+
+    return [
+      new RegExp(escapeRe(tags[0]) + "\\s*"),
+      new RegExp("\\s*" + escapeRe(tags[1]))
+    ];
   }
 
   /**
@@ -492,7 +493,8 @@ var Mustache;
             nonSpace = true;
           }
 
-          tokens.push(["text", chr, start, scanner.pos]);
+          tokens.push(["text", chr, start, start + 1]);
+          start += 1;
 
           if (chr === "\n") {
             stripSpace(); // Check for whitespace on the current line.
