@@ -64,17 +64,6 @@ var Mustache;
     return Object.prototype.toString.call(obj) === "[object Array]";
   };
 
-  // OSWASP Guidelines: Escape all non alphanumeric characters in ASCII space.
-  var jsCharsRe = /[\x00-\x2F\x3A-\x40\x5B-\x60\x7B-\xFF\u2028\u2029]/gm;
-
-  function quote(text) {
-    var escaped = text.replace(jsCharsRe, function (c) {
-      return "\\u" + ('0000' + c.charCodeAt(0).toString(16)).slice(-4);
-    });
-
-    return '"' + escaped + '"';
-  }
-
   function escapeRe(string) {
     return string.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
   }
@@ -335,56 +324,56 @@ var Mustache;
   /**
    * Low-level function that compiles the given `tokens` into a
    * function that accepts two arguments: a Context and a
-   * Renderer. Returns the body of the function as a string if
-   * `returnBody` is true.
+   * Renderer.
    */
-  function compileTokens(tokens, returnBody) {
-    var body = ['""'], token, quotedValue, bounds, text;
-
+  function compileTokens(tokens) {
+    var subproceedures = [];
     for (var i = 0, len = tokens.length; i < len; ++i) {
       token = tokens[i];
-      quotedValue = quote(token[1]);
 
       switch (token[0]) {
       case "#":
-        bounds = sectionBounds(token);
-        text = "t.slice(" + bounds[0] + ", " + bounds[1] + ")";
-        body.push("r._section(" + quotedValue + ", c, " + text + ", function (c, r) {\n" +
-          "  " + compileTokens(token[4], true) + "\n" +
-          "})");
-        break;
       case "^":
-        body.push("r._inverted(" + quotedValue + ", c, function (c, r) {\n" +
-          "  " + compileTokens(token[4], true) + "\n" +
-          "})");
-        break;
-      case ">":
-        body.push("r._partial(" + quotedValue + ", c)");
-        break;
-      case "&":
-        body.push("r._name(" + quotedValue + ", c)");
-        break;
-      case "name":
-        body.push("r._escaped(" + quotedValue + ", c)");
-        break;
-      case "text":
-        body.push(quotedValue);
-        break;
+        subproceedures[i] = compileTokens(token[4]);
       }
     }
 
-    // Convert to a string body.
-    body = "return " + body.join(" + ") + ";";
+    function renderFunction(c, r, t) {
+      var body = [];
+      for (var i = 0, len = tokens.length; i < len; ++i) {
+        token = tokens[i];
 
-    // Good for debugging.
-    // console.log(body);
+        switch (token[0]) {
+        case "#":
+          bounds = sectionBounds(token);
+          text = t.slice(bounds[0], bounds[1]);
+          body.push(r._section(token[1], c, text, function (c, r) {
+            return subproceedures[i](c, r, t);
+          }));
+          break;
+        case "^":
+          body.push(r._inverted(token[1], c, function (c, r) {
+            return subproceedures[i](c, r, t);
+          }));
+          break;
+        case ">":
+          body.push(r._partial(token[1], c));
+          break;
+        case "&":
+          body.push(r._name(token[1], c));
+          break;
+        case "name":
+          body.push(r._escaped(token[1], c));
+          break;
+        case "text":
+          body.push(token[1]);
+          break;
+        }
+      }
 
-    if (returnBody) {
-      return body;
+      return body.join('');
     }
-
-    // For great evil!
-    return new Function("c, r, t", body);
+    return renderFunction;
   }
 
   function escapeTags(tags) {
