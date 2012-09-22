@@ -193,41 +193,43 @@ var Mustache;
   };
 
   Writer.prototype.compile = function (template, tags) {
-    return this._compile(template, tags);
+    var fn = this._cache[template];
+
+    if (!fn) {
+      var tokens = exports.parse(template, tags);
+      fn = this._cache[template] = this.compileTokens(tokens, template);
+    }
+
+    return fn;
   };
 
   Writer.prototype.compilePartial = function (name, template, tags) {
-    var fn = this._compile(template, tags);
+    var fn = this.compile(template, tags);
     this._partialCache[name] = fn;
     return fn;
   };
 
-  Writer.prototype.render = function (template, view, partials) {
-    return this.compile(template)(view, partials);
-  };
+  Writer.prototype.compileTokens = function (tokens, template) {
+    var fn = compileTokens(tokens);
+    var self = this;
 
-  Writer.prototype._compile = function (template, tags) {
-    if (!this._cache[template]) {
-      var tokens = exports.parse(template, tags);
-      var fn = compileTokens(tokens);
-
-      var self = this;
-      this._cache[template] = function (view, partials) {
-        if (partials) {
-          if (typeof partials === "function") {
-            self._loadPartial = partials;
-          } else {
-            for (var name in partials) {
-              self.compilePartial(name, partials[name]);
-            }
+    return function (view, partials) {
+      if (partials) {
+        if (typeof partials === "function") {
+          self._loadPartial = partials;
+        } else {
+          for (var name in partials) {
+            self.compilePartial(name, partials[name]);
           }
         }
+      }
 
-        return fn(self, Context.make(view), template);
-      };
-    }
+      return fn(self, Context.make(view), template);
+    };
+  };
 
-    return this._cache[template];
+  Writer.prototype.render = function (template, view, partials) {
+    return this.compile(template)(view, partials);
   };
 
   Writer.prototype._section = function (name, context, text, callback) {
@@ -318,7 +320,7 @@ var Mustache;
 
   /**
    * Low-level function that compiles the given `tokens` into a function
-   * that accepts two arguments: a Context and a Writer.
+   * that accepts three arguments: a Writer, a Context, and the template.
    */
   function compileTokens(tokens) {
     var subRenders = {};
@@ -334,7 +336,7 @@ var Mustache;
       return subRenders[i];
     }
 
-    function renderFunction(writer, context, template) {
+    return function (writer, context, template) {
       var buffer = "";
       var token, sectionText;
 
@@ -365,9 +367,7 @@ var Mustache;
       }
 
       return buffer;
-    }
-
-    return renderFunction;
+    };
   }
 
   /**
@@ -588,6 +588,14 @@ var Mustache;
    */
   exports.compilePartial = function (name, template, tags) {
     return _writer.compilePartial(name, template, tags);
+  };
+
+  /**
+   * Compiles the given array of tokens (the output of a parse) to a reusable
+   * function using the default writer.
+   */
+  exports.compileTokens = function (tokens, template) {
+    return _writer.compileTokens(tokens, template);
   };
 
   /**
