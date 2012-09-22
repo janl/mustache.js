@@ -16,6 +16,19 @@ vows.describe("Mustache.Writer").addBatch({
       });
 
       assert.equal(result, partial);
+    },
+    "caches partials by content, not by name": function (writer) {
+      var result = writer.render("{{>partial}}", {}, {
+        partial: "partial one"
+      });
+
+      assert.equal(result, "partial one");
+
+      result = writer.render("{{>partial}}", {}, {
+        partial: "partial two"
+      });
+
+      assert.equal(result, "partial two");
     }
   }
 }).export(module);
