@@ -193,24 +193,26 @@ var Mustache;
   };
 
   Writer.prototype.compile = function (template, tags) {
-    return this._compile(this._cache, template, template, tags);
+    return this._compile(template, tags);
   };
 
   Writer.prototype.compilePartial = function (name, template, tags) {
-    return this._compile(this._partialCache, name, template, tags);
+    var fn = this._compile(template, tags);
+    this._partialCache[name] = fn;
+    return fn;
   };
 
   Writer.prototype.render = function (template, view, partials) {
     return this.compile(template)(view, partials);
   };
 
-  Writer.prototype._compile = function (cache, key, template, tags) {
-    if (!cache[key]) {
+  Writer.prototype._compile = function (template, tags) {
+    if (!this._cache[template]) {
       var tokens = exports.parse(template, tags);
       var fn = compileTokens(tokens);
 
       var self = this;
-      cache[key] = function (view, partials) {
+      this._cache[template] = function (view, partials) {
         if (partials) {
           if (typeof partials === "function") {
             self._loadPartial = partials;
@@ -225,7 +227,7 @@ var Mustache;
       };
     }
 
-    return cache[key];
+    return this._cache[template];
   };
 
   Writer.prototype._section = function (name, context, text, callback) {
