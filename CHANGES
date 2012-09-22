@@ -1,3 +1,9 @@
+= HEAD / 22 Sep 2012
+
+  * Cache partials by template, not by name. Fixes #257.
+  * Added Mustache.compileTokens to compile the output of Mustache.parse. Fixes
+    #258.
+
 = 0.7.0 / 10 Sep 2012
 
   * Rename Renderer => Writer.
