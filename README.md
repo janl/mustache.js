@@ -102,7 +102,7 @@ The behavior of the section is determined by the value of the key.
 
 #### False Values or Empty Lists
 
-If the `person` key exists and has a value of `null`, `undefined`, or `false`, or is an empty list, the block will not be rendered.
+If the `person` key does not exist, or exists and has a value of `null`, `undefined`, or `false`, or is an empty list, the block will not be rendered.
 
 View:
 
