@@ -20,7 +20,7 @@ var Mustache;
   var exports = {};
 
   exports.name = "mustache.js";
-  exports.version = "0.7.0";
+  exports.version = "0.7.1";
   exports.tags = ["{{", "}}"];
 
   exports.Scanner = Scanner;
@@ -29,6 +29,7 @@ var Mustache;
 
   var whiteRe = /\s*/;
   var spaceRe = /\s+/;
+  var spaceReg = /\s+/g;
   var nonSpaceRe = /\S/;
   var eqRe = /\s*=/;
   var curlyRe = /\s*\}/;
@@ -143,10 +144,19 @@ var Mustache;
     return new Context(view, this);
   };
 
-  Context.prototype.lookup = function (name) {
+  Context.prototype.lookup = function (name, view) {
     var value = this._cache[name];
 
     if (!value) {
+
+      if (!view && name.indexOf("|") > 0) {
+        var names = name.split("|");
+        for (var i=0,len=names.length; i<len; i++) {
+          value = this.lookup(names[i], value);
+        }
+        return value;
+      }
+
       if (name === ".") {
         value = this.view;
       } else {
@@ -177,7 +187,7 @@ var Mustache;
     }
 
     if (typeof value === "function") {
-      value = value.call(this.view);
+      value = value.call(view||this.view);
     }
 
     return value;
@@ -545,8 +555,6 @@ var Mustache;
         throw new Error("Unclosed tag at " + scanner.pos);
       }
 
-      tokens.push([type, value, start, scanner.pos]);
-
       if (type === "name" || type === "{" || type === "&") {
         nonSpace = true;
       }
@@ -555,7 +563,13 @@ var Mustache;
       if (type === "=") {
         tags = value.split(spaceRe);
         tagRes = escapeTags(tags);
+      } else if (type !== "!") { // If not a comment
+        // The tag's content MUST be a non-whitespace character sequence NOT containing
+        // the current closing delimiter.
+        value = value.replace(spaceReg,'');
       }
+
+      tokens.push([type, value, start, scanner.pos]);
     }
 
     squashTokens(tokens);
