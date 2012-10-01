@@ -1,0 +1,5 @@
+<table>
+<tr class="odd"><td>1</td></tr>
+<tr class="even"><td>2</td></tr>
+<tr class="odd"><td>3</td></tr>
+</table>

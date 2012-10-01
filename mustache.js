@@ -22,6 +22,7 @@ var Mustache;
   exports.name = "mustache.js";
   exports.version = "0.7.0";
   exports.tags = ["{{", "}}"];
+  exports.currentContext = null; // behavior is defined only when dereferenced from within a lambda call
 
   exports.Scanner = Scanner;
   exports.Context = Context;
@@ -125,9 +126,11 @@ var Mustache;
     return match;
   };
 
-  function Context(view, parent) {
+  function Context(view, parent, index, array) {
     this.view = view;
     this.parent = parent;
+    if (!!index) this.index = index;
+    this.array = array;
     this.clearCache();
   }
 
@@ -139,8 +142,8 @@ var Mustache;
     this._cache = {};
   };
 
-  Context.prototype.push = function (view) {
-    return new Context(view, this);
+  Context.prototype.push = function (view, index, array) {
+    return new Context(view, this, index, array);
   };
 
   Context.prototype.lookup = function (name) {
@@ -177,11 +180,14 @@ var Mustache;
     }
 
     if (typeof value === "function") {
+      exports.currentContext = this;
       value = value.call(this.view);
     }
 
     return value;
   };
+
+  Context.prototype.index = 0;
 
   function Writer() {
     this.clearCache();
@@ -241,7 +247,7 @@ var Mustache;
         var buffer = "";
 
         for (var i = 0, len = value.length; i < len; ++i) {
-          buffer += callback(this, context.push(value[i]));
+          buffer += callback(this, context.push(value[i], i, value));
         }
 
         return buffer;
@@ -254,6 +260,7 @@ var Mustache;
         return self.render(template, context);
       };
 
+      exports.currentContext = context;
       return value.call(context.view, text, scopedRender) || "";
     default:
       if (value) {
@@ -290,6 +297,7 @@ var Mustache;
     var value = context.lookup(name);
 
     if (typeof value === "function") {
+      exports.currentContext = context;
       value = value.call(context.view);
     }
 
