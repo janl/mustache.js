@@ -7,17 +7,7 @@ var Mustache = require('./../mustache');
 var expectations = {
   '{{hi}}'                                  : [ [ 'name', 'hi', 0, 6 ] ],
   '{{hi.world}}'                            : [ [ 'name', 'hi.world', 0, 12 ] ],
-  /*
-   * This is not the assumption that I would have made based on the spec.
-   * https://github.com/mustache/spec/blob/master/specs/interpolation.yml
-   *
-   * The tag's content MUST be a non-whitespace character sequence NOT containing
-   * the current closing delimiter.
-   *
-   * See corrected version below.
   '{{hi . world}}'                          : [ [ 'name', 'hi . world', 0, 14 ] ],
-   */
-  '{{hi . world}}'                          : [ [ 'name', 'hi.world', 0, 14 ] ],
   '{{ hi}}'                                 : [ [ 'name', 'hi', 0, 7 ] ],
   '{{hi }}'                                 : [ [ 'name', 'hi', 0, 7 ] ],
   '{{ hi }}'                                : [ [ 'name', 'hi', 0, 8 ] ],

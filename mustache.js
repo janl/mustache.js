@@ -20,7 +20,7 @@ var Mustache;
   var exports = {};
 
   exports.name = "mustache.js";
-  exports.version = "0.7.1";
+  exports.version = "0.7.0";
   exports.tags = ["{{", "}}"];
 
   exports.Scanner = Scanner;
@@ -29,11 +29,12 @@ var Mustache;
 
   var whiteRe = /\s*/;
   var spaceRe = /\s+/;
-  var spaceReg = /\s+/g;
   var nonSpaceRe = /\S/;
   var eqRe = /\s*=/;
   var curlyRe = /\s*\}/;
   var tagRe = /#|\^|\/|>|\{|&|=|!/;
+  var dotRe = /\s*\.\s*/g;
+  var pipeRe = /\s*\|\s*/g;
 
   // Workaround for https://issues.apache.org/jira/browse/COUCHDB-577
   // See https://github.com/janl/mustache.js/issues/189
@@ -149,8 +150,8 @@ var Mustache;
 
     if (!value) {
 
-      if (!view && name.indexOf("|") > 0) {
-        var names = name.split("|");
+      if (typeof view === 'undefined' && name.indexOf("|") > 0) {
+        var names = name.split(pipeRe);
         for (var i=0,len=names.length; i<len; i++) {
           value = this.lookup(names[i], value);
         }
@@ -164,7 +165,7 @@ var Mustache;
 
         while (context) {
           if (name.indexOf(".") > 0) {
-            var names = name.split("."), i = 0;
+            var names = name.split(dotRe), i = 0;
 
             value = context.view;
 
@@ -187,7 +188,7 @@ var Mustache;
     }
 
     if (typeof value === "function") {
-      value = value.call(view||this.view);
+      value = value.call(typeof view === 'undefined' ? this.view : view);
     }
 
     return value;
@@ -555,6 +556,8 @@ var Mustache;
         throw new Error("Unclosed tag at " + scanner.pos);
       }
 
+      tokens.push([type, value, start, scanner.pos]);
+
       if (type === "name" || type === "{" || type === "&") {
         nonSpace = true;
       }
@@ -563,13 +566,7 @@ var Mustache;
       if (type === "=") {
         tags = value.split(spaceRe);
         tagRes = escapeTags(tags);
-      } else if (type !== "!") { // If not a comment
-        // The tag's content MUST be a non-whitespace character sequence NOT containing
-        // the current closing delimiter.
-        value = value.replace(spaceReg,'');
       }
-
-      tokens.push([type, value, start, scanner.pos]);
     }
 
     squashTokens(tokens);
