@@ -345,7 +345,7 @@ var Mustache;
 
         switch (token[0]) {
         case "#":
-          sectionText = template.slice.apply(template, sectionBounds(token));
+          sectionText = template == null ? null : template.slice.apply(template, sectionBounds(token));
           buffer += writer._section(token[1], context, sectionText, subRender(i, token[4], template));
           break;
         case "^":
