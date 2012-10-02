@@ -33,6 +33,8 @@ var Mustache;
   var eqRe = /\s*=/;
   var curlyRe = /\s*\}/;
   var tagRe = /#|\^|\/|>|\{|&|=|!/;
+  var dotRe = /\s*\.\s*/g;
+  var pipeRe = /\s*\|\s*/g;
 
   // Workaround for https://issues.apache.org/jira/browse/COUCHDB-577
   // See https://github.com/janl/mustache.js/issues/189
@@ -143,10 +145,19 @@ var Mustache;
     return new Context(view, this);
   };
 
-  Context.prototype.lookup = function (name) {
+  Context.prototype.lookup = function (name, view) {
     var value = this._cache[name];
 
     if (!value) {
+
+      if (typeof view === 'undefined' && name.indexOf("|") > 0) {
+        var names = name.split(pipeRe);
+        for (var i=0,len=names.length; i<len; i++) {
+          value = this.lookup(names[i], value);
+        }
+        return value;
+      }
+
       if (name === ".") {
         value = this.view;
       } else {
@@ -154,7 +165,7 @@ var Mustache;
 
         while (context) {
           if (name.indexOf(".") > 0) {
-            var names = name.split("."), i = 0;
+            var names = name.split(dotRe), i = 0;
 
             value = context.view;
 
@@ -177,7 +188,7 @@ var Mustache;
     }
 
     if (typeof value === "function") {
-      value = value.call(this.view);
+      value = value.call(typeof view === 'undefined' ? this.view : view);
     }
 
     return value;
