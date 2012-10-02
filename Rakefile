@@ -1,15 +1,33 @@
 require 'rake'
 require 'rake/clean'
 
-task :default => :spec
+task :default => :test
 
-desc "Run all specs"
-task :spec do
-  require 'rspec/core/rake_task'
-  RSpec::Core::RakeTask.new(:spec) do |t|
-    #t.spec_opts = ['--options', "\"#{File.dirname(__FILE__)}/spec/spec.opts\""]
-    t.pattern = 'spec/*_spec.rb'
-  end
+ROOT = File.expand_path('..', __FILE__)
+MUSTACHE_JS = File.read(File.join(ROOT, 'mustache.js'))
+
+def mustache_version
+  match = MUSTACHE_JS.match(/exports\.version = "([^"]+)";/)
+  match[1]
+end
+
+def minified_file
+  ENV['FILE'] || 'mustache.min.js'
+end
+
+desc "Run all tests, requires vows (see http://vowsjs.org)"
+task :test do
+  sh "vows --spec"
+end
+
+desc "Minify to #{minified_file}, requires UglifyJS (see http://marijnhaverbeke.nl/uglifyjs)"
+task :minify do
+  sh "uglifyjs mustache.js > #{minified_file}"
+end
+
+desc "Run JSHint, requires jshint (see http://www.jshint.com)"
+task :lint do
+  sh "jshint mustache.js"
 end
 
 # Creates a task that uses the various template wrappers to make a wrapped
@@ -47,13 +65,4 @@ templated_build "jQuery"
 templated_build "MooTools"
 templated_build "Dojo", :location => "dojox/string"
 templated_build "YUI3", :location => "yui3/mustache"
-templated_build "RequireJS"
 templated_build "qooxdoo"
-
-task :minify do
-  # npm install uglify-js
-  mmjs = "mustache.min.js"
-  `echo "/*! Version: 0.5.1-dev */" > #{mmjs}`
-  `uglifyjs mustache.js >> #{mmjs}`
-  puts "Created #{mmjs}"
-end

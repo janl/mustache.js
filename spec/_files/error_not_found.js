@@ -1,1 +1,0 @@
-var error_not_found = {bar: 2};
