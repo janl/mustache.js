@@ -603,6 +603,7 @@ var Mustache;
    * default writer.
    */
   exports.render = function (template, view, partials) {
+    if(template === undefined) return "";
     return _writer.render(template, view, partials);
   };
 
