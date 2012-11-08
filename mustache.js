@@ -429,7 +429,7 @@ var Mustache;
    * to a single token.
    */
   function squashTokens(tokens) {
-    var token, lastToken;
+    var token, lastToken, squashedTokens = [];
 
     for (var i = 0; i < tokens.length; ++i) {
       token = tokens[i];
@@ -437,11 +437,13 @@ var Mustache;
       if (lastToken && lastToken[0] === "text" && token[0] === "text") {
         lastToken[1] += token[1];
         lastToken[3] = token[3];
-        tokens.splice(i--, 1); // Remove this token from the array.
       } else {
         lastToken = token;
+        squashedTokens.push(token);
       }
     }
+
+    return squashedTokens; 
   }
 
   function escapeTags(tags) {
@@ -558,7 +560,7 @@ var Mustache;
       }
     }
 
-    squashTokens(tokens);
+    tokens = squashTokens(tokens);
 
     return nestTokens(tokens);
   };
