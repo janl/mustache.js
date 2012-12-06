@@ -1,9 +1,7 @@
-var assert = require('assert');
-var vows = require('vows');
-var Mustache = require('./../mustache');
+require('./helper');
 
 // A map of templates to their expected token output. Tokens are in the format:
-// [type, value, startIndex, endIndex].
+// [type, value, startIndex, endIndex, subTokens].
 var expectations = {
   ''                                        : [],
   '{{hi}}'                                  : [ [ 'name', 'hi', 0, 6 ] ],
@@ -55,16 +53,14 @@ var expectations = {
                                             : [ [ '#', 'foo', 0, 8, [ [ '#', 'a', 11, 17, [ [ 'text', '    ', 18, 22 ], [ 'name', 'b', 22, 27 ], [ 'text', '\n', 27, 28 ] ] ] ] ] ]
 };
 
-var spec = {};
+describe('Mustache.parse', function () {
 
-for (var template in expectations) {
-  (function (template, tokens) {
-    spec['knows how to parse ' + JSON.stringify(template)] = function () {
-      assert.deepEqual(Mustache.parse(template), tokens);
-    };
-  })(template, expectations[template]);
-}
+  for (var template in expectations) {
+    (function (template, tokens) {
+      it('knows how to parse ' + JSON.stringify(template), function () {
+        assert.deepEqual(Mustache.parse(template), tokens);
+      });
+    })(template, expectations[template]);
+  }
 
-vows.describe('Mustache.parse').addBatch({
-  'parse': spec
-}).export(module);
+});

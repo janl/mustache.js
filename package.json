@@ -6,12 +6,12 @@
   "keywords": ["mustache", "template", "templates", "ejs"],
   "main": "./mustache.js",
   "devDependencies": {
-    "vows": "0.6.x"
+    "mocha": "1.5.0"
   },
   "volo": {
     "url": "https://raw.github.com/janl/mustache.js/0.7.1/mustache.js"
   },
   "scripts": {
-    "test": "vows --spec"
+    "test": "mocha test"
   }
 }
