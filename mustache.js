@@ -254,7 +254,8 @@ var Mustache;
         return self.render(template, context);
       };
 
-      return value.call(context.view, text, scopedRender) || "";
+      var result = value.call(context.view, text, scopedRender);
+      return result != null ? result : "";
     default:
       if (value) {
         return callback(this, context);
