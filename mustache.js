@@ -443,7 +443,7 @@ var Mustache;
       }
     }
 
-    return squashedTokens; 
+    return squashedTokens;
   }
 
   function escapeTags(tags) {
@@ -464,6 +464,7 @@ var Mustache;
    * course, the default is to use mustaches (i.e. Mustache.tags).
    */
   exports.parse = function (template, tags) {
+    template = template || '';
     tags = tags || exports.tags;
 
     var tagRes = escapeTags(tags);

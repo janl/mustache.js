@@ -5,6 +5,7 @@ var Mustache = require('./../mustache');
 // A map of templates to their expected token output. Tokens are in the format:
 // [type, value, startIndex, endIndex].
 var expectations = {
+  ''                                        : [],
   '{{hi}}'                                  : [ [ 'name', 'hi', 0, 6 ] ],
   '{{hi.world}}'                            : [ [ 'name', 'hi.world', 0, 12 ] ],
   '{{hi . world}}'                          : [ [ 'name', 'hi . world', 0, 14 ] ],
