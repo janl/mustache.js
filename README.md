@@ -307,6 +307,32 @@ According to [ctemplates](http://google-ctemplate.googlecode.com/svn/trunk/doc/h
 
 Custom delimiters may not contain whitespace or the equals sign.
 
+### Compiled Templates
+
+Mustache templates can be compiled into JavaScript functions using `Mustache.compile` for improved rendering performance.
+
+If you have template views that are rendered multiple times, compiling your template into a JavaScript function will minimise the amount of work required for each re-render.
+
+Pre-compiled templates can also be generated server-side, for delivery to the browser as ready to use JavaScript functions, further reducing the amount of client side processing required for initialising templates.
+
+**Mustache.compile**
+
+Use `Mustache.compile` to compile standard Mustache string templates into reusable Mustache template functions.
+
+    var compiledTemplate = Mustache.compile(stringTemplate);
+
+The function returned from `Mustache.compile` can then be called directly, passing in the template data as an argument (with an object of partials as an optional second parameter), to generate the final output.
+
+    var templateOutput = compiledTemplate(templateData);
+
+**Mustache.compilePartial**
+
+Template partials can also be compiled using the `Mustache.compilePartial` function. The first parameter of this function, is the name of the partial as it appears within parent templates.
+
+    Mustache.compilePartial('partial-name', stringTemplate);
+
+Compiled partials are then available to both `Mustache.render` and `Mustache.compile`.
+
 ## Plugins for JavaScript Libraries
 
 mustache.js may be built specifically for several different client libraries, including the following:
