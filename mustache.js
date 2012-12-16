@@ -430,11 +430,11 @@ var Mustache;
    * to a single token.
    */
   function squashTokens(tokens) {
-    var token, lastToken, squashedTokens = [];
+    var squashedTokens = [];
 
-    for (var i = 0; i < tokens.length; ++i) {
+    var token, lastToken;
+    for (var i = 0, len = tokens.length; i < len; ++i) {
       token = tokens[i];
-
       if (lastToken && lastToken[0] === "text" && token[0] === "text") {
         lastToken[1] += token[1];
         lastToken[3] = token[3];
@@ -471,10 +471,10 @@ var Mustache;
     var tagRes = escapeTags(tags);
     var scanner = new Scanner(template);
 
-    var tokens = [],      // Buffer to hold the tokens
-        spaces = [],      // Indices of whitespace tokens on the current line
-        hasTag = false,   // Is there a {{tag}} on the current line?
-        nonSpace = false; // Is there a non-space char on the current line?
+    var tokens = [];       // Buffer to hold the tokens
+    var spaces = [];       // Indices of whitespace tokens on the current line
+    var hasTag = false;    // Is there a {{tag}} on the current line?
+    var nonSpace = false;  // Is there a non-space char on the current line?
 
     // Strips all whitespace tokens array for the current line
     // if there was a {{#tag}} on it and otherwise only space.
