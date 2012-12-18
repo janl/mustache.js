@@ -5,17 +5,15 @@
 
 /*global define: false*/
 
-var Mustache;
-
-(function (exports) {
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = exports; // CommonJS
-  } else if (typeof define === "function") {
-    define(exports); // AMD
+(function (root, factory) {
+  if (typeof exports === "object") {
+    module.exports = factory; // CommonJS
+  } else if (typeof define === "function" && define.amd) {
+    define(factory); // AMD
   } else {
-    Mustache = exports; // <script>
+    root.Mustache = factory; // <script>
   }
-}((function () {
+}(this, (function () {
 
   var exports = {};
 
