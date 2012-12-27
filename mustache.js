@@ -163,9 +163,7 @@
             value = context.view[name];
           }
 
-          if (value != null) {
-            break;
-          }
+          if (value != null) break;
 
           context = context.parent;
         }
@@ -174,9 +172,7 @@
       this._cache[name] = value;
     }
 
-    if (typeof value === "function") {
-      value = value.call(this.view);
-    }
+    if (typeof value === 'function') value = value.call(this.view);
 
     return value;
   };
@@ -237,7 +233,7 @@
     switch (typeof value) {
     case "object":
       if (isArray(value)) {
-        var buffer = "";
+        var buffer = '';
 
         for (var i = 0, len = value.length; i < len; ++i) {
           buffer += callback(this, context.push(value[i]));
@@ -255,18 +251,18 @@
       };
 
       var result = value.call(context.view, text, scopedRender);
-      return result != null ? result : "";
+      return result == null ? '' : result;
     default:
       if (value) {
         return callback(this, context);
       }
     }
 
-    return "";
+    return '';
   };
 
-  Writer.prototype._inverted = function (name, context, callback) {
-    var value = context.lookup(name);
+  Writer.prototype._inverted = function (token, context, callback) {
+    var value = context.lookup(token[1]);
 
     // Use JavaScript's definition of falsy. Include empty arrays.
     // See https://github.com/janl/mustache.js/issues/186
@@ -274,31 +270,29 @@
       return callback(this, context);
     }
 
-    return "";
+    return '';
   };
 
-  Writer.prototype._partial = function (name, context) {
+  Writer.prototype._partial = function (token, context) {
+    var name = token[1];
+
     if (!(name in this._partialCache) && this._loadPartial) {
       this.compilePartial(name, this._loadPartial(name));
     }
 
     var fn = this._partialCache[name];
 
-    return fn ? fn(context) : "";
+    return fn ? fn(context) : '';
   };
 
-  Writer.prototype._name = function (name, context) {
-    var value = context.lookup(name);
-
-    if (typeof value === "function") {
-      value = value.call(context.view);
-    }
-
-    return (value == null) ? "" : String(value);
+  Writer.prototype._name = function (token, context) {
+    var value = context.lookup(token[1]);
+    if (typeof value === 'function') value = value.call(context.view);
+    return value == null ? '' : value;
   };
 
-  Writer.prototype._escaped = function (name, context) {
-    return exports.escape(this._name(name, context));
+  Writer.prototype._escaped = function (token, context) {
+    return exports.escape(this._name(token, context));
   };
 
   /**
@@ -320,7 +314,7 @@
     }
 
     return function (writer, context, template) {
-      var buffer = "";
+      var buffer = '';
 
       var token;
       for (var i = 0, len = tokens.length; i < len; ++i) {
@@ -330,16 +324,16 @@
           buffer += writer._section(token, context, template, subRender(i, token[4], template));
           break;
         case "^":
-          buffer += writer._inverted(token[1], context, subRender(i, token[4], template));
+          buffer += writer._inverted(token, context, subRender(i, token[4], template));
           break;
         case ">":
-          buffer += writer._partial(token[1], context);
+          buffer += writer._partial(token, context);
           break;
         case "&":
-          buffer += writer._name(token[1], context);
+          buffer += writer._name(token, context);
           break;
         case "name":
-          buffer += writer._escaped(token[1], context);
+          buffer += writer._escaped(token, context);
           break;
         case "text":
           buffer += token[1];
