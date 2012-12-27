@@ -18,7 +18,7 @@
   var exports = {};
 
   exports.name = "mustache.js";
-  exports.version = "0.7.1";
+  exports.version = "0.7.2";
   exports.tags = ["{{", "}}"];
 
   exports.Scanner = Scanner;
