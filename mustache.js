@@ -302,24 +302,6 @@ var Mustache;
   };
 
   /**
-   * Calculates the bounds of the section represented by the given `token` in
-   * the original template by drilling down into nested sections to find the
-   * last token that is part of that section. Returns an array of [start, end].
-   */
-  function sectionBounds(token) {
-    var start = token[3];
-    var end = start;
-
-    var tokens;
-    while ((tokens = token[4]) && tokens.length) {
-      token = tokens[tokens.length - 1];
-      end = token[3];
-    }
-
-    return [start, end];
-  }
-
-  /**
    * Low-level function that compiles the given `tokens` into a function
    * that accepts three arguments: a Writer, a Context, and the template.
    */
@@ -346,7 +328,7 @@ var Mustache;
 
         switch (token[0]) {
         case "#":
-          sectionText = template.slice.apply(template, sectionBounds(token));
+          sectionText = template.slice(token[3], token[5]);
           buffer += writer._section(token[1], context, sectionText, subRender(i, token[4], template));
           break;
         case "^":
@@ -373,8 +355,9 @@ var Mustache;
 
   /**
    * Forms the given array of `tokens` into a nested tree structure where
-   * tokens that represent a section have a fifth item: an array that contains
-   * all tokens in that section.
+   * tokens that represent a section have two additional items: 1) an array of
+   * all tokens that appear in that section and 2) the index in the original
+   * template that represents the end of that section.
    */
   function nestTokens(tokens) {
     var tree = [];
@@ -392,9 +375,9 @@ var Mustache;
         collector = token[4] = [];
         break;
       case '/':
-        sections.pop();
-        var length = sections.length;
-        collector = length > 0 ? sections[length - 1][4] : tree;
+        var section = sections.pop();
+        section[5] = token[2];
+        collector = sections.length > 0 ? sections[sections.length - 1][4] : tree;
         break;
       default:
         collector.push(token);
