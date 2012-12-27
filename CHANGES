@@ -1,6 +1,7 @@
 = HEAD
 
   * Converted tests to use mocha instead of vows.
+  * Fixed a rendering bug when using nested higher-order sections.
 
 = 0.7.1 / 6 Dec 2012
 
