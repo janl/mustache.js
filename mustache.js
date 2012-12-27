@@ -230,7 +230,8 @@
     return this.compile(template)(view, partials);
   };
 
-  Writer.prototype._section = function (name, context, text, callback) {
+  Writer.prototype._section = function (token, context, template, callback) {
+    var name = token[1];
     var value = context.lookup(name);
 
     switch (typeof value) {
@@ -247,6 +248,7 @@
 
       return value ? callback(this, context.push(value)) : "";
     case "function":
+      var text = template == null ? null : template.slice(token[3], token[5]);
       var self = this;
       var scopedRender = function (template) {
         return self.render(template, context);
@@ -319,15 +321,13 @@
 
     return function (writer, context, template) {
       var buffer = "";
-      var token, sectionText;
 
+      var token;
       for (var i = 0, len = tokens.length; i < len; ++i) {
         token = tokens[i];
-
         switch (token[0]) {
         case "#":
-          sectionText = template.slice(token[3], token[5]);
-          buffer += writer._section(token[1], context, sectionText, subRender(i, token[4], template));
+          buffer += writer._section(token, context, template, subRender(i, token[4], template));
           break;
         case "^":
           buffer += writer._inverted(token[1], context, subRender(i, token[4], template));
