@@ -287,7 +287,6 @@
 
   Writer.prototype._name = function (token, context) {
     var value = context.lookup(token[1]);
-    if (typeof value === 'function') value = value.call(context.view);
     return value == null ? '' : value;
   };
 
