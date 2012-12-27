@@ -380,46 +380,25 @@ var Mustache;
     var tree = [];
     var collector = tree;
     var sections = [];
-    var token, section;
 
-    for (var i = 0; i < tokens.length; ++i) {
+    var token;
+    for (var i = 0, len = tokens.length; i < len; ++i) {
       token = tokens[i];
-
       switch (token[0]) {
-      case "#":
-      case "^":
-        token[4] = [];
+      case '#':
+      case '^':
         sections.push(token);
         collector.push(token);
-        collector = token[4];
+        collector = token[4] = [];
         break;
-      case "/":
-        if (sections.length === 0) {
-          throw new Error("Unopened section: " + token[1]);
-        }
-
-        section = sections.pop();
-
-        if (section[1] !== token[1]) {
-          throw new Error("Unclosed section: " + section[1]);
-        }
-
-        if (sections.length > 0) {
-          collector = sections[sections.length - 1][4];
-        } else {
-          collector = tree;
-        }
+      case '/':
+        sections.pop();
+        var length = sections.length;
+        collector = length > 0 ? sections[length - 1][4] : tree;
         break;
       default:
         collector.push(token);
       }
-    }
-
-    // Make sure there were no open sections when we're done.
-    section = sections.pop();
-
-    if (section) {
-      throw new Error("Unclosed section: " + section[1]);
     }
 
     return tree;
@@ -435,7 +414,7 @@ var Mustache;
     var token, lastToken;
     for (var i = 0, len = tokens.length; i < len; ++i) {
       token = tokens[i];
-      if (lastToken && lastToken[0] === "text" && token[0] === "text") {
+      if (token[0] === 'text' && lastToken && lastToken[0] === 'text') {
         lastToken[1] += token[1];
         lastToken[3] = token[3];
       } else {
@@ -448,10 +427,6 @@ var Mustache;
   }
 
   function escapeTags(tags) {
-    if (tags.length !== 2) {
-      throw new Error("Invalid tags: " + tags.join(" "));
-    }
-
     return [
       new RegExp(escapeRe(tags[0]) + "\\s*"),
       new RegExp("\\s*" + escapeRe(tags[1]))
@@ -468,9 +443,15 @@ var Mustache;
     template = template || '';
     tags = tags || exports.tags;
 
+    if (typeof tags === 'string') tags = tags.split(spaceRe);
+    if (tags.length !== 2) {
+      throw new Error('Invalid tags: ' + tags.join(', '));
+    }
+
     var tagRes = escapeTags(tags);
     var scanner = new Scanner(template);
 
+    var sections = [];     // Stack to hold section tokens
     var tokens = [];       // Buffer to hold the tokens
     var spaces = [];       // Indices of whitespace tokens on the current line
     var hasTag = false;    // Is there a {{tag}} on the current line?
@@ -492,7 +473,6 @@ var Mustache;
     }
 
     var start, type, value, chr;
-
     while (!scanner.eos()) {
       start = scanner.pos;
       value = scanner.scanUntil(tagRes[0]);
@@ -546,25 +526,48 @@ var Mustache;
 
       // Match the closing tag.
       if (!scanner.scan(tagRes[1])) {
-        throw new Error("Unclosed tag at " + scanner.pos);
+        throw new Error('Unclosed tag at ' + scanner.pos);
       }
 
-      tokens.push([type, value, start, scanner.pos]);
+      // Check section nesting.
+      if (type === '/') {
+        if (sections.length === 0) {
+          throw new Error('Unopened section "' + value + '" at ' + start);
+        }
 
-      if (type === "name" || type === "{" || type === "&") {
+        var section = sections.pop();
+
+        if (section[1] !== value) {
+          throw new Error('Unclosed section "' + section[1] + '" at ' + start);
+        }
+      }
+
+      var token = [type, value, start, scanner.pos];
+      tokens.push(token);
+
+      if (type === '#' || type === '^') {
+        sections.push(token);
+      } else if (type === "name" || type === "{" || type === "&") {
         nonSpace = true;
-      }
-
-      // Set the tags for the next time around.
-      if (type === "=") {
+      } else if (type === "=") {
+        // Set the tags for the next time around.
         tags = value.split(spaceRe);
+
+        if (tags.length !== 2) {
+          throw new Error('Invalid tags at ' + start + ': ' + tags.join(', '));
+        }
+
         tagRes = escapeTags(tags);
       }
     }
 
-    tokens = squashTokens(tokens);
+    // Make sure there are no open sections when we're done.
+    var section = sections.pop();
+    if (section) {
+      throw new Error('Unclosed section "' + section[1] + '" at ' + scanner.pos);
+    }
 
-    return nestTokens(tokens);
+    return nestTokens(squashTokens(tokens));
   };
 
   // The high-level clearCache, compile, compilePartial, and render functions

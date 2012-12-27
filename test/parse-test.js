@@ -63,4 +63,44 @@ describe('Mustache.parse', function () {
     })(template, expectations[template]);
   }
 
+  describe('when there is an unclosed tag', function () {
+    it('throws an error', function () {
+      assert.throws(function () {
+        Mustache.parse('My name is {{name');
+      }, /unclosed tag at 17/i);
+    });
+  });
+
+  describe('when there is an unclosed section', function () {
+    it('throws an error', function () {
+      assert.throws(function () {
+        Mustache.parse('A list: {{#people}}{{name}}');
+      }, /unclosed section "people" at 27/i);
+    });
+  });
+
+  describe('when there is an unopened section', function () {
+    it('throws an error', function () {
+      assert.throws(function () {
+        Mustache.parse('The end of the list! {{/people}}');
+      }, /unopened section "people" at 21/i);
+    });
+  });
+
+  describe('when invalid tags are given as an argument', function () {
+    it('throws an error', function () {
+      assert.throws(function () {
+        Mustache.parse('A template <% name %>', [ '<%' ]);
+      }, /invalid tags/i);
+    });
+  });
+
+  describe('when the template contains invalid tags', function () {
+    it('throws an error', function () {
+      assert.throws(function () {
+        Mustache.parse('A template {{=<%=}}');
+      }, /invalid tags at 11/i);
+    });
+  });
+
 });
