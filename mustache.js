@@ -372,9 +372,7 @@
     tags = tags || exports.tags;
 
     if (typeof tags === 'string') tags = tags.split(spaceRe);
-    if (tags.length !== 2) {
-      throw new Error('Invalid tags: ' + tags.join(', '));
-    }
+    if (tags.length !== 2) throw new Error('Invalid tags: ' + tags.join(', '));
 
     var tagRes = escapeTags(tags);
     var scanner = new Scanner(template);
@@ -403,8 +401,9 @@
     var start, type, value, chr, token;
     while (!scanner.eos()) {
       start = scanner.pos;
-      value = scanner.scanUntil(tagRes[0]);
 
+      // Match any text between tags.
+      value = scanner.scanUntil(tagRes[0]);
       if (value) {
         for (var i = 0, len = value.length; i < len; ++i) {
           chr = value.charAt(i);
@@ -423,74 +422,54 @@
         }
       }
 
-      start = scanner.pos;
-
       // Match the opening tag.
       if (!scanner.scan(tagRes[0])) break;
       hasTag = true;
 
+      // Get the tag type.
       type = scanner.scan(tagRe) || 'name';
-
-      // Skip any whitespace between tag and value.
       scanner.scan(whiteRe);
 
-      // Extract the tag value.
-      if (type === "=") {
+      // Get the tag value.
+      if (type === '=') {
         value = scanner.scanUntil(eqRe);
         scanner.scan(eqRe);
         scanner.scanUntil(tagRes[1]);
-      } else if (type === "{") {
-        var closeRe = new RegExp("\\s*" + escapeRe("}" + tags[1]));
-        value = scanner.scanUntil(closeRe);
+      } else if (type === '{') {
+        value = scanner.scanUntil(new RegExp('\\s*' + escapeRe('}' + tags[1])));
         scanner.scan(curlyRe);
         scanner.scanUntil(tagRes[1]);
-        type = "&";
+        type = '&';
       } else {
         value = scanner.scanUntil(tagRes[1]);
       }
 
       // Match the closing tag.
-      if (!scanner.scan(tagRes[1])) {
-        throw new Error('Unclosed tag at ' + scanner.pos);
-      }
-
-      // Check section nesting.
-      if (type === '/') {
-        if (sections.length === 0) {
-          throw new Error('Unopened section "' + value + '" at ' + start);
-        }
-
-        var section = sections.pop();
-
-        if (section[1] !== value) {
-          throw new Error('Unclosed section "' + section[1] + '" at ' + start);
-        }
-      }
+      if (!scanner.scan(tagRes[1])) throw new Error('Unclosed tag at ' + scanner.pos);
 
       token = [type, value, start, scanner.pos];
       tokens.push(token);
 
       if (type === '#' || type === '^') {
         sections.push(token);
-      } else if (type === "name" || type === "{" || type === "&") {
+      } else if (type === '/') {
+        // Check section nesting.
+        if (sections.length === 0) throw new Error('Unopened section "' + value + '" at ' + start);
+        var openSection = sections.pop();
+        if (openSection[1] !== value) throw new Error('Unclosed section "' + openSection[1] + '" at ' + start);
+      } else if (type === 'name' || type === '{' || type === '&') {
         nonSpace = true;
-      } else if (type === "=") {
+      } else if (type === '=') {
         // Set the tags for the next time around.
         tags = value.split(spaceRe);
-
-        if (tags.length !== 2) {
-          throw new Error('Invalid tags at ' + start + ': ' + tags.join(', '));
-        }
-
+        if (tags.length !== 2) throw new Error('Invalid tags at ' + start + ': ' + tags.join(', '));
         tagRes = escapeTags(tags);
       }
     }
 
     // Make sure there are no open sections when we're done.
-    var section = sections.pop();
-    if (section) {
-      throw new Error('Unclosed section "' + section[1] + '" at ' + scanner.pos);
-    }
+    var openSection = sections.pop();
+    if (openSection) throw new Error('Unclosed section "' + openSection[1] + '" at ' + scanner.pos);
 
     tokens = squashTokens(tokens);
 
