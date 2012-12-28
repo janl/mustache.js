@@ -203,13 +203,19 @@
     return fn;
   };
 
-  Writer.prototype.compileTokens = function (tokens, template) {
-    var fn = compileTokens(tokens);
-    var self = this;
+  Writer.prototype.getPartial = function (name) {
+    if (!(name in this._partialCache) && this._loadPartial) {
+      this.compilePartial(name, this._loadPartial(name));
+    }
 
+    return this._partialCache[name];
+  };
+
+  Writer.prototype.compileTokens = function (tokens, template) {
+    var self = this;
     return function (view, partials) {
       if (partials) {
-        if (typeof partials === "function") {
+        if (typeof partials === 'function') {
           self._loadPartial = partials;
         } else {
           for (var name in partials) {
@@ -218,7 +224,7 @@
         }
       }
 
-      return fn(self, Context.make(view), template);
+      return renderTokens(tokens, self, Context.make(view), template);
     };
   };
 
@@ -226,122 +232,72 @@
     return this.compile(template)(view, partials);
   };
 
-  Writer.prototype._section = function (token, context, template, callback) {
-    var name = token[1];
-    var value = context.lookup(name);
-
-    switch (typeof value) {
-    case "object":
-      if (isArray(value)) {
-        var buffer = '';
-
-        for (var i = 0, len = value.length; i < len; ++i) {
-          buffer += callback(this, context.push(value[i]));
-        }
-
-        return buffer;
-      }
-
-      return value ? callback(this, context.push(value)) : "";
-    case "function":
-      var text = template == null ? null : template.slice(token[3], token[5]);
-      var self = this;
-      var scopedRender = function (template) {
-        return self.render(template, context);
-      };
-
-      var result = value.call(context.view, text, scopedRender);
-      return result == null ? '' : result;
-    default:
-      if (value) {
-        return callback(this, context);
-      }
-    }
-
-    return '';
-  };
-
-  Writer.prototype._inverted = function (token, context, callback) {
-    var value = context.lookup(token[1]);
-
-    // Use JavaScript's definition of falsy. Include empty arrays.
-    // See https://github.com/janl/mustache.js/issues/186
-    if (!value || (isArray(value) && value.length === 0)) {
-      return callback(this, context);
-    }
-
-    return '';
-  };
-
-  Writer.prototype._partial = function (token, context) {
-    var name = token[1];
-
-    if (!(name in this._partialCache) && this._loadPartial) {
-      this.compilePartial(name, this._loadPartial(name));
-    }
-
-    var fn = this._partialCache[name];
-
-    return fn ? fn(context) : '';
-  };
-
-  Writer.prototype._name = function (token, context) {
-    var value = context.lookup(token[1]);
-    return value == null ? '' : value;
-  };
-
-  Writer.prototype._escaped = function (token, context) {
-    return exports.escape(this._name(token, context));
-  };
-
   /**
-   * Low-level function that compiles the given `tokens` into a function
-   * that accepts three arguments: a Writer, a Context, and the template.
+   * Low-level function that renders the given `tokens` using the given `writer`
+   * and `context`. The `template` string is only needed for templates that use
+   * higher-order sections to extract the portion of the original template that
+   * was contained in that section.
    */
-  function compileTokens(tokens) {
-    var subRenders = {};
+  function renderTokens(tokens, writer, context, template) {
+    var buffer = '';
 
-    function subRender(i, tokens, template) {
-      if (!subRenders[i]) {
-        var fn = compileTokens(tokens);
-        subRenders[i] = function (writer, context) {
-          return fn(writer, context, template);
-        };
+    var token, tokenValue, value;
+    for (var i = 0, len = tokens.length; i < len; ++i) {
+      token = tokens[i];
+      tokenValue = token[1];
+
+      switch (token[0]) {
+      case '#':
+        value = context.lookup(tokenValue);
+
+        if (typeof value === 'object') {
+          if (isArray(value)) {
+            for (var j = 0, jlen = value.length; j < jlen; ++j) {
+              buffer += renderTokens(token[4], writer, context.push(value[j]), template);
+            }
+          } else if (value) {
+            buffer += renderTokens(token[4], writer, context.push(value), template);
+          }
+        } else if (typeof value === 'function') {
+          var text = template == null ? null : template.slice(token[3], token[5]);
+          var result = value.call(context.view, text, function (template) {
+            return writer.render(template, context);
+          });
+          if (result != null) buffer += result;
+        } else if (value) {
+          buffer += renderTokens(token[4], writer, context, template);
+        }
+
+        break;
+      case '^':
+        value = context.lookup(tokenValue);
+
+        // Use JavaScript's definition of falsy. Include empty arrays.
+        // See https://github.com/janl/mustache.js/issues/186
+        if (!value || (isArray(value) && value.length === 0)) {
+          buffer += renderTokens(token[4], writer, context, template);
+        }
+
+        break;
+      case '>':
+        value = writer.getPartial(tokenValue);
+        if (typeof value === 'function') buffer += value(context);
+        break;
+      case '&':
+        value = context.lookup(tokenValue);
+        if (value != null) buffer += value;
+        break;
+      case 'name':
+        value = context.lookup(tokenValue);
+        if (value != null) buffer += exports.escape(value);
+        break;
+      case 'text':
+        buffer += tokenValue;
+        break;
       }
-
-      return subRenders[i];
     }
 
-    return function (writer, context, template) {
-      var buffer = '';
-
-      var token;
-      for (var i = 0, len = tokens.length; i < len; ++i) {
-        token = tokens[i];
-        switch (token[0]) {
-        case "#":
-          buffer += writer._section(token, context, template, subRender(i, token[4], template));
-          break;
-        case "^":
-          buffer += writer._inverted(token, context, subRender(i, token[4], template));
-          break;
-        case ">":
-          buffer += writer._partial(token, context);
-          break;
-        case "&":
-          buffer += writer._name(token, context);
-          break;
-        case "name":
-          buffer += writer._escaped(token, context);
-          break;
-        case "text":
-          buffer += token[1];
-          break;
-        }
-      }
-
-      return buffer;
-    };
+    return buffer;
   }
 
   /**
@@ -544,8 +500,7 @@
     return nestTokens(squashTokens(tokens));
   };
 
-  // The high-level clearCache, compile, compilePartial, and render functions
-  // use this default writer.
+  // All Mustache.* functions use this writer.
   var _writer = new Writer();
 
   /**
