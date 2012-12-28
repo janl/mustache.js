@@ -398,7 +398,7 @@
       nonSpace = false;
     }
 
-    var start, type, value, chr;
+    var start, type, value, chr, token;
     while (!scanner.eos()) {
       start = scanner.pos;
       value = scanner.scanUntil(tagRes[0]);
@@ -413,24 +413,21 @@
             nonSpace = true;
           }
 
-          tokens.push(["text", chr, start, start + 1]);
+          tokens.push(['text', chr, start, start + 1]);
           start += 1;
 
-          if (chr === "\n") {
-            stripSpace(); // Check for whitespace on the current line.
-          }
+          // Check for whitespace on the current line.
+          if (chr == '\n') stripSpace();
         }
       }
 
       start = scanner.pos;
 
       // Match the opening tag.
-      if (!scanner.scan(tagRes[0])) {
-        break;
-      }
-
+      if (!scanner.scan(tagRes[0])) break;
       hasTag = true;
-      type = scanner.scan(tagRe) || "name";
+
+      type = scanner.scan(tagRe) || 'name';
 
       // Skip any whitespace between tag and value.
       scanner.scan(whiteRe);
@@ -468,7 +465,7 @@
         }
       }
 
-      var token = [type, value, start, scanner.pos];
+      token = [type, value, start, scanner.pos];
       tokens.push(token);
 
       if (type === '#' || type === '^') {
