@@ -340,12 +340,14 @@
     var token, lastToken;
     for (var i = 0, len = tokens.length; i < len; ++i) {
       token = tokens[i];
-      if (token[0] === 'text' && lastToken && lastToken[0] === 'text') {
-        lastToken[1] += token[1];
-        lastToken[3] = token[3];
-      } else {
-        lastToken = token;
-        squashedTokens.push(token);
+      if (token) {
+        if (token[0] === 'text' && lastToken && lastToken[0] === 'text') {
+          lastToken[1] += token[1];
+          lastToken[3] = token[3];
+        } else {
+          lastToken = token;
+          squashedTokens.push(token);
+        }
       }
     }
 
@@ -388,7 +390,7 @@
     function stripSpace() {
       if (hasTag && !nonSpace) {
         while (spaces.length) {
-          tokens.splice(spaces.pop(), 1);
+          delete tokens[spaces.pop()];
         }
       } else {
         spaces = [];
@@ -490,7 +492,9 @@
       throw new Error('Unclosed section "' + section[1] + '" at ' + scanner.pos);
     }
 
-    return nestTokens(squashTokens(tokens));
+    tokens = squashTokens(tokens);
+
+    return nestTokens(tokens);
   };
 
   // All Mustache.* functions use this writer.
