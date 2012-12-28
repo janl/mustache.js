@@ -126,15 +126,11 @@
   function Context(view, parent) {
     this.view = view;
     this.parent = parent;
-    this.clearCache();
+    this._cache = {};
   }
 
   Context.make = function (view) {
     return (view instanceof Context) ? view : new Context(view);
-  };
-
-  Context.prototype.clearCache = function () {
-    this._cache = {};
   };
 
   Context.prototype.push = function (view) {
