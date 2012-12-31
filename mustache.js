@@ -141,17 +141,15 @@
     var value = this._cache[name];
 
     if (!value) {
-      if (name === ".") {
+      if (name == '.') {
         value = this.view;
       } else {
         var context = this;
 
         while (context) {
-          if (name.indexOf(".") > 0) {
-            var names = name.split("."), i = 0;
-
+          if (name.indexOf('.') > 0) {
             value = context.view;
-
+            var names = name.split('.'), i = 0;
             while (value && i < names.length) {
               value = value[names[i++]];
             }
@@ -256,10 +254,10 @@
           }
         } else if (typeof value === 'function') {
           var text = template == null ? null : template.slice(token[3], token[5]);
-          var result = value.call(context.view, text, function (template) {
+          value = value.call(context.view, text, function (template) {
             return writer.render(template, context);
           });
-          if (result != null) buffer += result;
+          if (value != null) buffer += value;
         } else if (value) {
           buffer += renderTokens(token[4], writer, context, template);
         }
