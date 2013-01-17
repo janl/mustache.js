@@ -353,13 +353,13 @@ These may be built using [Rake](http://rake.rubyforge.org/) and one of the follo
 
 ## Testing
 
-The mustache.js test suite uses the [vows](http://vowsjs.org/) testing framework. In order to run the tests you'll need to install [node](http://nodejs.org/). Once that's done you can install vows using [npm](http://npmjs.org/).
+The mustache.js test suite uses the [mocha](http://visionmedia.github.com/mocha/) testing framework. In order to run the tests you'll need to install [node](http://nodejs.org/). Once that's done you can install mocha using [npm](http://npmjs.org/).
 
-    $ npm install -g vows
+    $ npm install -g mocha
 
 Then run the tests.
 
-    $ vows --spec
+    $ mocha test
 
 The test suite consists of both unit and integration tests. If a template isn't rendering correctly for you, you can make a test for it by doing the following:
 
@@ -373,7 +373,7 @@ The test suite consists of both unit and integration tests. If a template isn't 
 
 Then, you can run the test with:
 
-    $ TEST=mytest vows test/render_test.js
+    $ TEST=mytest mocha test/render_test.js
 
 ## Thanks
 
