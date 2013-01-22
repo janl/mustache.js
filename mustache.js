@@ -5,17 +5,15 @@
 
 /*global define: false*/
 
-(function (root, factory) {
+(function (factory) {
   if (typeof exports === "object" && exports) {
-    module.exports = factory; // CommonJS
+    factory(exports); // CommonJS
   } else if (typeof define === "function" && define.amd) {
-    define(factory); // AMD
+    define(factory({})); // AMD
   } else {
-    root.Mustache = factory; // <script>
+    factory(Mustache = {}); // <script>
   }
-}(this, (function () {
-
-  var exports = {};
+})(function (exports) {
 
   exports.name = "mustache.js";
   exports.version = "0.7.2";
@@ -532,4 +530,4 @@
 
   return exports;
 
-}())));
+});
