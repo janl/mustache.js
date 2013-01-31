@@ -5,15 +5,15 @@
 
 /*global define: false*/
 
-(function (factory) {
+(function (root, factory) {
   if (typeof exports === "object" && exports) {
     factory(exports); // CommonJS
   } else if (typeof define === "function" && define.amd) {
     define(factory({})); // AMD
   } else {
-    factory(Mustache = {}); // <script>
+    root.Mustache = factory({}); // <script>
   }
-})(function (exports) {
+})(this, function (exports) {
 
   exports.name = "mustache.js";
   exports.version = "0.7.2";
