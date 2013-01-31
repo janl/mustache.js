@@ -32,10 +32,13 @@
   var curlyRe = /\s*\}/;
   var tagRe = /#|\^|\/|>|\{|&|=|!/;
 
+  var _test = RegExp.prototype.test;
+  var _toString = Object.prototype.toString;
+
   // Workaround for https://issues.apache.org/jira/browse/COUCHDB-577
   // See https://github.com/janl/mustache.js/issues/189
   function testRe(re, string) {
-    return RegExp.prototype.test.call(re, string);
+    return _test.call(re, string);
   }
 
   function isWhitespace(string) {
@@ -43,7 +46,7 @@
   }
 
   var isArray = Array.isArray || function (obj) {
-    return Object.prototype.toString.call(obj) === "[object Array]";
+    return _toString.call(obj) === '[object Array]';
   };
 
   function escapeRe(string) {
