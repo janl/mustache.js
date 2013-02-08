@@ -261,7 +261,7 @@
             return writer.render(template, context);
           });
           if (value != null) buffer += value;
-        } else if (value) {
+        } else if (value || value === 0) {
           buffer += renderTokens(token[4], writer, context, template);
         }
 
@@ -271,7 +271,7 @@
 
         // Use JavaScript's definition of falsy. Include empty arrays.
         // See https://github.com/janl/mustache.js/issues/186
-        if (!value || (isArray(value) && value.length === 0)) {
+        if (value!==0 && !value || (isArray(value) && value.length === 0)) {
           buffer += renderTokens(token[4], writer, context, template);
         }
 
