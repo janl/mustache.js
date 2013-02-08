@@ -144,7 +144,7 @@
     var value = this._cache[name];
 
     if (!value) {
-      if (name == '.') {
+      if (name === '.') {
         value = this.view;
       } else {
         var context = this;
@@ -160,7 +160,7 @@
             value = context.view[name];
           }
 
-          if (value != null) break;
+          if (value !== null) break;
 
           context = context.parent;
         }
@@ -256,11 +256,11 @@
             buffer += renderTokens(token[4], writer, context.push(value), template);
           }
         } else if (typeof value === 'function') {
-          var text = template == null ? null : template.slice(token[3], token[5]);
+          var text = template === null ? null : template.slice(token[3], token[5]);
           value = value.call(context.view, text, function (template) {
             return writer.render(template, context);
           });
-          if (value != null) buffer += value;
+          if (value !== null) buffer += value;
         } else if (value) {
           buffer += renderTokens(token[4], writer, context, template);
         }
@@ -282,11 +282,11 @@
         break;
       case '&':
         value = context.lookup(tokenValue);
-        if (value != null) buffer += value;
+        if (value !== null) buffer += value;
         break;
       case 'name':
         value = context.lookup(tokenValue);
-        if (value != null) buffer += exports.escape(value);
+        if (value !== null) buffer += exports.escape(value);
         break;
       case 'text':
         buffer += tokenValue;
@@ -419,7 +419,7 @@
           start += 1;
 
           // Check for whitespace on the current line.
-          if (chr == '\n') stripSpace();
+          if (chr === '\n') stripSpace();
         }
       }
 
