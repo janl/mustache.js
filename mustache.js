@@ -261,7 +261,7 @@
             return writer.render(template, context);
           });
           if (value != null) buffer += value;
-        } else if (value) {
+        } else if (value || value === 0) {
           buffer += renderTokens(token[4], writer, context, template);
         }
 
