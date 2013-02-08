@@ -216,7 +216,9 @@
           self._loadPartial = partials;
         } else {
           for (var name in partials) {
-            self.compilePartial(name, partials[name]);
+            if (partials.hasOwnProperty(name)) {
+              self.compilePartial(name, partials[name]);
+            }
           }
         }
       }
