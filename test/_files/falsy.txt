@@ -2,7 +2,7 @@
 inverted empty string
 
 inverted empty array
-
+zero
 inverted zero
 
 inverted null
