@@ -30,7 +30,7 @@
   var nonSpaceRe = /\S/;
   var eqRe = /\s*=/;
   var curlyRe = /\s*\}/;
-  var tagRe = /#|\^|\/|>|\{|&|=|!/;
+  var tagRe = /#|\^|\/|>|\{(?!\{)|&|=|!/;
   var refRe = /\{\{\s*([a-zA-Z0-9\.\-\_]+)\s*\}\}/;
 
   var _test = RegExp.prototype.test;
@@ -432,7 +432,6 @@
 
           tokens.push(['text', chr, start, start + 1]);
           start += 1;
-
           // Check for whitespace on the current line.
           if (chr == '\n') stripSpace();
         }
@@ -460,6 +459,7 @@
         value = scanner.scanUntil(tagRes[1], tagRes[0]);
         if (tagRes[0].test(value)) {
           type = 'name-ref';
+          hasTag = false;
         }
       }
 
