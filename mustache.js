@@ -31,6 +31,7 @@
   var eqRe = /\s*=/;
   var curlyRe = /\s*\}/;
   var tagRe = /#|\^|\/|>|\{|&|=|!/;
+  var refRe = /\{\{\s*([a-zA-Z0-9\.\-\_]+)\s*\}\}/;
 
   var _test = RegExp.prototype.test;
   var _toString = Object.prototype.toString;
@@ -105,8 +106,8 @@
    * Skips all text until the given regular expression can be matched. Returns
    * the skipped string, which is the entire tail if no match can be made.
    */
-  Scanner.prototype.scanUntil = function (re) {
-    var match, pos = this.tail.search(re);
+  Scanner.prototype.scanUntil = function (re, opp) {
+    var match, tag, pos = this.tail.search(re);
 
     switch (pos) {
     case -1:
@@ -121,6 +122,12 @@
       match = this.tail.substring(0, pos);
       this.tail = this.tail.substring(pos);
       this.pos += pos;
+      if (opp && opp.test(match)) {
+        tag = re.exec(this.tail)[0];
+        this.pos += tag.length;
+        this.tail = this.tail.substring(tag.length);
+        match += tag + this.scanUntil(re);
+      }
     }
 
     return match;
@@ -238,7 +245,7 @@
   function renderTokens(tokens, writer, context, template) {
     var buffer = '';
 
-    var token, tokenValue, value;
+    var token, tokenValue, value, match, ref;
     for (var i = 0, len = tokens.length; i < len; ++i) {
       token = tokens[i];
       tokenValue = token[1];
@@ -287,6 +294,14 @@
       case 'name':
         value = context.lookup(tokenValue);
         if (value != null) buffer += exports.escape(value);
+        break;
+      case "name-ref":
+        if (match = refRe.exec(tokenValue)) {
+          ref = context.lookup(match[1]);
+          value = context.lookup(tokenValue.replace(refRe, ref));
+        }
+
+        if (value != null && value != undefined) buffer += value;
         break;
       case 'text':
         buffer += tokenValue;
@@ -442,7 +457,10 @@
         scanner.scanUntil(tagRes[1]);
         type = '&';
       } else {
-        value = scanner.scanUntil(tagRes[1]);
+        value = scanner.scanUntil(tagRes[1], tagRes[0]);
+        if (tagRes[0].test(value)) {
+          type = 'name-ref';
+        }
       }
 
       // Match the closing tag.
