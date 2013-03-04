@@ -301,7 +301,9 @@
           value = context.lookup(tokenValue.replace(refRe, ref));
         }
 
-        if (value != null && value != undefined) buffer += value;
+        if (value != null && value != undefined) {
+          buffer += exports.escape(value);
+        }
         break;
       case 'text':
         buffer += tokenValue;
