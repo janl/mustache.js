@@ -278,7 +278,12 @@
         break;
       case '>':
         value = writer.getPartial(tokenValue);
-        if (typeof value === 'function') buffer += value(context);
+        if (typeof value === 'function') {
+          value = value(context);
+          if (token[4])
+            value = value.replace(/^(?=.)/gm, token[4]);
+          buffer += value;
+        }
         break;
       case '&':
         value = context.lookup(tokenValue);
@@ -381,6 +386,7 @@
     var sections = [];     // Stack to hold section tokens
     var tokens = [];       // Buffer to hold the tokens
     var spaces = [];       // Indices of whitespace tokens on the current line
+    var whitespace = '';   // Whitespace characters at the same line before a tag
     var hasTag = false;    // Is there a {{tag}} on the current line?
     var nonSpace = false;  // Is there a non-space char on the current line?
 
@@ -397,6 +403,7 @@
 
       hasTag = false;
       nonSpace = false;
+      whitespace = '';
     }
 
     var start, type, value, chr, token;
@@ -411,6 +418,7 @@
 
           if (isWhitespace(chr)) {
             spaces.push(tokens.length);
+            whitespace += chr;
           } else {
             nonSpace = true;
           }
@@ -422,6 +430,9 @@
           if (chr == '\n') stripSpace();
         }
       }
+
+      // The following tag is not standalone
+      if (whitespace && nonSpace) whitespace = '';
 
       // Match the opening tag.
       if (!scanner.scan(tagRes[0])) break;
@@ -449,6 +460,10 @@
       if (!scanner.scan(tagRes[1])) throw new Error('Unclosed tag at ' + scanner.pos);
 
       token = [type, value, start, scanner.pos];
+
+      // Store whitespaces before standalone partials
+      if (type === '>' && whitespace) token[4] = whitespace;
+
       tokens.push(token);
 
       if (type === '#' || type === '^') {
@@ -466,6 +481,7 @@
         if (tags.length !== 2) throw new Error('Invalid tags at ' + start + ': ' + tags.join(', '));
         tagRes = escapeTags(tags);
       }
+      whitespace = '';
     }
     // Standalone tags should not require a newline to follow them
     // therefore we strip spaces from the last line if it is a standalone tag,

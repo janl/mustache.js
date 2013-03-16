@@ -6,8 +6,6 @@ var specsDir = path.join(__dirname, 'spec/specs');
 
 var skipTests = {
   partials: [
-    'Standalone Without Previous Line',
-    'Standalone Without Newline',
     'Standalone Indentation'
   ],
   '~lambdas': [
