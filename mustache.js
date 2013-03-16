@@ -467,6 +467,10 @@
         tagRes = escapeTags(tags);
       }
     }
+    // Standalone tags should not require a newline to follow them
+    // therefore we strip spaces from the last line if it is a standalone tag,
+    // even if it might not be followed by a newline
+    stripSpace();
 
     // Make sure there are no open sections when we're done.
     var openSection = sections.pop();

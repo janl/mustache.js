@@ -5,22 +5,10 @@ var path = require('path');
 var specsDir = path.join(__dirname, 'spec/specs');
 
 var skipTests = {
-  comments: [
-    'Standalone Without Newline'
-  ],
-  delimiters: [
-    'Standalone Without Newline'
-  ],
-  inverted: [
-    'Standalone Without Newline'
-  ],
   partials: [
     'Standalone Without Previous Line',
     'Standalone Without Newline',
     'Standalone Indentation'
-  ],
-  sections: [
-    'Standalone Without Newline'
   ],
   '~lambdas': [
     'Interpolation',
