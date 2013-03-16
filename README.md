@@ -357,6 +357,11 @@ The mustache.js test suite uses the [mocha](http://visionmedia.github.com/mocha/
 
     $ npm install -g mocha
 
+You also need to install the sub module containing [Mustache specifications](http://github.com/mustache/spec) in the project root.
+
+    $ git submodule init
+    $ git submodule update
+
 Then run the tests.
 
     $ mocha test
