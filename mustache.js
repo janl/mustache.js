@@ -258,9 +258,9 @@
         } else if (typeof value === 'function') {
           var text = template == null ? null : template.slice(token[3], token[5]);
           value = value.call(context.view, text, function (template) {
-            return writer.render(template, context);
+            return writer.render('' + template, context);
           });
-          if (value != null) buffer += value;
+          if (value != null) buffer += writer.render('' + value, context);
         } else if (value) {
           buffer += renderTokens(token[4], writer, context, template);
         }

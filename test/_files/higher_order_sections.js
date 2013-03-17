@@ -3,7 +3,7 @@
   helper: "To tinker?",
   bolder: function () {
     return function (text, render) {
-      return text + ' => <b>' + render(text) + '</b> ' + this.helper;
+      return '<b>' + render(text) + '</b> ' + this.helper;
     }
   }
 })

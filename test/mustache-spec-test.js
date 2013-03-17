@@ -27,7 +27,6 @@ var skipTests = {
     'Standalone Without Newline'
   ],
   '~lambdas': [
-    'Section - Expansion',
     'Section - Alternate Delimiters'
   ]
 };
