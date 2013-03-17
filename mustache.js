@@ -282,10 +282,14 @@
         break;
       case '&':
         value = context.lookup(tokenValue);
+        if (typeof value === 'function')
+          value = writer.render('' + value.call(context.view), context);
         if (value != null) buffer += value;
         break;
       case 'name':
         value = context.lookup(tokenValue);
+        if (typeof value === 'function')
+          value = writer.render('' + value.call(context.view), context);
         if (value != null) buffer += exports.escape(value);
         break;
       case 'text':

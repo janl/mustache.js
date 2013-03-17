@@ -4,6 +4,10 @@ var fs = require('fs');
 var path = require('path');
 var specsDir = path.join(__dirname, 'spec/specs');
 
+// need to define globals used in ~lambdas - Interpolation - Multiple Calls
+// otherwise mocha complains
+g=null, calls=null;
+
 var skipTests = {
   comments: [
     'Standalone Without Newline'
@@ -23,11 +27,6 @@ var skipTests = {
     'Standalone Without Newline'
   ],
   '~lambdas': [
-    'Interpolation',
-    'Interpolation - Expansion',
-    'Interpolation - Alternate Delimiters',
-    'Interpolation - Multiple Calls',
-    'Escaping',
     'Section - Expansion',
     'Section - Alternate Delimiters'
   ]
