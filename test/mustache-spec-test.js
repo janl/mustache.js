@@ -5,9 +5,6 @@ var path = require('path');
 var specsDir = path.join(__dirname, 'spec/specs');
 
 var skipTests = {
-  partials: [
-    'Standalone Indentation'
-  ],
   '~lambdas': [
     'Interpolation',
     'Interpolation - Expansion',

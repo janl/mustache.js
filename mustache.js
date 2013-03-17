@@ -181,6 +181,7 @@
   Writer.prototype.clearCache = function () {
     this._cache = {};
     this._partialCache = {};
+    this._partials = {};
   };
 
   Writer.prototype.compile = function (template, tags) {
@@ -194,18 +195,27 @@
     return fn;
   };
 
-  Writer.prototype.compilePartial = function (name, template, tags) {
+  Writer.prototype.compilePartial = function (name, template, tags, indentation) {
+    // A standalone partial should be indented with the whitespace before the
+    // partial on the same row. We keep track on instances of the same partial
+    // with different indentations by prefixing its name with the indentation in
+    // the partial cache.
+    var cacheName = (indentation || '') + name;
+    if (indentation)
+      template = template.replace(/^(?=.)/gm, indentation);
     var fn = this.compile(template, tags);
-    this._partialCache[name] = fn;
+    this._partialCache[cacheName] = fn;
     return fn;
   };
 
-  Writer.prototype.getPartial = function (name) {
-    if (!(name in this._partialCache) && this._loadPartial) {
-      this.compilePartial(name, this._loadPartial(name));
+  Writer.prototype.getPartial = function (name, indentation) {
+    var cacheName = (indentation || '') + name;
+    if (!(cacheName in this._partialCache)) {
+      var partial = this._loadPartial ? this._loadPartial(name) : this._partials[name];
+      if (partial) this.compilePartial(name, partial, null, indentation);
     }
 
-    return this._partialCache[name];
+    return this._partialCache[cacheName];
   };
 
   Writer.prototype.compileTokens = function (tokens, template) {
@@ -217,6 +227,7 @@
         } else {
           for (var name in partials) {
             self.compilePartial(name, partials[name]);
+            self._partials[name] = partials[name];
           }
         }
       }
@@ -277,13 +288,9 @@
 
         break;
       case '>':
-        value = writer.getPartial(tokenValue);
-        if (typeof value === 'function') {
-          value = value(context);
-          if (token[4])
-            value = value.replace(/^(?=.)/gm, token[4]);
-          buffer += value;
-        }
+        // indentation for standalone partial in token[4]
+        value = writer.getPartial(tokenValue, token[4]);
+        if (typeof value === 'function') buffer += value(context);
         break;
       case '&':
         value = context.lookup(tokenValue);
