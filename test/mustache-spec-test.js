@@ -41,10 +41,19 @@ var noSkip = process.env.NOSKIP;
 // variable (e.g. TEST=interpolation mocha test/mustache-spec-test.js)
 var fileToRun = process.env.TEST;
 
+// Mustache should work on node 0.6 that doesn't have fs.exisisSync
+function existsDir(path) {
+  try {
+    return fs.statSync(path).isDirectory();
+  } catch (x) {
+    return false;
+  }
+}
+
 var specFiles;
 if (fileToRun) {
   specFiles = [fileToRun];
-} else if (fs.existsSync(specsDir)) {
+} else if (existsDir(specsDir)) {
   specFiles = fs.readdirSync(specsDir).filter(function (file) {
     return (/\.json$/).test(file);
   }).map(function (file) {
