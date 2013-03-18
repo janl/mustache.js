@@ -1,0 +1,9 @@
+* John Lennon
+* Paul McCartney
+* George Harrison
+* Ringo Starr
+
+* John Lennon 4
+* Paul McCartney 4
+* George Harrison 4
+* Ringo Starr 4
