@@ -5,17 +5,8 @@
 
 /*global define: false*/
 
-(function (root, factory) {
-  if (typeof exports === "object" && exports) {
-    module.exports = factory; // CommonJS
-  } else if (typeof define === "function" && define.amd) {
-    define(factory); // AMD
-  } else {
-    root.Mustache = factory; // <script>
-  }
-}(this, (function () {
 
-  var exports = {};
+(function createMustache(root, exports) {
 
   exports.name = "mustache.js";
   exports.version = "0.7.2";
@@ -530,6 +521,31 @@
     }
   };
 
-  return exports;
+  root.Mustache = exports;
 
-}())));
+}(
+  // root
+  (function setRoot() {
+  	var root;
+
+    if (typeof exports === "object" && exports) {
+      // CommonJS
+      root = {};
+    } else if (typeof define === "function" && define.amd) {
+      // AMD
+      root = Object.create({}, {
+      	Mustache: {set: function (factory) {
+          define(factory);
+        }}}
+      );
+    } else {
+      // <script> or importScripts()
+      root = this;
+    }
+
+    return root;
+  })(),
+
+  // exports
+  (typeof exports === "object" && exports) ? exports : {}
+));
