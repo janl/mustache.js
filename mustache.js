@@ -514,8 +514,8 @@
   };
 
   /**
-   * Renders the `template` with the given `view` and `partials` using the
-   * default writer.
+   * Renders the `template` with the given `view`, `partials`, and `tags`
+   * using the default writer.
    */
   exports.render = function (template, view, partials, tags) {
     return _writer.render(template, view, partials, tags);
