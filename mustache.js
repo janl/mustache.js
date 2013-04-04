@@ -258,9 +258,9 @@
         } else if (typeof value === 'function') {
           var text = template == null ? null : template.slice(token[3], token[5]);
           value = value.call(context.view, text, function (template) {
-            return writer.render(template, context);
+            return writer.render('' + template, context);
           });
-          if (value != null) buffer += value;
+          if (value != null) buffer += writer.render('' + value, context);
         } else if (value) {
           buffer += renderTokens(token[4], writer, context, template);
         }
@@ -282,10 +282,14 @@
         break;
       case '&':
         value = context.lookup(tokenValue);
+        if (typeof value === 'function')
+          value = writer.render('' + value.call(context.view), context);
         if (value != null) buffer += value;
         break;
       case 'name':
         value = context.lookup(tokenValue);
+        if (typeof value === 'function')
+          value = writer.render('' + value.call(context.view), context);
         if (value != null) buffer += exports.escape(value);
         break;
       case 'text':
