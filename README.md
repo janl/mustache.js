@@ -348,7 +348,7 @@ These may be built using [Rake](http://rake.rubyforge.org/) and one of the follo
     $ rake jquery
     $ rake mootools
     $ rake dojo
-    $ rake yui
+    $ rake yui3
     $ rake qooxdoo
 
 ## Testing
