@@ -225,8 +225,8 @@
     };
   };
 
-  Writer.prototype.render = function (template, view, partials) {
-    return this.compile(template)(view, partials);
+  Writer.prototype.render = function (template, view, partials, tags) {
+    return this.compile(template, tags)(view, partials);
   };
 
   /**
@@ -446,7 +446,9 @@
       }
 
       // Match the closing tag.
-      if (!scanner.scan(tagRes[1])) throw new Error('Unclosed tag at ' + scanner.pos);
+      if (!scanner.scan(tagRes[1])) {
+        throw new Error('Unclosed tag at ' + scanner.pos);
+      }
 
       token = [type, value, start, scanner.pos];
       tokens.push(token);
@@ -512,11 +514,11 @@
   };
 
   /**
-   * Renders the `template` with the given `view` and `partials` using the
-   * default writer.
+   * Renders the `template` with the given `view`, `partials`, and `tags`
+   * using the default writer.
    */
-  exports.render = function (template, view, partials) {
-    return _writer.render(template, view, partials);
+  exports.render = function (template, view, partials, tags) {
+    return _writer.render(template, view, partials, tags);
   };
 
   // This is here for backwards compatibility with 0.4.x.

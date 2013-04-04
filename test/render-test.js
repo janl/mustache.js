@@ -22,11 +22,21 @@ function getPartial(testName) {
   }
 }
 
+function getTags(testName) {
+  try {
+    var tags = getContents(testName, 'tags');
+    if (tags) return eval(tags);
+  } catch (e) {
+    // No big deal. Not all tests need to test tags support.
+  }
+}
+
 function getTest(testName) {
   var test = {};
   test.view = getView(testName);
   test.template = getContents(testName, 'mustache');
   test.partial = getPartial(testName);
+  test.tags = getTags(testName);
   test.expect = getContents(testName, 'txt');
   return test;
 }
@@ -55,12 +65,8 @@ describe('Mustache.render', function () {
     var test = getTest(testName);
 
     it('knows how to render ' + testName, function () {
-      var output;
-      if (test.partial) {
-        output = Mustache.render(test.template, test.view, { partial: test.partial });
-      } else {
-        output = Mustache.render(test.template, test.view);
-      }
+      var partial = test.partial ? { partial: test.partial } : undefined;
+      var output = Mustache.render(test.template, test.view, partial, test.tags);
 
       assert.equal(output, test.expect);
     });
