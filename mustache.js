@@ -141,35 +141,43 @@
   };
 
   Context.prototype.lookup = function (name) {
-    var value = this._cache[name];
+    var value = this._cache[name], view = this.view;
 
     if (!value) {
       if (name == '.') {
-        value = this.view;
+        value = view;
       } else {
         var context = this;
+        var names = name.split('.');
 
+        // Walk the context stack from top to bottom, finding the first
+        // context that contains the first part of the name
         while (context) {
-          if (name.indexOf('.') > 0) {
-            value = context.view;
-            var names = name.split('.'), i = 0;
-            while (value && i < names.length) {
-              value = value[names[i++]];
-            }
-          } else {
-            value = context.view[name];
-          }
+          view = context.view;
+          value = view[names[0]];
 
           if (value != null) break;
 
           context = context.parent;
+        }
+
+        var i = 1;
+        // If there are more name parts, resolve them in the context
+        // from the former resolution.
+        while (value && i < names.length) {
+          // Call methods in the context of their object
+          if (typeof value === 'function') value = value.call(view);
+          view = value;
+          value = view[names[i++]];
         }
       }
 
       this._cache[name] = value;
     }
 
-    if (typeof value === 'function') value = value.call(this.view);
+    // Call methods in the context of their object and pass the lookup context
+    // as a parameter.
+    if (typeof value === 'function') value = value.call(view, this.view);
 
     return value;
   };
@@ -258,9 +266,9 @@
         } else if (typeof value === 'function') {
           var text = template == null ? null : template.slice(token[3], token[5]);
           value = value.call(context.view, text, function (template) {
-            return writer.render(template, context);
+            return writer.render('' + template, context);
           });
-          if (value != null) buffer += value;
+          if (value != null) buffer += writer.render('' + value, context);
         } else if (value) {
           buffer += renderTokens(token[4], writer, context, template);
         }
@@ -282,10 +290,14 @@
         break;
       case '&':
         value = context.lookup(tokenValue);
+        if (typeof value === 'function')
+          value = writer.render('' + value.call(context.view), context);
         if (value != null) buffer += value;
         break;
       case 'name':
         value = context.lookup(tokenValue);
+        if (typeof value === 'function')
+          value = writer.render('' + value.call(context.view), context);
         if (value != null) buffer += exports.escape(value);
         break;
       case 'text':

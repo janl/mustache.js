@@ -7,8 +7,8 @@
       {name: "green", current: false, url: "#Green"},
       {name: "blue", current: false, url: "#Blue"}
   ],
-  link: function () {
-    return this["current"] !== true;
+  link: function (ctx) {
+    return ctx["current"] !== true;
   },
   list: function () {
     return this.item.length !== 0;
