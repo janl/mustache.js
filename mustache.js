@@ -127,7 +127,7 @@
   };
 
   function Context(view, parent) {
-    this.view = view;
+    this.view = view || {};
     this.parent = parent;
     this._cache = {};
   }
