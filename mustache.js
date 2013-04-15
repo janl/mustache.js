@@ -5,25 +5,15 @@
 
 /*global define: false*/
 
-(function (root, factory) {
+(function (root, mustache) {
   if (typeof exports === "object" && exports) {
-    module.exports = factory; // CommonJS
+    module.exports = mustache; // CommonJS
   } else if (typeof define === "function" && define.amd) {
-    define(factory); // AMD
+    define(mustache); // AMD
   } else {
-    root.Mustache = factory; // <script>
+    root.Mustache = mustache; // <script>
   }
 }(this, (function () {
-
-  var exports = {};
-
-  exports.name = "mustache.js";
-  exports.version = "0.7.2";
-  exports.tags = ["{{", "}}"];
-
-  exports.Scanner = Scanner;
-  exports.Context = Context;
-  exports.Writer = Writer;
 
   var whiteRe = /\s*/;
   var spaceRe = /\s+/;
@@ -67,10 +57,6 @@
       return entityMap[s];
     });
   }
-
-  // Export the escaping function so that the user may override it.
-  // See https://github.com/janl/mustache.js/issues/244
-  exports.escape = escapeHtml;
 
   function Scanner(string) {
     this.string = string;
@@ -187,7 +173,7 @@
     var fn = this._cache[template];
 
     if (!fn) {
-      var tokens = exports.parse(template, tags);
+      var tokens = mustache.parse(template, tags);
       fn = this._cache[template] = this.compileTokens(tokens, template);
     }
 
@@ -286,7 +272,7 @@
         break;
       case 'name':
         value = context.lookup(tokenValue);
-        if (value != null) buffer += exports.escape(value);
+        if (value != null) buffer += mustache.escape(value);
         break;
       case 'text':
         buffer += tokenValue;
@@ -368,9 +354,9 @@
    * opening and closing tags used in the template (e.g. ["<%", "%>"]). Of
    * course, the default is to use mustaches (i.e. Mustache.tags).
    */
-  exports.parse = function (template, tags) {
+  function parseTemplate(template, tags) {
     template = template || '';
-    tags = tags || exports.tags;
+    tags = tags || mustache.tags;
 
     if (typeof tags === 'string') tags = tags.split(spaceRe);
     if (tags.length !== 2) throw new Error('Invalid tags: ' + tags.join(', '));
@@ -475,7 +461,23 @@
     tokens = squashTokens(tokens);
 
     return nestTokens(tokens);
-  };
+  }
+
+  var mustache = {};
+
+  mustache.name = "mustache.js";
+  mustache.version = "0.7.2";
+  mustache.tags = ["{{", "}}"];
+
+  mustache.Scanner = Scanner;
+  mustache.Context = Context;
+  mustache.Writer = Writer;
+
+  mustache.parse = parseTemplate;
+
+  // Export the escaping function so that the user may override it.
+  // See https://github.com/janl/mustache.js/issues/244
+  mustache.escape = escapeHtml;
 
   // All Mustache.* functions use this writer.
   var _writer = new Writer();
@@ -483,7 +485,7 @@
   /**
    * Clears all cached templates and partials in the default writer.
    */
-  exports.clearCache = function () {
+  mustache.clearCache = function () {
     return _writer.clearCache();
   };
 
@@ -491,7 +493,7 @@
    * Compiles the given `template` to a reusable function using the default
    * writer.
    */
-  exports.compile = function (template, tags) {
+  mustache.compile = function (template, tags) {
     return _writer.compile(template, tags);
   };
 
@@ -499,7 +501,7 @@
    * Compiles the partial with the given `name` and `template` to a reusable
    * function using the default writer.
    */
-  exports.compilePartial = function (name, template, tags) {
+  mustache.compilePartial = function (name, template, tags) {
     return _writer.compilePartial(name, template, tags);
   };
 
@@ -507,7 +509,7 @@
    * Compiles the given array of tokens (the output of a parse) to a reusable
    * function using the default writer.
    */
-  exports.compileTokens = function (tokens, template) {
+  mustache.compileTokens = function (tokens, template) {
     return _writer.compileTokens(tokens, template);
   };
 
@@ -515,13 +517,13 @@
    * Renders the `template` with the given `view` and `partials` using the
    * default writer.
    */
-  exports.render = function (template, view, partials) {
+  mustache.render = function (template, view, partials) {
     return _writer.render(template, view, partials);
   };
 
   // This is here for backwards compatibility with 0.4.x.
-  exports.to_html = function (template, view, partials, send) {
-    var result = exports.render(template, view, partials);
+  mustache.to_html = function (template, view, partials, send) {
+    var result = mustache.render(template, view, partials);
 
     if (typeof send === "function") {
       send(result);
@@ -530,6 +532,6 @@
     }
   };
 
-  return exports;
+  return mustache;
 
 }())));
