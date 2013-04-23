@@ -22,24 +22,23 @@
   var curlyRe = /\s*\}/;
   var tagRe = /#|\^|\/|>|\{|&|=|!/;
 
-  var _test = RegExp.prototype.test;
-  var _toString = Object.prototype.toString;
-
   // Workaround for https://issues.apache.org/jira/browse/COUCHDB-577
   // See https://github.com/janl/mustache.js/issues/189
-  function testRe(re, string) {
-    return _test.call(re, string);
+  var RegExp_test = RegExp.prototype.test;
+  function testRegExp(re, string) {
+    return RegExp_test.call(re, string);
   }
 
   function isWhitespace(string) {
-    return !testRe(nonSpaceRe, string);
+    return !testRegExp(nonSpaceRe, string);
   }
 
+  var Object_toString = Object.prototype.toString;
   var isArray = Array.isArray || function (obj) {
-    return _toString.call(obj) === '[object Array]';
+    return Object_toString.call(obj) === '[object Array]';
   };
 
-  function escapeRe(string) {
+  function escapeRegExp(string) {
     return string.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
   }
 
@@ -343,8 +342,8 @@
 
   function escapeTags(tags) {
     return [
-      new RegExp(escapeRe(tags[0]) + "\\s*"),
-      new RegExp("\\s*" + escapeRe(tags[1]))
+      new RegExp(escapeRegExp(tags[0]) + "\\s*"),
+      new RegExp("\\s*" + escapeRegExp(tags[1]))
     ];
   }
 
@@ -423,7 +422,7 @@
         scanner.scan(eqRe);
         scanner.scanUntil(tagRes[1]);
       } else if (type === '{') {
-        value = scanner.scanUntil(new RegExp('\\s*' + escapeRe('}' + tags[1])));
+        value = scanner.scanUntil(new RegExp('\\s*' + escapeRegExp('}' + tags[1])));
         scanner.scan(curlyRe);
         scanner.scanUntil(tagRes[1]);
         type = '&';
