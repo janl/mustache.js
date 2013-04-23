@@ -5,15 +5,19 @@
 
 /*global define: false*/
 
-(function (root, mustache) {
+(function (root, factory) {
   if (typeof exports === "object" && exports) {
-    module.exports = mustache; // CommonJS
-  } else if (typeof define === "function" && define.amd) {
-    define(mustache); // AMD
+    factory(exports); // CommonJS
   } else {
-    root.Mustache = mustache; // <script>
+    var mustache = {};
+    factory(mustache);
+    if (typeof define === "function" && define.amd) {
+      define(mustache); // AMD
+    } else {
+      root.Mustache = mustache; // <script>
+    }
   }
-}(this, (function () {
+}(this, function (mustache) {
 
   var whiteRe = /\s*/;
   var spaceRe = /\s+/;
@@ -462,8 +466,6 @@
     return nestTokens(tokens);
   }
 
-  var mustache = {};
-
   mustache.name = "mustache.js";
   mustache.version = "0.7.2";
   mustache.tags = ["{{", "}}"];
@@ -531,6 +533,4 @@
     }
   };
 
-  return mustache;
-
-}())));
+}));
