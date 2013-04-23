@@ -481,13 +481,13 @@
   mustache.escape = escapeHtml;
 
   // All Mustache.* functions use this writer.
-  var _writer = new Writer();
+  var defaultWriter = new Writer();
 
   /**
    * Clears all cached templates and partials in the default writer.
    */
   mustache.clearCache = function () {
-    return _writer.clearCache();
+    return defaultWriter.clearCache();
   };
 
   /**
@@ -495,7 +495,7 @@
    * writer.
    */
   mustache.compile = function (template, tags) {
-    return _writer.compile(template, tags);
+    return defaultWriter.compile(template, tags);
   };
 
   /**
@@ -503,7 +503,7 @@
    * function using the default writer.
    */
   mustache.compilePartial = function (name, template, tags) {
-    return _writer.compilePartial(name, template, tags);
+    return defaultWriter.compilePartial(name, template, tags);
   };
 
   /**
@@ -511,7 +511,7 @@
    * function using the default writer.
    */
   mustache.compileTokens = function (tokens, template) {
-    return _writer.compileTokens(tokens, template);
+    return defaultWriter.compileTokens(tokens, template);
   };
 
   /**
@@ -519,7 +519,7 @@
    * default writer.
    */
   mustache.render = function (template, view, partials) {
-    return _writer.render(template, view, partials);
+    return defaultWriter.render(template, view, partials);
   };
 
   // This is here for backwards compatibility with 0.4.x.
