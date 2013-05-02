@@ -170,6 +170,7 @@ var Mustache = function() {
           }
         } else if (type === "#") { // normal section
           if (that.is_array(value)) { // Enumerable, Let's loop!
+            value = that.setLoopHelpers(value);
             renderedContent = that.map(value, function(row) {
               return that.render(content, that.create_context(row), partials, true);
             }).join("");
@@ -399,6 +400,24 @@ var Mustache = function() {
         }
         return r;
       }
+    },
+
+    /*
+      Loop helpers goes here.
+    */
+    setLoopHelpers: function (array) {
+      var l = array.length, i;
+      for (i = 0; i < l; i++) {
+        array[i].loop = {
+          "counter": (i+1), 
+          "counter0": i,
+          "revcounter": (l-i),
+          "revcounter0": (l-i-1),
+          "first": array[0],
+          "last": array[l-1]
+        };
+      }
+      return array;
     },
 
     getCachedRegex: function(name, generator) {
