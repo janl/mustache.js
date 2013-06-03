@@ -313,8 +313,6 @@ Mustache templates can be compiled into JavaScript functions using `Mustache.com
 
 If you have template views that are rendered multiple times, compiling your template into a JavaScript function will minimise the amount of work required for each re-render.
 
-Pre-compiled templates can also be generated server-side, for delivery to the browser as ready to use JavaScript functions, further reducing the amount of client side processing required for initialising templates.
-
 **Mustache.compile**
 
 Use `Mustache.compile` to compile standard Mustache string templates into reusable Mustache template functions.
