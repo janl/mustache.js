@@ -3,7 +3,7 @@
  */
 
 // EXPOSE qooxdoo variant
-qx.bom.Template.version = Mustache.version;
-qx.bom.Template.render = Mustache.render;
+qx.bom.Template.version = this.Mustache.version;
+qx.bom.Template.render = this.Mustache.render;
 
-})();
+}).call({});

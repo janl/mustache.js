@@ -19,7 +19,7 @@
 
    This class contains code based on the following work:
 
-   * Mustache.js version 0.5.1-dev
+   * Mustache.js version 0.7.2
 
      Code:
        https://github.com/janl/mustache.js
@@ -56,27 +56,25 @@
    WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ************************************************************************ */
-/* ************************************************************************
 
-#ignore(module)
-
-************************************************************************ */
 /**
- * The is a template class which can be used for HTML templating. In fact, 
- * this is a wrapper for mustache.js which is a "framework-agnostic way to 
+ * The is a template class which can be used for HTML templating. In fact,
+ * this is a wrapper for mustache.js which is a "framework-agnostic way to
  * render logic-free views".
- * 
+ *
  * Here is a basic example how to use it:
  * Template:
- * <pre>
+ * <pre class="javascript">
  * var template = "Hi, my name is {{name}}!";
  * var view = {name: "qooxdoo"};
- * qx.bom.Template.toHtml(template, view);
+ * qx.bom.Template.render(template, view);
  * // return "Hi, my name is qooxdoo!"
  * </pre>
- * 
+ *
  * For further details, please visit the mustache.js documentation here:
  *   https://github.com/janl/mustache.js/blob/master/README.md
+ *
+ * @ignore(module)
  */
 qx.Bootstrap.define("qx.bom.Template", {
   statics : {
@@ -95,35 +93,60 @@ qx.Bootstrap.define("qx.bom.Template", {
      */
     render: null,
 
+    /**
+     * Combines {@link #render} and {@link #get}. Input is equal to {@link #render}
+     * and output is equal to {@link #get}. The advantage over {@link #get}
+     * is that you don't need a HTML template but can use a template
+     * string and still get a DOM element. Keep in mind that templates
+     * can only have one root element.
+     *
+     * @param template {String} The String containing the template.
+     * @param view {Object} The object holding the data to render.
+     * @param partials {Object} Object holding parts of a template.
+     * @return {Element} A DOM element holding the parsed template data.
+     */
+    renderToNode : function(template, view, partials) {
+       var renderedTmpl = this.render(template, view, partials);
+       return this._createNodeFromTemplate(renderedTmpl);
+    },
 
     /**
-     * Helper method which provides you with a direct access to templates 
-     * stored as HTML in the DOM. The DOM node with the given ID will be used 
-     * as a template, parsed and a new DOM node will be returned containing the 
-     * parsed data. Keep in mind to have only one root DOM element in the the 
+     * Helper method which provides you with a direct access to templates
+     * stored as HTML in the DOM. The DOM node with the given ID will be used
+     * as a template, parsed and a new DOM node will be returned containing the
+     * parsed data. Keep in mind to have only one root DOM element in the the
      * template.
+     * Additionally, you should not put the template into a regular, hidden
+     * DOM element because the template may not be valid HTML due to the containing
+     * mustache tags. We suggest to put it into a script tag with the type
+     * <code>text/template</code>.
      *
      * @param id {String} The id of the HTML template in the DOM.
      * @param view {Object} The object holding the data to render.
      * @param partials {Object} Object holding parts of a template.
-     * @return {DomNode} A DOM element holding the parsed template data.
+     * @return {Element} A DOM element holding the parsed template data.
      */
     get : function(id, view, partials) {
       // get the content stored in the DOM
       var template = document.getElementById(id);
-      var inner = template.innerHTML;
+      return this.renderToNode(template.innerHTML, view, partials);
+    },
 
-      // apply the view
-      inner = this.toHtml(inner, view, partials);
-
-      // special case for text only conversion
-      if (inner.search(/<|>/) === -1) {
-        return inner;
+    /**
+     * Accepts a parsed template and returns a (potentially nested) node.
+     *
+     * @param template {String} The String containing the template.
+     * @return {Element} A DOM element holding the parsed template data.
+     */
+    _createNodeFromTemplate : function(template) {
+      // template is text only (no html elems) so use text node
+      if (template.search(/<|>/) === -1) {
+        return document.createTextNode(template);
       }
 
-      // create a helper to convert the string into DOM nodes
-      var helper = qx.bom.Element.create("div");
-      helper.innerHTML = inner;
+      // template has html elems so convert string into DOM nodes
+      var helper = qx.dom.Element.create("div");
+      helper.innerHTML = template;
 
       return helper.children[0];
     }
@@ -133,7 +156,9 @@ qx.Bootstrap.define("qx.bom.Template", {
 (function() {
 
 /**
- * Below is the original mustache.js code. Snapshot date is mentioned in 
+ * Below is the original mustache.js code. Snapshot date is mentioned in
  * the head of this file.
- * @lint ignoreUndefined(module)
+ * @ignore(exports)
+ * @ignore(define.*)
+ * @ignore(module.*)
  */
