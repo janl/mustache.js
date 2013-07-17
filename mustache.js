@@ -238,6 +238,17 @@
 
         if (typeof value === 'object') {
           if (isArray(value)) {
+            context = context.push({
+              '@index':function(){
+                return j+1;
+              },
+              '@arrayindex':function(){
+                return j;
+              },
+              '@length':function(){
+                return jlen;
+              }
+            });
             for (var j = 0, jlen = value.length; j < jlen; ++j) {
               buffer += renderTokens(token[4], writer, context.push(value[j]), template);
             }
