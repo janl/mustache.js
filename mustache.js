@@ -140,8 +140,8 @@
 
         while (context) {
           if (name.indexOf('.') > 0) {
-            value = context.view;
             var names = name.split('.'), i = 0;
+            value = this.lookup(names.shift());
             while (value && i < names.length) {
               value = value[names[i++]];
             }
