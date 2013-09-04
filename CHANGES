@@ -6,6 +6,10 @@
     that was contained by that section. Fixes #262.
   * Performance improvements.
 
+= 0.7.3 / 4 Sep 2013
+
+  * Fixed a bug with require.js where anonymous defines are forbidden.
+
 = 0.7.2 / 27 Dec 2012
 
   * Fixed a rendering bug (#274) when using nested higher-order sections.
