@@ -55,6 +55,10 @@
     "/": '&#x2F;'
   };
 
+  var isFunction = function (func) {
+    return (typeof func === "function");
+  };
+
   function escapeHtml(string) {
     return String(string).replace(/[&<>"'\/]/g, function (s) {
       return entityMap[s];
@@ -184,7 +188,8 @@
   };
 
   Writer.prototype.compilePartial = function (name, template, tags) {
-    var fn = this.compile(template, tags);
+    //if template is already a compiled template do not compile it
+    var fn = (isFunction(template) ? template : this.compile(template, tags));
     this._partialCache[name] = fn;
     return fn;
   };
