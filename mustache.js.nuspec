@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>mustache.js</id>
-    <version>0.7.2</version>
+    <version>0.7.3</version>
     <authors>mustache.js Authors</authors>
     <licenseUrl>https://github.com/janl/mustache.js/blob/master/LICENSE</licenseUrl>
     <projectUrl>http://mustache.github.com/</projectUrl>

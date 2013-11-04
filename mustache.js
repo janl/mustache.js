@@ -12,7 +12,7 @@
     var mustache = {};
     factory(mustache);
     if (typeof define === "function" && define.amd) {
-      define(mustache); // AMD
+      define("mustache", mustache); // AMD
     } else {
       root.Mustache = mustache; // <script>
     }
@@ -467,7 +467,7 @@
   }
 
   mustache.name = "mustache.js";
-  mustache.version = "0.7.2";
+  mustache.version = "0.7.3";
   mustache.tags = ["{{", "}}"];
 
   mustache.Scanner = Scanner;
