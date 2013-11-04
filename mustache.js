@@ -228,6 +228,12 @@
   function renderTokens(tokens, writer, context, template) {
     var buffer = '';
 
+    // This function is used to render an artbitrary template
+    // in the current context by higher-order functions.
+    function subRender(template) {
+      return writer.render(template, context);
+    }
+
     var token, tokenValue, value;
     for (var i = 0, len = tokens.length; i < len; ++i) {
       token = tokens[i];
@@ -247,9 +253,7 @@
           }
         } else if (typeof value === 'function') {
           var text = template == null ? null : template.slice(token[3], token[5]);
-          value = value.call(context.view, text, function (template) {
-            return writer.render(template, context);
-          });
+          value = value.call(context.view, text, subRender);
           if (value != null) buffer += value;
         } else if (value) {
           buffer += renderTokens(token[4], writer, context, template);
@@ -389,7 +393,7 @@
       nonSpace = false;
     }
 
-    var start, type, value, chr, token;
+    var start, type, value, chr, token, openSection;
     while (!scanner.eos()) {
       start = scanner.pos;
 
@@ -445,26 +449,32 @@
         sections.push(token);
       } else if (type === '/') {
         // Check section nesting.
-        if (sections.length === 0) throw new Error('Unopened section "' + value + '" at ' + start);
-        var openSection = sections.pop();
-        if (openSection[1] !== value) throw new Error('Unclosed section "' + openSection[1] + '" at ' + start);
+        openSection = sections.pop();
+        if (!openSection) {
+          throw new Error('Unopened section "' + value + '" at ' + start);
+        }
+        if (openSection[1] !== value) {
+          throw new Error('Unclosed section "' + openSection[1] + '" at ' + start);
+        }
       } else if (type === 'name' || type === '{' || type === '&') {
         nonSpace = true;
       } else if (type === '=') {
         // Set the tags for the next time around.
         tags = value.split(spaceRe);
-        if (tags.length !== 2) throw new Error('Invalid tags at ' + start + ': ' + tags.join(', '));
+        if (tags.length !== 2) {
+          throw new Error('Invalid tags at ' + start + ': ' + tags.join(', '));
+        }
         tagRes = escapeTags(tags);
       }
     }
 
     // Make sure there are no open sections when we're done.
-    var openSection = sections.pop();
-    if (openSection) throw new Error('Unclosed section "' + openSection[1] + '" at ' + scanner.pos);
+    openSection = sections.pop();
+    if (openSection) {
+      throw new Error('Unclosed section "' + openSection[1] + '" at ' + scanner.pos);
+    }
 
-    tokens = squashTokens(tokens);
-
-    return nestTokens(tokens);
+    return nestTokens(squashTokens(tokens));
   }
 
   mustache.name = "mustache.js";
