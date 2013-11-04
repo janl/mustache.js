@@ -1,10 +1,7 @@
-.DS_Store
-.rvmrc
 node_modules
-runner.js
 jquery.mustache.js
-qooxdoo.mustache.js
+mootools.mustache.js
 dojox
 yui3
-requirejs.mustache.js
+qooxdoo.mustache.js
 
