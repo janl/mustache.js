@@ -82,9 +82,10 @@
     var match = this.tail.match(re);
 
     if (match && match.index === 0) {
-      this.tail = this.tail.substring(match[0].length);
-      this.pos += match[0].length;
-      return match[0];
+      var string = match[0];
+      this.tail = this.tail.substring(string.length);
+      this.pos += string.length;
+      return string;
     }
 
     return "";
@@ -95,22 +96,22 @@
    * the skipped string, which is the entire tail if no match can be made.
    */
   Scanner.prototype.scanUntil = function (re) {
-    var match, pos = this.tail.search(re);
+    var index = this.tail.search(re), match;
 
-    switch (pos) {
+    switch (index) {
     case -1:
       match = this.tail;
-      this.pos += this.tail.length;
       this.tail = "";
       break;
     case 0:
       match = "";
       break;
     default:
-      match = this.tail.substring(0, pos);
-      this.tail = this.tail.substring(pos);
-      this.pos += pos;
+      match = this.tail.substring(0, index);
+      this.tail = this.tail.substring(index);
     }
+
+    this.pos += match.length;
 
     return match;
   };
