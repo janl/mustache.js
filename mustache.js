@@ -123,7 +123,7 @@
   function Context(view, parent) {
     this.view = view == null ? {} : view;
     this.parent = parent;
-    this._cache = {};
+    this._cache = { '.': this.view };
   }
 
   Context.make = function (view) {
@@ -139,27 +139,23 @@
     if (name in this._cache) {
       value = this._cache[name];
     } else {
-      if (name === '.') {
-        value = this.view;
-      } else {
-        var context = this;
+      var context = this;
 
-        while (context) {
-          if (name.indexOf('.') > 0) {
-            value = context.view;
+      while (context) {
+        if (name.indexOf('.') > 0) {
+          value = context.view;
 
-            var names = name.split('.'), i = 0;
-            while (value != null && i < names.length) {
-              value = value[names[i++]];
-            }
-          } else {
-            value = context.view[name];
+          var names = name.split('.'), i = 0;
+          while (value != null && i < names.length) {
+            value = value[names[i++]];
           }
-
-          if (value != null) break;
-
-          context = context.parent;
+        } else {
+          value = context.view[name];
         }
+
+        if (value != null) break;
+
+        context = context.parent;
       }
 
       this._cache[name] = value;
