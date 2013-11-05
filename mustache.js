@@ -482,7 +482,7 @@
   }
 
   mustache.name = "mustache.js";
-  mustache.version = "0.7.2";
+  mustache.version = "0.7.3";
   mustache.tags = ["{{", "}}"];
 
   mustache.Scanner = Scanner;

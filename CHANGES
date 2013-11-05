@@ -1,4 +1,4 @@
-= HEAD
+= 0.7.3 / 5 Nov 2013
 
   * Don't require the original template to be passed to the rendering function
     when using compiled templates. This is still required when using higher-order
