@@ -251,7 +251,7 @@
       case '#':
         value = context.lookup(tokenValue);
 
-        if (typeof value === 'object') {
+        if (typeof value === 'object' || typeof value === 'string') {
           if (isArray(value)) {
             for (var j = 0, jlen = value.length; j < jlen; ++j) {
               buffer += renderTokens(token[4], writer, context.push(value[j]), template);
