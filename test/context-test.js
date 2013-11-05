@@ -43,6 +43,23 @@ describe('A new Mustache.Context', function () {
   });
 });
 
+describe('A Mustache.Context', function () {
+  var context;
+
+  describe('with an empty string in the lookup chain', function () {
+    var view, context;
+    beforeEach(function () {
+      view = { a: '' };
+      view.a.b = 'value';
+      context = new Context(view);
+    });
+
+    it('is able to lookup a nested property', function () {
+      assert.equal(context.lookup('a.b'), view.a.b);
+    });
+  });
+});
+
 describe('Mustache.Context.make', function () {
   it('returns the same object when given a Context', function () {
     var context = new Context;

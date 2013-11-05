@@ -121,7 +121,7 @@
   };
 
   function Context(view, parent) {
-    this.view = view || {};
+    this.view = view == null ? {} : view;
     this.parent = parent;
     this._cache = {};
   }
@@ -135,9 +135,10 @@
   };
 
   Context.prototype.lookup = function (name) {
-    var value = this._cache[name];
-
-    if (!value) {
+    var value;
+    if (name in this._cache) {
+      value = this._cache[name];
+    } else {
       if (name === '.') {
         value = this.view;
       } else {
@@ -148,7 +149,7 @@
             value = context.view;
 
             var names = name.split('.'), i = 0;
-            while (value && i < names.length) {
+            while (value != null && i < names.length) {
               value = value[names[i++]];
             }
           } else {
