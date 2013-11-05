@@ -117,7 +117,7 @@
   };
 
   function Context(view, parent) {
-    this.view = view || {};
+    this.view = view || '';
     this.parent = parent;
     this._cache = {};
   }
@@ -133,7 +133,7 @@
   Context.prototype.lookup = function (name) {
     var value = this._cache[name];
 
-    if (!value) {
+    if (typeof value == 'undefined') {
       if (name == '.') {
         value = this.view;
       } else {
