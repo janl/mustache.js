@@ -378,7 +378,7 @@ The test suite consists of both unit and integration tests. If a template isn't 
 
 Then, you can run the test with:
 
-    $ TEST=mytest mocha test/render_test.js
+    $ TEST=mytest mocha test/render-test.js
 
 ## Thanks
 
