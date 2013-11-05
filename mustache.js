@@ -38,9 +38,13 @@
   }
 
   var Object_toString = Object.prototype.toString;
-  var isArray = Array.isArray || function (obj) {
-    return Object_toString.call(obj) === '[object Array]';
+  var isArray = Array.isArray || function (object) {
+    return Object_toString.call(object) === '[object Array]';
   };
+
+  function isFunction(object) {
+    return typeof object === 'function';
+  }
 
   function escapeRegExp(string) {
     return string.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
@@ -134,7 +138,7 @@
     var value = this._cache[name];
 
     if (!value) {
-      if (name == '.') {
+      if (name === '.') {
         value = this.view;
       } else {
         var context = this;
@@ -142,6 +146,7 @@
         while (context) {
           if (name.indexOf('.') > 0) {
             value = context.view;
+
             var names = name.split('.'), i = 0;
             while (value && i < names.length) {
               value = value[names[i++]];
@@ -159,7 +164,9 @@
       this._cache[name] = value;
     }
 
-    if (typeof value === 'function') value = value.call(this.view);
+    if (isFunction(value)) {
+      value = value.call(this.view);
+    }
 
     return value;
   };
@@ -202,7 +209,7 @@
     var self = this;
     return function (view, partials) {
       if (partials) {
-        if (typeof partials === 'function') {
+        if (isFunction(partials)) {
           self._loadPartial = partials;
         } else {
           for (var name in partials) {
@@ -251,7 +258,7 @@
           } else if (value) {
             buffer += renderTokens(token[4], writer, context.push(value), template);
           }
-        } else if (typeof value === 'function') {
+        } else if (isFunction(value)) {
           var text = template == null ? null : template.slice(token[3], token[5]);
           value = value.call(context.view, text, subRender);
           if (value != null) buffer += value;
@@ -272,7 +279,7 @@
         break;
       case '>':
         value = writer.getPartial(tokenValue);
-        if (typeof value === 'function') buffer += value(context);
+        if (isFunction(value)) buffer += value(context);
         break;
       case '&':
         value = context.lookup(tokenValue);
@@ -537,7 +544,7 @@
   mustache.to_html = function (template, view, partials, send) {
     var result = mustache.render(template, view, partials);
 
-    if (typeof send === "function") {
+    if (isFunction(send)) {
       send(result);
     } else {
       return result;
