@@ -59,10 +59,3 @@ describe('A Mustache.Context', function () {
     });
   });
 });
-
-describe('Mustache.Context.make', function () {
-  it('returns the same object when given a Context', function () {
-    var context = new Context;
-    assert.strictEqual(Context.make(context), context);
-  });
-});

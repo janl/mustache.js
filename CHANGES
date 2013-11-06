@@ -1,3 +1,15 @@
+= HEAD
+
+  * Remove compile* writer functions and replace them with cache* equivalents. This
+    reflects more clearly what the functions are actually doing, and also provides
+    a better basis for understanding what writer.clearCache() does.
+  * Do not cache dynamically loaded partials.
+  * Throw an error when rendering a template that contains higher-order sections and
+    the original template is not provided.
+  * Remove partials argument from low-level writer.render.
+  * Remove low-level Context.make function.
+  * Better code readability and inline documentation.
+
 = 0.7.3 / 5 Nov 2013
 
   * Don't require the original template to be passed to the rendering function

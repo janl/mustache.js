@@ -3,41 +3,34 @@ var Writer = Mustache.Writer;
 
 describe('A new Mustache.Writer', function () {
   var writer;
-  beforeEach(function () {
-    writer = new Writer;
-  });
 
-  it('loads partials correctly', function () {
-    var partial = 'The content of the partial.';
-    var result = writer.render('{{>partial}}', {}, function (name) {
-      assert.equal(name, 'partial');
-      return partial;
+  describe('with a cached partial', function () {
+    beforeEach(function () {
+      writer = new Writer;
     });
 
-    assert.equal(result, partial);
+    it('caches partials by content, not name', function () {
+      writer.cachePartial('partial', 'partial one');
+      assert.equal(writer.render('{{>partial}}'), 'partial one');
+
+      writer.cachePartial('partial', 'partial two');
+      assert.equal(writer.render('{{>partial}}'), 'partial two');
+    });
   });
 
-  it('caches partials by content, not name', function () {
-    var result = writer.render('{{>partial}}', {}, {
-      partial: 'partial one'
+  describe('with a partial loader', function () {
+    var partial;
+    beforeEach(function () {
+      partial = 'The content of the partial.';
+      writer = new Writer(function (name) {
+        assert.equal(name, 'partial');
+        return partial;
+      });
     });
 
-    assert.equal(result, 'partial one');
-
-    result = writer.render('{{>partial}}', {}, {
-      partial: 'partial two'
+    it('loads partials correctly', function () {
+      assert.equal(writer.render('{{>partial}}'), partial);
     });
-
-    assert.equal(result, 'partial two');
   });
 
-  it('can compile an array of tokens', function () {
-    var template = 'Hello {{name}}!';
-    var tokens = Mustache.parse(template);
-    var render = writer.compileTokens(tokens, template);
-
-    var result = render({ name: 'Michael' });
-
-    assert.equal(result, 'Hello Michael!');
-  });
 });

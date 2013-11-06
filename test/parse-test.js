@@ -99,7 +99,7 @@ describe('Mustache.parse', function () {
     it('throws an error', function () {
       assert.throws(function () {
         Mustache.parse('A template {{=<%=}}');
-      }, /invalid tags at 11/i);
+      }, /invalid tags/i);
     });
   });
 
