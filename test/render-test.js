@@ -17,7 +17,7 @@ function getView(testName) {
 function getPartial(testName) {
   try {
     return getContents(testName, 'partial');
-  } catch (e) {
+  } catch (error) {
     // No big deal. Not all tests need to test partial support.
   }
 }

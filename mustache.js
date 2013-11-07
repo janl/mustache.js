@@ -272,7 +272,7 @@
   }
 
   /**
-   * A simple string scanner that is used by the mustache.parse to find
+   * A simple string scanner that is used by the template parser to find
    * tokens in template strings.
    */
   function Scanner(string) {
@@ -388,62 +388,27 @@
 
   /**
    * A Writer knows how to take a stream of tokens and render them to a
-   * string, given a context. It also maintains a cache of templates and
-   * partials to avoid the need to parse the same template twice.
-   *
-   * The `partialLoader` argument may be a function that is used to load
-   * partials on the fly as they are needed if they are not found in cache.
-   * Partials loaded in this manner are not cached.
+   * string, given a context. It also maintains a cache of templates to
+   * avoid the need to parse the same template twice.
    */
-  function Writer(partialLoader) {
-    this.clearCache();
-
-    if (isFunction(partialLoader)) {
-      this._loadPartial = partialLoader;
-    }
+  function Writer() {
+    this._cache = {};
   }
 
   /**
-   * Clears all cached templates and partials in this writer.
+   * Clears all cached templates in this writer.
    */
   Writer.prototype.clearCache = function () {
     this._cache = {};
-    this._partialCache = {};
-  };
-
-  /**
-   * Gets an array of tokens for the partial with the given `name`, either
-   * from cache or from this writer's partial loading function.
-   */
-  Writer.prototype.getPartial = function (name) {
-    if (!(name in this._partialCache) && this._loadPartial) {
-      var template = this._loadPartial(name);
-      if (template) {
-        // Intentionally do not cache dynamically-loaded templates.
-        return mustache.parse(template);
-      }
-    }
-
-    return this._partialCache[name];
-  };
-
-  /**
-   * Parses and caches the given `template` with the given `name` as a
-   * partial. This writer may then render other templates that reference
-   * that partial using the ">" tag and that partial's name. Returns the
-   * array of tokens that is generated from the parse.
-   */
-  Writer.prototype.cachePartial = function (name, template, tags) {
-    return (this._partialCache[name] = this.cache(template, tags));
   };
 
   /**
    * Parses and caches the given `template` and returns the array of tokens
    * that is generated from the parse.
    */
-  Writer.prototype.cache = function (template, tags) {
+  Writer.prototype.parse = function (template, tags) {
     if (!(template in this._cache)) {
-      this._cache[template] = mustache.parse(template, tags);
+      this._cache[template] = parseTemplate(template, tags);
     }
 
     return this._cache[template];
@@ -452,29 +417,35 @@
   /**
    * High-level method that is used to render the given `template` with
    * the given `view`.
+   *
+   * The optional `partials` argument may be an object that contains the
+   * names and templates of partials that are used in the template. It may
+   * also be a function that is used to load partial templates on the fly
+   * that takes a single argument: the name of the partial.
    */
-  Writer.prototype.render = function (template, view) {
-    var tokens = this.cache(template);
+  Writer.prototype.render = function (template, view, partials) {
+    var tokens = this.parse(template);
     var context = (view instanceof Context) ? view : new Context(view);
-    return this.renderTokens(tokens, context, template);
+    return this.renderTokens(tokens, context, partials, template);
   };
 
   /**
    * Low-level method that renders the given array of `tokens` using
-   * the given `context`.
+   * the given `context` and `partials`.
    *
-   * Note: The `template` string is only needed for templates that use
-   * higher-order sections to extract the portion of the original template
-   * that was contained in that section.
+   * Note: The `originalTemplate` is only ever used to extract the portion
+   * of the original template that was contained in a higher-order section.
+   * If the template doesn't use higher-order sections, this argument may
+   * be omitted.
    */
-  Writer.prototype.renderTokens = function (tokens, context, template) {
+  Writer.prototype.renderTokens = function (tokens, context, partials, originalTemplate) {
     var buffer = '';
 
     // This function is used to render an arbitrary template
-    // in the current context by higher-order functions.
+    // in the current context by higher-order sections.
     var self = this;
     function subRender(template) {
-      return self.render(template, context);
+      return self.render(template, context, partials);
     }
 
     var token, value;
@@ -488,21 +459,21 @@
 
         if (isArray(value)) {
           for (var j = 0, jlen = value.length; j < jlen; ++j) {
-            buffer += this.renderTokens(token[4], context.push(value[j]), template);
+            buffer += this.renderTokens(token[4], context.push(value[j]), partials, originalTemplate);
           }
         } else if (typeof value === 'object' || typeof value === 'string') {
-          buffer += this.renderTokens(token[4], context.push(value), template);
+          buffer += this.renderTokens(token[4], context.push(value), partials, originalTemplate);
         } else if (isFunction(value)) {
-          if (typeof template !== 'string') {
+          if (typeof originalTemplate !== 'string') {
             throw new Error('Cannot use higher-order sections without the original template');
           }
 
           // Extract the portion of the original template that the section contains.
-          value = value.call(context.view, template.slice(token[3], token[5]), subRender);
+          value = value.call(context.view, originalTemplate.slice(token[3], token[5]), subRender);
 
           if (value != null) buffer += value;
         } else {
-          buffer += this.renderTokens(token[4], context, template);
+          buffer += this.renderTokens(token[4], context, partials, originalTemplate);
         }
 
         break;
@@ -512,13 +483,14 @@
         // Use JavaScript's definition of falsy. Include empty arrays.
         // See https://github.com/janl/mustache.js/issues/186
         if (!value || (isArray(value) && value.length === 0)) {
-          buffer += this.renderTokens(token[4], context, template);
+          buffer += this.renderTokens(token[4], context, partials, originalTemplate);
         }
 
         break;
       case '>':
-        value = this.getPartial(token[1]);
-        if (value != null) buffer += this.renderTokens(value, context, template);
+        if (!partials) continue;
+        value = this.parse(isFunction(partials) ? partials(token[1]) : partials[token[1]]);
+        if (value != null) buffer += this.renderTokens(value, context, partials, originalTemplate);
         break;
       case '&':
         value = context.lookup(token[1]);
@@ -541,60 +513,33 @@
   mustache.version = "0.7.3";
   mustache.tags = [ "{{", "}}" ];
 
-  // Export the parsing function.
-  mustache.parse = parseTemplate;
-
-  // Export the escaping function so that the user may override it.
-  // See https://github.com/janl/mustache.js/issues/244
-  mustache.escape = escapeHtml;
-
   // All high-level mustache.* functions use this writer.
   var defaultWriter = new Writer();
 
   /**
-   * Clears all cached templates and partials in the default writer.
+   * Clears all cached templates in the default writer.
    */
   mustache.clearCache = function () {
     return defaultWriter.clearCache();
   };
 
   /**
-   * Caches the given partial in the default writer and returns the
+   * Parses and caches the given template in the default writer and returns the
    * array of tokens it contains.
-   */
-  mustache.cachePartial = function (name, template, tags) {
-    return defaultWriter.cachePartial(name, template, tags);
-  };
-
-  /**
-   * Caches the given template in the default writer and returns the
-   * array of tokens it contains.
-   */
-  mustache.cache = function (template, tags) {
-    return defaultWriter.cache(template, tags);
-  };
-
-  /**
-   * Renders the `template` with the given `view` using the default writer.
    *
-   * The optionals `partials` argument may either be a function that is used to load
-   * partials on the fly or an object containing names and templates of partials. If
-   * it is an object, the partials will be cached in the default writer.
+   * Pre-caching templates ahead of time avoids the need to parse templates
+   * on the fly as they are rendered.
+   */
+  mustache.parse = function (template, tags) {
+    return defaultWriter.parse(template, tags);
+  };
+
+  /**
+   * Renders the `template` with the given `view` and `partials` using the
+   * default writer.
    */
   mustache.render = function (template, view, partials) {
-    if (partials) {
-      if (isFunction(partials)) {
-        defaultWriter._loadPartial = partials;
-      } else {
-        for (var name in partials) {
-          if (partials.hasOwnProperty(name)) {
-            defaultWriter.cachePartial(name, partials[name]);
-          }
-        }
-      }
-    }
-
-    return defaultWriter.render(template, view);
+    return defaultWriter.render(template, view, partials);
   };
 
   // This is here for backwards compatibility with 0.4.x.
@@ -607,6 +552,10 @@
       return result;
     }
   };
+
+  // Export the escaping function so that the user may override it.
+  // See https://github.com/janl/mustache.js/issues/244
+  mustache.escape = escapeHtml;
 
   // Export these mainly for testing, but also for advanced usage.
   mustache.Scanner = Scanner;

@@ -1,12 +1,8 @@
 = HEAD
 
-  * Remove compile* writer functions and replace them with cache* equivalents. This
-    reflects more clearly what the functions are actually doing, and also provides
-    a better basis for understanding what writer.clearCache() does.
-  * Do not cache dynamically loaded partials.
+  * Remove compile* writer functions, use mustache.parse instead. Smaller API.
   * Throw an error when rendering a template that contains higher-order sections and
     the original template is not provided.
-  * Remove partials argument from low-level writer.render.
   * Remove low-level Context.make function.
   * Better code readability and inline documentation.
 
