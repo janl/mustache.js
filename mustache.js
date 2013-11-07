@@ -150,7 +150,9 @@
           start += 1;
 
           // Check for whitespace on the current line.
-          if (chr == '\n') stripSpace();
+          if (chr === '\n') {
+            stripSpace();
+          }
         }
       }
 
@@ -177,9 +179,11 @@
       }
 
       // Match the closing tag.
-      if (!scanner.scan(tagRes[1])) throw new Error('Unclosed tag at ' + scanner.pos);
+      if (!scanner.scan(tagRes[1])) {
+        throw new Error('Unclosed tag at ' + scanner.pos);
+      }
 
-      token = [type, value, start, scanner.pos];
+      token = [ type, value, start, scanner.pos ];
       tokens.push(token);
 
       if (type === '#' || type === '^') {
@@ -334,10 +338,10 @@
    * Represents a rendering context by wrapping a view object and
    * maintaining a reference to the parent context.
    */
-  function Context(view, parent) {
+  function Context(view, parentContext) {
     this.view = view == null ? {} : view;
-    this.parent = parent;
-    this._cache = { '.': this.view };
+    this.cache = { '.': this.view };
+    this.parent = parentContext;
   }
 
   /**
@@ -354,8 +358,8 @@
    */
   Context.prototype.lookup = function (name) {
     var value;
-    if (name in this._cache) {
-      value = this._cache[name];
+    if (name in this.cache) {
+      value = this.cache[name];
     } else {
       var context = this;
 
@@ -376,7 +380,7 @@
         context = context.parent;
       }
 
-      this._cache[name] = value;
+      this.cache[name] = value;
     }
 
     if (isFunction(value)) {
@@ -392,14 +396,14 @@
    * avoid the need to parse the same template twice.
    */
   function Writer() {
-    this._cache = {};
+    this.cache = {};
   }
 
   /**
    * Clears all cached templates in this writer.
    */
   Writer.prototype.clearCache = function () {
-    this._cache = {};
+    this.cache = {};
   };
 
   /**
@@ -407,11 +411,11 @@
    * that is generated from the parse.
    */
   Writer.prototype.parse = function (template, tags) {
-    if (!(template in this._cache)) {
-      this._cache[template] = parseTemplate(template, tags);
+    if (!(template in this.cache)) {
+      this.cache[template] = parseTemplate(template, tags);
     }
 
-    return this._cache[template];
+    return this.cache[template];
   };
 
   /**
@@ -525,10 +529,8 @@
 
   /**
    * Parses and caches the given template in the default writer and returns the
-   * array of tokens it contains.
-   *
-   * Pre-caching templates ahead of time avoids the need to parse templates
-   * on the fly as they are rendered.
+   * array of tokens it contains. Doing this ahead of time avoids the need to
+   * parse templates on the fly as they are rendered.
    */
   mustache.parse = function (template, tags) {
     return defaultWriter.parse(template, tags);
