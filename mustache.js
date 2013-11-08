@@ -231,8 +231,8 @@
           lastToken[1] += token[1];
           lastToken[3] = token[3];
         } else {
-          lastToken = token;
           squashedTokens.push(token);
+          lastToken = token;
         }
       }
     }
@@ -251,19 +251,19 @@
     var collector = nestedTokens;
     var sections = [];
 
-    var token;
+    var token, section;
     for (var i = 0, len = tokens.length; i < len; ++i) {
       token = tokens[i];
 
       switch (token[0]) {
       case '#':
       case '^':
-        sections.push(token);
         collector.push(token);
+        sections.push(token);
         collector = token[4] = [];
         break;
       case '/':
-        var section = sections.pop();
+        section = sections.pop();
         section[5] = token[2];
         collector = sections.length > 0 ? sections[sections.length - 1][4] : nestedTokens;
         break;
