@@ -6,17 +6,26 @@
 /*global define: false*/
 
 (function (root, factory) {
+  // Define a local copy of Mustache.
+  var Mustache = {};
+  
+  // Build Mustache
+  factory(Mustache);
+
   if (typeof exports === "object" && exports) {
-    factory(exports); // CommonJS
+    module.exports = Mustache; // CommonJS
   } else {
-    var mustache = {};
-    factory(mustache);
     if (typeof define === "function" && define.amd) {
-      define(mustache); // AMD
-    } else {
-      root.Mustache = mustache; // <script>
+      define( "mustache", Mustache ); // AMD
     }
   }
+
+  // If there is a window object, that at least has a document property,
+  // define the Mustache identifier
+  if ( typeof root === "object" && typeof root.document === "object" ) {
+    root.Mustache = Mustache;
+  }
+
 }(this, function (mustache) {
 
   var whiteRe = /\s*/;
