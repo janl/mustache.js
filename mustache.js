@@ -514,7 +514,7 @@
   };
 
   mustache.name = "mustache.js";
-  mustache.version = "0.7.3";
+  mustache.version = "0.8.0";
   mustache.tags = [ "{{", "}}" ];
 
   // All high-level mustache.* functions use this writer.

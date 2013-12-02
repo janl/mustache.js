@@ -1,10 +1,11 @@
-= HEAD
+= 0.8.0 / 2 Dec 2013
 
   * Remove compile* writer functions, use mustache.parse instead. Smaller API.
   * Throw an error when rendering a template that contains higher-order sections and
     the original template is not provided.
   * Remove low-level Context.make function.
   * Better code readability and inline documentation.
+  * Stop caching templates by name.
 
 = 0.7.3 / 5 Nov 2013
 
