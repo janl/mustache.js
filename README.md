@@ -24,14 +24,16 @@ An updated list of mustache.js users is kept [on the Github wiki](http://wiki.gi
 
 Below is quick example how to use mustache.js:
 
-    var view = {
-      title: "Joe",
-      calc: function () {
-        return 2 + 4;
-      }
-    };
+```js
+var view = {
+  title: "Joe",
+  calc: function () {
+    return 2 + 4;
+  }
+};
 
-    var output = Mustache.render("{{title}} spends {{calc}}", view);
+var output = Mustache.render("{{title}} spends {{calc}}", view);
+```
 
 In this example, the `Mustache.render` function takes two parameters: 1) the [mustache](http://mustache.github.com/) template and 2) a `view` object that contains the data and code needed to render the template.
 
@@ -49,48 +51,60 @@ All variables are HTML-escaped by default. If you want to render unescaped HTML,
 
 View:
 
-    {
-      "name": "Chris",
-      "company": "<b>GitHub</b>"
-    }
+```json
+{
+  "name": "Chris",
+  "company": "<b>GitHub</b>"
+}
+```
 
 Template:
 
-    * {{name}}
-    * {{age}}
-    * {{company}}
-    * {{{company}}}
-    * {{&company}}
+```html
+* {{name}}
+* {{age}}
+* {{company}}
+* {{{company}}}
+* {{&company}}
+```
 
 Output:
 
-    * Chris
-    *
-    * &lt;b&gt;GitHub&lt;/b&gt;
-    * <b>GitHub</b>
-    * <b>GitHub</b>
+```html
+* Chris
+*
+* &lt;b&gt;GitHub&lt;/b&gt;
+* <b>GitHub</b>
+* <b>GitHub</b>
+```
 
 JavaScript's dot notation may be used to access keys that are properties of objects in a view.
 
 View:
 
-    {
-      "name": {
-        "first": "Michael",
-        "last": "Jackson"
-      },
-      "age": "RIP"
-    }
+```json
+{
+  "name": {
+    "first": "Michael",
+    "last": "Jackson"
+  },
+  "age": "RIP"
+}
+```
 
 Template:
 
-    * {{name.first}} {{name.last}}
-    * {{age}}
+```html
+* {{name.first}} {{name.last}}
+* {{age}}
+```
 
 Output:
 
-    * Michael Jackson
-    * RIP
+```html
+* Michael Jackson
+* RIP
+```
 
 ### Sections
 
@@ -106,20 +120,26 @@ If the `person` key does not exist, or exists and has a value of `null`, `undefi
 
 View:
 
-    {
-      "person": false
-    }
+```json
+{
+  "person": false
+}
+```
 
 Template:
 
-    Shown.
-    {{#person}}
-    Never shown!
-    {{/person}}
+```html
+Shown.
+{{#person}}
+Never shown!
+{{/person}}
+```
 
 Output:
 
-    Shown.
+```html
+Shown.
+```
 
 #### Non-Empty Lists
 
@@ -129,75 +149,93 @@ When the value is a list, the block is rendered once for each item in the list. 
 
 View:
 
-    {
-      "stooges": [
-        { "name": "Moe" },
-        { "name": "Larry" },
-        { "name": "Curly" }
-      ]
-    }
+```json
+{
+  "stooges": [
+    { "name": "Moe" },
+    { "name": "Larry" },
+    { "name": "Curly" }
+  ]
+}
+```
 
 Template:
 
-    {{#stooges}}
-    <b>{{name}}</b>
-    {{/stooges}}
+```html
+{{#stooges}}
+<b>{{name}}</b>
+{{/stooges}}
+```
 
 Output:
 
-    <b>Moe</b>
-    <b>Larry</b>
-    <b>Curly</b>
+```html
+<b>Moe</b>
+<b>Larry</b>
+<b>Curly</b>
+```
 
 When looping over an array of strings, a `.` can be used to refer to the current item in the list.
 
 View:
 
-    {
-      "musketeers": ["Athos", "Aramis", "Porthos", "D'Artagnan"]
-    }
+```json
+{
+  "musketeers": ["Athos", "Aramis", "Porthos", "D'Artagnan"]
+}
+```
 
 Template:
 
-    {{#musketeers}}
-    * {{.}}
-    {{/musketeers}}
+```html
+{{#musketeers}}
+* {{.}}
+{{/musketeers}}
+```
 
 Output:
 
-    * Athos
-    * Aramis
-    * Porthos
-    * D'Artagnan
+```html
+* Athos
+* Aramis
+* Porthos
+* D'Artagnan
+```
 
 If the value of a section variable is a function, it will be called in the context of the current item in the list on each iteration.
 
 View:
 
-    {
-      "beatles": [
-        { "firstName": "John", "lastName": "Lennon" },
-        { "firstName": "Paul", "lastName": "McCartney" },
-        { "firstName": "George", "lastName": "Harrison" },
-        { "firstName": "Ringo", "lastName": "Starr" }
-      ],
-      "name": function () {
-        return this.firstName + " " + this.lastName;
-      }
-    }
+```json
+{
+  "beatles": [
+    { "firstName": "John", "lastName": "Lennon" },
+    { "firstName": "Paul", "lastName": "McCartney" },
+    { "firstName": "George", "lastName": "Harrison" },
+    { "firstName": "Ringo", "lastName": "Starr" }
+  ],
+  "name": function () {
+    return this.firstName + " " + this.lastName;
+  }
+}
+```
 
 Template:
 
-    {{#beatles}}
-    * {{name}}
-    {{/beatles}}
+```html
+{{#beatles}}
+* {{name}}
+{{/beatles}}
+```
 
 Output:
 
-    * John Lennon
-    * Paul McCartney
-    * George Harrison
-    * Ringo Starr
+```html
+* John Lennon
+* Paul McCartney
+* George Harrison
+* Ringo Starr
+```
 
 #### Functions
 
@@ -205,22 +243,28 @@ If the value of a section key is a function, it is called with the section's lit
 
 View:
 
-    {
-      "name": "Tater",
-      "bold": function () {
-        return function (text, render) {
-          return "<b>" + render(text) + "</b>";
-        }
-      }
+```js
+{
+  "name": "Tater",
+  "bold": function () {
+    return function (text, render) {
+      return "<b>" + render(text) + "</b>";
     }
+  }
+}
+```
 
 Template:
 
-    {{#bold}}Hi {{name}}.{{/bold}}
+```html
+{{#bold}}Hi {{name}}.{{/bold}}
+```
 
 Output:
 
-    <b>Hi Tater.</b>
+```html
+<b>Hi Tater.</b>
+```
 
 ### Inverted Sections
 
@@ -228,28 +272,38 @@ An inverted section opens with `{{^section}}` instead of `{{#section}}`. The blo
 
 View:
 
-    {
-      "repos": []
-    }
+```json
+{
+  "repos": []
+}
+```
 
 Template:
 
-    {{#repos}}<b>{{name}}</b>{{/repos}}
-    {{^repos}}No repos :({{/repos}}
+```html
+{{#repos}}<b>{{name}}</b>{{/repos}}
+{{^repos}}No repos :({{/repos}}
+```
 
 Output:
 
-    No repos :(
+```html
+No repos :(
+```
 
 ### Comments
 
 Comments begin with a bang and are ignored. The following template:
 
-    <h1>Today{{! ignore me }}.</h1>
+```html
+<h1>Today{{! ignore me }}.</h1>
+```
 
 Will render as follows:
 
-    <h1>Today.</h1>
+```html
+<h1>Today.</h1>
+```
 
 Comments may contain newlines.
 
@@ -261,11 +315,15 @@ Partials are rendered at runtime (as opposed to compile time), so recursive part
 
 They also inherit the calling context. Whereas in ERB you may have this:
 
-    <%= partial :next_more, :start => start, :size => size %>
+```html+erb
+<%= partial :next_more, :start => start, :size => size %>
+```
 
 Mustache requires only this:
 
-    {{> next_more}}
+```html
+{{> next_more}}
+```
 
 Why? Because the `next_more.mustache` file will inherit the `size` and `start` variables from the calling context. In this way you may want to think of partials as includes, or template expansion, even though it's not literally true.
 
@@ -282,12 +340,20 @@ For example, this template and partial:
 
 Can be thought of as a single, expanded template:
 
-    <h2>Names</h2>
-    {{#names}}
-      <strong>{{name}}</strong>
-    {{/names}}
+```html
+<h2>Names</h2>
+{{#names}}
+  <strong>{{name}}</strong>
+{{/names}}
+```
 
 In mustache.js an object of partials may be passed as the third argument to `Mustache.render`. The object should be keyed by the name of the partial, and its value should be the partial text.
+
+```js
+Mustache.render(template, view, {
+  user: userTemplate
+});
+```
 
 ### Set Delimiter
 
@@ -295,11 +361,13 @@ Set Delimiter tags start with an equals sign and change the tag delimiters from 
 
 Consider the following contrived example:
 
-    * {{ default_tags }}
-    {{=<% %>=}}
-    * <% erb_style_tags %>
-    <%={{ }}=%>
-    * {{ default_tags_again }}
+```html
+* {{ default_tags }}
+{{=<% %>=}}
+* <% erb_style_tags %>
+<%={{ }}=%>
+* {{ default_tags_again }}
+```
 
 Here we have a list with three items. The first item uses the default tag style, the second uses ERB style as defined by the Set Delimiter tag, and the third returns to the default style after yet another Set Delimiter declaration.
 
@@ -307,31 +375,16 @@ According to [ctemplates](http://google-ctemplate.googlecode.com/svn/trunk/doc/h
 
 Custom delimiters may not contain whitespace or the equals sign.
 
-### Compiled Templates
+## Pre-parsing and Caching Templates
 
-Mustache templates can be compiled into JavaScript functions using `Mustache.compile` for improved rendering performance.
+By default, when mustache.js first parses a template it keeps the full parsed token tree in a cache. The next time it sees that same template it skips the parsing step and renders the template much more quickly. If you'd like, you can do this ahead of time using `mustache.parse`.
 
-If you have template views that are rendered multiple times, compiling your template into a JavaScript function will minimise the amount of work required for each re-render.
+```js
+Mustache.parse(template);
 
-Pre-compiled templates can also be generated server-side, for delivery to the browser as ready to use JavaScript functions, further reducing the amount of client side processing required for initialising templates.
-
-**Mustache.compile**
-
-Use `Mustache.compile` to compile standard Mustache string templates into reusable Mustache template functions.
-
-    var compiledTemplate = Mustache.compile(stringTemplate);
-
-The function returned from `Mustache.compile` can then be called directly, passing in the template data as an argument (with an object of partials as an optional second parameter), to generate the final output.
-
-    var templateOutput = compiledTemplate(templateData);
-
-**Mustache.compilePartial**
-
-Template partials can also be compiled using the `Mustache.compilePartial` function. The first parameter of this function, is the name of the partial as it appears within parent templates.
-
-    Mustache.compilePartial('partial-name', stringTemplate);
-
-Compiled partials are then available to both `Mustache.render` and `Mustache.compile`.
+// Then, sometime later.
+Mustache.render(template, view);
+```
 
 ## Plugins for JavaScript Libraries
 
