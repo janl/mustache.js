@@ -206,7 +206,7 @@ If the value of a section variable is a function, it will be called in the conte
 
 View:
 
-```json
+```js
 {
   "beatles": [
     { "firstName": "John", "lastName": "Lennon" },
@@ -361,7 +361,7 @@ Set Delimiter tags start with an equals sign and change the tag delimiters from 
 
 Consider the following contrived example:
 
-```html
+```
 * {{ default_tags }}
 {{=<% %>=}}
 * <% erb_style_tags %>
