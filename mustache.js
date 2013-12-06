@@ -411,11 +411,14 @@
    * that is generated from the parse.
    */
   Writer.prototype.parse = function (template, tags) {
-    if (!(template in this.cache)) {
-      this.cache[template] = parseTemplate(template, tags);
+    var cache = this.cache;
+    var tokens = cache[template];
+
+    if (tokens == null) {
+      tokens = cache[template] = parseTemplate(template, tags);
     }
 
-    return this.cache[template];
+    return tokens;
   };
 
   /**
