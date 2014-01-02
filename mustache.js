@@ -496,8 +496,9 @@
         break;
       case '>':
         if (!partials) continue;
-        value = this.parse(isFunction(partials) ? partials(token[1]) : partials[token[1]]);
-        if (value != null) buffer += this.renderTokens(value, context, partials, originalTemplate);
+        var partialTemplate = isFunction(partials) ? partials(token[1]) : partials[token[1]];
+        value = this.parse(partialTemplate);
+        if (value != null) buffer += this.renderTokens(value, context, partials, partialTemplate);
         break;
       case '&':
         value = context.lookup(token[1]);
