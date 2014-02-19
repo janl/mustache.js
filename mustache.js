@@ -76,6 +76,13 @@
   var curlyRe = /\s*\}/;
   var tagRe = /#|\^|\/|>|\{|&|=|!/;
 
+  var customTagRe = "";
+  var customTags = {}; // {tag1: callback1, tag2: callback2}
+
+  function isCustomTag(str) {
+    return str.match(customTagRe);
+  }
+
   /**
    * Breaks up the given `template` string into a tree of tokens. If the `tags`
    * argument is given here it must be an array with two string values: the
@@ -161,7 +168,7 @@
       hasTag = true;
 
       // Get the tag type.
-      type = scanner.scan(tagRe) || 'name';
+      type = scanner.scan(tagRe) || scanner.scan(new RegExp(customTagRe)) || 'name';
       scanner.scan(whiteRe);
 
       // Get the tag value.
@@ -455,7 +462,7 @@
       return self.render(template, context, partials);
     }
 
-    var token, value;
+    var token, value, out;
     for (var i = 0, len = tokens.length; i < len; ++i) {
       token = tokens[i];
 
@@ -511,6 +518,14 @@
         buffer += token[1];
         break;
       }
+
+      if (isCustomTag(token[0])) {
+        value = context.lookup(token[1]);
+        out = customTags[token[0]] && customTags[token[0]](token[1], value);
+        if (typeof out === 'string') {
+          buffer += out;
+        }
+      }
     }
 
     return buffer;
@@ -557,6 +572,24 @@
       return result;
     }
   };
+
+  /**
+   * Adds a custom tag.
+   */
+  mustache.addCustomTag = function (tag, callback) {
+    if (!tag.match(/^\w+$/)) {
+      throw new Error("invalid tag name");
+    }
+    var customTagsArr;
+    if (customTagRe === '') {
+      customTagsArr = [];
+    } else {
+      customTagsArr = customTagRe.split('|');
+    }
+    customTagsArr.push(tag);
+    customTagRe = customTagsArr.join('|');
+    customTags[tag] = callback;
+  }
 
   // Export the escaping function so that the user may override it.
   // See https://github.com/janl/mustache.js/issues/244
