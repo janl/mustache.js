@@ -79,10 +79,6 @@
   var customTagRe = "";
   var customTags = {}; // {tag1: callback1, tag2: callback2}
 
-  function isCustomTag(str) {
-    return str.match(customTagRe);
-  }
-
   /**
    * Breaks up the given `template` string into a tree of tokens. If the `tags`
    * argument is given here it must be an array with two string values: the
@@ -168,7 +164,7 @@
       hasTag = true;
 
       // Get the tag type.
-      type = scanner.scan(tagRe) || scanner.scan(new RegExp(customTagRe)) || 'name';
+      type = scanner.scan(tagRe) || 'name';
       scanner.scan(whiteRe);
 
       // Get the tag value.
@@ -462,7 +458,7 @@
       return self.render(template, context, partials);
     }
 
-    var token, value, out;
+    var token, value, out, scn, ctag;
     for (var i = 0, len = tokens.length; i < len; ++i) {
       token = tokens[i];
 
@@ -512,19 +508,24 @@
         break;
       case 'name':
         value = context.lookup(token[1]);
-        if (value != null) buffer += mustache.escape(value);
+        if (value != null) {
+          buffer += mustache.escape(value);
+        } else {
+          // token may be a custom tag
+          scn = new Scanner(token[1]);
+          ctag = scn.scan(new RegExp(customTagRe));
+          if (ctag) {
+            scn.scan(whiteRe);
+            out = customTags[ctag](scn.tail, context.lookup(scn.tail));
+            if (typeof out === 'string') {
+              buffer += out;
+            }
+          }
+        }
         break;
       case 'text':
         buffer += token[1];
         break;
-      }
-
-      if (isCustomTag(token[0])) {
-        value = context.lookup(token[1]);
-        out = customTags[token[0]] && customTags[token[0]](token[1], value);
-        if (typeof out === 'string') {
-          buffer += out;
-        }
       }
     }
 
@@ -577,17 +578,37 @@
    * Adds a custom tag.
    */
   mustache.addCustomTag = function (tag, callback) {
-    if (!tag.match(/^\w+$/)) {
+    // allow only alphabetic characters
+    if (!tag.match(/^[A-z]+$/)) {
       throw new Error("invalid tag name");
     }
-    var customTagsArr;
-    if (customTagRe === '') {
-      customTagsArr = [];
-    } else {
-      customTagsArr = customTagRe.split('|');
+    if (typeof callback !== 'function') {
+      throw new Error("invalid callback");
     }
-    customTagsArr.push(tag);
-    customTagRe = customTagsArr.join('|');
+    var customTagsArr;
+    if (!customTags[tag]) {
+      // tag does not exist
+      if (customTagRe === '') {
+        customTagsArr = [];
+      } else {
+        customTagsArr = customTagRe.split('|');
+      }
+      customTagsArr.push(tag);
+      // sort customTagsArr to put the longest strings to the top
+      // in order to prevent regExp mistakes
+      customTagsArr.sort(function (str1, str2) {
+        if (str1.length === str2.length) {
+          if (str1 === str2) {
+            return 0;
+          } else {
+            return str1 < str2 ? 1 : -1;
+          }
+        } else {
+          return str1.length < str2.length ? 1 : -1;
+        }
+      });
+      customTagRe = customTagsArr.join('|');
+    }
     customTags[tag] = callback;
   }
 
