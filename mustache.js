@@ -114,7 +114,7 @@
 
         s += escapeJs(k) + ':' + escapeJs(v);
 
-        if (i < o.length - 1) {
+        if (i < keys.length - 1) {
           s += ',';
         }
       }
