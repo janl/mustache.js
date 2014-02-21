@@ -140,7 +140,7 @@
   var spaceRe = /\s+/;
   var equalsRe = /\s*=/;
   var curlyRe = /\s*\}/;
-  var tagRe = /#|\^|\/|>|\{|js&|&|=|!/;
+  var tagRe = /#|\^|\/|>|\{|\$|&|=|!/;
 
   /**
    * Breaks up the given `template` string into a tree of tokens. If the `tags`
@@ -264,7 +264,7 @@
         if (openSection[1] !== value) {
           throw new Error('Unclosed section "' + openSection[1] + '" at ' + start);
         }
-      } else if (type === 'name' || type === '{' || type === '&' || type === 'js&') {
+      } else if (type === 'name' || type === '{' || type === '&' || type === '$') {
         nonSpace = true;
       } else if (type === '=') {
         // Set the tags for the next time around.
@@ -569,7 +569,7 @@
         value = context.lookup(token[1]);
         if (value != null) buffer += value;
         break;
-      case 'js&':
+      case '$':
         value = context.lookup(token[1]);
         if (value != null) buffer += mustache.escapeJs(value);
         break;
