@@ -1,3 +1,7 @@
+= 0.8.2 / 17 Mar 2014
+
+  * Supporting Bower through a bower.json file.
+
 = 0.8.1 / 3 Jan 2014
 
   * Fix usage of partial templates.

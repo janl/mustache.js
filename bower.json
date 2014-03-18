@@ -1,0 +1,21 @@
+{
+  "name": "Mustache.js",
+  "main": "mustache.js",
+  "version": "0.8.2",
+  "homepage": "https://github.com/janl/mustache.js",
+  "authors": [
+    "mustache.js Authors <http://github.com/janl/mustache.js>"
+  ],
+  "description": "Logic-less {{mustache}} templates with JavaScript",
+  "keywords": ["mustache", "template", "templates", "ejs"],
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "test"
+  ]
+}
