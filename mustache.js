@@ -74,7 +74,7 @@
   var spaceRe = /\s+/;
   var equalsRe = /\s*=/;
   var curlyRe = /\s*\}/;
-  var tagRe = /#|\^|\/|>|\{|&|=|!/;
+  var tagRe = /#|\?|\^|\/|>|\{|&|=|!/;
 
   /**
    * Breaks up the given `template` string into a tree of tokens. If the `tags`
@@ -186,7 +186,7 @@
       token = [ type, value, start, scanner.pos ];
       tokens.push(token);
 
-      if (type === '#' || type === '^') {
+      if (type === '#' || type === '?' || type === '^') {
         sections.push(token);
       } else if (type === '/') {
         // Check section nesting.
@@ -257,6 +257,7 @@
 
       switch (token[0]) {
       case '#':
+      case '?':
       case '^':
         collector.push(token);
         sections.push(token);
@@ -480,6 +481,15 @@
 
           if (value != null) buffer += value;
         } else {
+          buffer += this.renderTokens(token[4], context, partials, originalTemplate);
+        }
+
+        break;
+      case '?':
+        value = context.lookup(token[1]);
+
+        // Use JavaScript's definition of truthy. Exclude empty arrays.
+        if (value && !(isArray(value) && value.length === 0)) {
           buffer += this.renderTokens(token[4], context, partials, originalTemplate);
         }
 
