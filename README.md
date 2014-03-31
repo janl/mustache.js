@@ -39,9 +39,46 @@ In this example, the `Mustache.render` function takes two parameters: 1) the [mu
 
 ## Templates
 
-A [mustache](http://mustache.github.com/) template is a string that contains any number of mustache tags. Tags are indicated by the double mustaches that surround them. `{{person}}` is a tag, as is `{{#person}}`. In both examples we refer to `person` as the tag's key.
+A [mustache](http://mustache.github.com/) template is a string that contains any number of mustache tags. Tags are indicated by the double mustaches that surround them. `{{person}}` is a tag, as is `{{#person}}`. In both examples we refer to `person` as the tag's key. There are several types of tags available in mustache.js, described below.
 
-There are several types of tags available in mustache.js.
+There are several techniques that can be used to load templates and hand them to mustache.js, here are two of them:
+
+#### Include Templates
+
+If you need a template for a dynamic part in a static website, you can consider including the template in the static HTML file to avoid loading templates separately. Here's a small example using `jQuery`:
+
+```html
+<html>
+<body onload="loadUser">
+<div id="target">Loading...</div>
+<textarea id="template" style="display:none;">
+Hello {{ name }}!
+</textarea>
+</body>
+</html>
+```
+
+```js
+function loadUser() {
+  var template = $('#template').val();
+  Mustache.parse(template);   // optional, speeds up future uses
+  var rendered = Mustache.render(template, {name: "Luke"});
+  $('#target').html(rendered);
+}
+```
+
+#### Load External Templates
+
+If your templates reside in individual files, you can load them asynchronously and render them when they arrive. Another example using `jQuery`:
+
+```js
+function loadUser() {
+  $.get('template.mst', function(template) {
+    var html = Mustache.render(template, {name: "Luke"});
+    $('#target').html(rendered);
+  });
+}
+```
 
 ### Variables
 
