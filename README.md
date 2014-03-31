@@ -51,16 +51,16 @@ If you need a template for a dynamic part in a static website, you can consider 
 <html>
 <body onload="loadUser">
 <div id="target">Loading...</div>
-<textarea id="template" style="display:none;">
+<script id="template" type="x-tmpl-mustache">
 Hello {{ name }}!
-</textarea>
+</script>
 </body>
 </html>
 ```
 
 ```js
 function loadUser() {
-  var template = $('#template').val();
+  var template = $('#template').html();
   Mustache.parse(template);   // optional, speeds up future uses
   var rendered = Mustache.render(template, {name: "Luke"});
   $('#target').html(rendered);
