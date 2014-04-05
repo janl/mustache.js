@@ -74,7 +74,7 @@ If your templates reside in individual files, you can load them asynchronously a
 ```js
 function loadUser() {
   $.get('template.mst', function(template) {
-    var html = Mustache.render(template, {name: "Luke"});
+    var rendered = Mustache.render(template, {name: "Luke"});
     $('#target').html(rendered);
   });
 }
