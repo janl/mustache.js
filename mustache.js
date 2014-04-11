@@ -59,6 +59,72 @@
     });
   }
 
+  function escapeJs(o) {
+    var s = '';
+
+    if (typeof o === 'string') {
+      s += "'";
+
+      for (var i = 0; i < o.length; ++i) {
+        var n = o.charCodeAt(i),
+            c = o[i];
+        
+        if (c == "'") {
+          s += "\\'";
+        } else if (c == '\\') {
+          s += '\\\\';
+        } else if (n < 32 || n > 122) {
+          var code = n.toString(16);
+
+          while (code.length < 4) {
+            code = '0' + code;
+          }
+
+          s += "\\u" + code;
+        } else {
+          s += c;
+        }
+      }
+
+      s += "'";
+    } else if (o instanceof Array) {
+      s += '[';
+
+      for (var i = 0; i < o.length; ++i) {
+        s += escapeJs(o[i]);
+
+        if (i < o.length - 1) {
+          s += ',';
+        }
+      }
+
+      s += ']';
+    } else if (typeof o === 'boolean') {
+      s = o ? 'true' : 'false';
+    } else if (typeof o === 'number') {
+      s = '' + o;
+    } else {
+      s += '{';
+
+      var keys = Object.keys(o);
+
+      for (var i = 0; i < keys.length; ++i) {
+        var k = keys[i],
+            v = o[k];
+
+        s += escapeJs(k) + ':' + escapeJs(v);
+
+        if (i < keys.length - 1) {
+          s += ',';
+        }
+      }
+
+      s += '}';
+    }
+
+    return s;
+  }
+
   function escapeTags(tags) {
     if (!isArray(tags) || tags.length !== 2) {
       throw new Error('Invalid tags: ' + tags);
@@ -74,7 +140,7 @@
   var spaceRe = /\s+/;
   var equalsRe = /\s*=/;
   var curlyRe = /\s*\}/;
-  var tagRe = /#|\^|\/|>|\{|&|=|!/;
+  var tagRe = /#|\^|\/|>|\{|\$|&|=|!/;
 
   /**
    * Breaks up the given `template` string into a tree of tokens. If the `tags`
@@ -198,7 +264,7 @@
         if (openSection[1] !== value) {
           throw new Error('Unclosed section "' + openSection[1] + '" at ' + start);
         }
-      } else if (type === 'name' || type === '{' || type === '&') {
+      } else if (type === 'name' || type === '{' || type === '&' || type === '$') {
         nonSpace = true;
       } else if (type === '=') {
         // Set the tags for the next time around.
@@ -503,6 +569,10 @@
         value = context.lookup(token[1]);
         if (value != null) buffer += value;
         break;
+      case '$':
+        value = context.lookup(token[1]);
+        if (value != null) buffer += mustache.escapeJs(value);
+        break;
       case 'name':
         value = context.lookup(token[1]);
         if (value != null) buffer += mustache.escape(value);
@@ -561,6 +631,7 @@
   // Export the escaping function so that the user may override it.
   // See https://github.com/janl/mustache.js/issues/244
   mustache.escape = escapeHtml;
+  mustache.escapeJs = escapeJs;
 
   // Export these mainly for testing, but also for advanced usage.
   mustache.Scanner = Scanner;
