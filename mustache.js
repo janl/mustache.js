@@ -76,6 +76,9 @@
   var curlyRe = /\s*\}/;
   var tagRe = /#|\^|\/|>|\{|&|=|!/;
 
+  var customTagRe = "";
+  var customTags = {}; // {tag1: callback1, tag2: callback2}
+
   /**
    * Breaks up the given `template` string into a tree of tokens. If the `tags`
    * argument is given here it must be an array with two string values: the
@@ -455,7 +458,7 @@
       return self.render(template, context, partials);
     }
 
-    var token, value;
+    var token, value, out, scn, ctag;
     for (var i = 0, len = tokens.length; i < len; ++i) {
       token = tokens[i];
 
@@ -505,7 +508,20 @@
         break;
       case 'name':
         value = context.lookup(token[1]);
-        if (value != null) buffer += mustache.escape(value);
+        if (value != null) {
+          buffer += mustache.escape(value);
+        } else {
+          // token may be a custom tag
+          scn = new Scanner(token[1]);
+          ctag = scn.scan(new RegExp(customTagRe));
+          if (ctag) {
+            scn.scan(whiteRe);
+            out = customTags[ctag](scn.tail, context.lookup(scn.tail));
+            if (typeof out === 'string') {
+              buffer += out;
+            }
+          }
+        }
         break;
       case 'text':
         buffer += token[1];
@@ -557,6 +573,44 @@
       return result;
     }
   };
+
+  /**
+   * Adds a custom tag.
+   */
+  mustache.addCustomTag = function (tag, callback) {
+    // allow only alphabetic characters
+    if (!tag.match(/^[A-z]+$/)) {
+      throw new Error("invalid tag name");
+    }
+    if (typeof callback !== 'function') {
+      throw new Error("invalid callback");
+    }
+    var customTagsArr;
+    if (!customTags[tag]) {
+      // tag does not exist
+      if (customTagRe === '') {
+        customTagsArr = [];
+      } else {
+        customTagsArr = customTagRe.split('|');
+      }
+      customTagsArr.push(tag);
+      // sort customTagsArr to put the longest strings to the top
+      // in order to prevent regExp mistakes
+      customTagsArr.sort(function (str1, str2) {
+        if (str1.length === str2.length) {
+          if (str1 === str2) {
+            return 0;
+          } else {
+            return str1 < str2 ? 1 : -1;
+          }
+        } else {
+          return str1.length < str2.length ? 1 : -1;
+        }
+      });
+      customTagRe = customTagsArr.join('|');
+    }
+    customTags[tag] = callback;
+  }
 
   // Export the escaping function so that the user may override it.
   // See https://github.com/janl/mustache.js/issues/244
