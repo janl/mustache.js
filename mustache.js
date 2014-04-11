@@ -12,7 +12,7 @@
     var mustache = {};
 
     factory(mustache);
-    
+
     if (typeof define === "function" && define.amd) {
       define(mustache); // AMD
     } else {
@@ -20,18 +20,6 @@
     }
   }
 }(this, function (mustache) {
-
-  // Workaround for https://issues.apache.org/jira/browse/COUCHDB-577
-  // See https://github.com/janl/mustache.js/issues/189
-  var RegExp_test = RegExp.prototype.test;
-  function testRegExp(re, string) {
-    return RegExp_test.call(re, string);
-  }
-
-  var nonSpaceRe = /\S/;
-  function isWhitespace(string) {
-    return !testRegExp(nonSpaceRe, string);
-  }
 
   var Object_toString = Object.prototype.toString;
   var isArray = Array.isArray || function (object) {
@@ -46,6 +34,18 @@
     return string.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
   }
 
+  // Workaround for https://issues.apache.org/jira/browse/COUCHDB-577
+  // See https://github.com/janl/mustache.js/issues/189
+  var RegExp_test = RegExp.prototype.test;
+  function testRegExp(re, string) {
+    return RegExp_test.call(re, string);
+  }
+
+  var nonSpaceRe = /\S/;
+  function isWhitespace(string) {
+    return !testRegExp(nonSpaceRe, string);
+  }
+  
   var entityMap = {
     "&": "&amp;",
     "<": "&lt;",
@@ -100,8 +100,10 @@
    * which the closing tag for that section begins.
    */
   function parseTemplate(template, tags) {
+    if (!template)
+      return [];
+
     tags = tags || mustache.tags;
-    template = template || '';
 
     if (typeof tags === 'string')
       tags = tags.split(spaceRe);
@@ -155,7 +157,9 @@
       }
 
       // Match the opening tag.
-      if (!scanner.scan(tagRes[0])) break;
+      if (!scanner.scan(tagRes[0]))
+        break;
+
       hasTag = true;
 
       // Get the tag type.
