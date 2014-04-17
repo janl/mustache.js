@@ -61,16 +61,6 @@
     });
   }
 
-  function escapeTags(tags) {
-    if (!isArray(tags) || tags.length !== 2)
-      throw new Error('Invalid tags: ' + tags);
-
-    return [
-      new RegExp(escapeRegExp(tags[0]) + "\\s*"),
-      new RegExp("\\s*" + escapeRegExp(tags[1]))
-    ];
-  }
-
   var whiteRe = /\s*/;
   var spaceRe = /\s+/;
   var equalsRe = /\s*=/;
@@ -103,14 +93,6 @@
     if (!template)
       return [];
 
-    tags = tags || mustache.tags;
-
-    if (typeof tags === 'string')
-      tags = tags.split(spaceRe);
-
-    var tagRes = escapeTags(tags);
-    var scanner = new Scanner(template);
-
     var sections = [];     // Stack to hold section tokens
     var tokens = [];       // Buffer to hold the tokens
     var spaces = [];       // Indices of whitespace tokens on the current line
@@ -131,12 +113,30 @@
       nonSpace = false;
     }
 
+    var openingTagRe, closingTagRe, closingCurlyRe;
+    function compileTags(tags) {
+      if (typeof tags === 'string')
+        tags = tags.split(spaceRe, 2);
+
+      if (!isArray(tags) || tags.length !== 2)
+        throw new Error('Invalid tags: ' + tags);
+
+      openingTagRe = new RegExp(escapeRegExp(tags[0]) + '\\s*');
+      closingTagRe = new RegExp('\\s*' + escapeRegExp(tags[1]));
+      closingCurlyRe = new RegExp('\\s*' + escapeRegExp('}' + tags[1]));
+    }
+
+    compileTags(tags || mustache.tags);
+
+    var scanner = new Scanner(template);
+
     var start, type, value, chr, token, openSection;
     while (!scanner.eos()) {
       start = scanner.pos;
 
       // Match any text between tags.
-      value = scanner.scanUntil(tagRes[0]);
+      value = scanner.scanUntil(openingTagRe);
+
       if (value) {
         for (var i = 0, valueLength = value.length; i < valueLength; ++i) {
           chr = value.charAt(i);
@@ -147,7 +147,7 @@
             nonSpace = true;
           }
 
-          tokens.push(['text', chr, start, start + 1]);
+          tokens.push([ 'text', chr, start, start + 1 ]);
           start += 1;
 
           // Check for whitespace on the current line.
@@ -157,7 +157,7 @@
       }
 
       // Match the opening tag.
-      if (!scanner.scan(tagRes[0]))
+      if (!scanner.scan(openingTagRe))
         break;
 
       hasTag = true;
@@ -170,18 +170,18 @@
       if (type === '=') {
         value = scanner.scanUntil(equalsRe);
         scanner.scan(equalsRe);
-        scanner.scanUntil(tagRes[1]);
+        scanner.scanUntil(closingTagRe);
       } else if (type === '{') {
-        value = scanner.scanUntil(new RegExp('\\s*' + escapeRegExp('}' + tags[1])));
+        value = scanner.scanUntil(closingCurlyRe);
         scanner.scan(curlyRe);
-        scanner.scanUntil(tagRes[1]);
+        scanner.scanUntil(closingTagRe);
         type = '&';
       } else {
-        value = scanner.scanUntil(tagRes[1]);
+        value = scanner.scanUntil(closingTagRe);
       }
 
       // Match the closing tag.
-      if (!scanner.scan(tagRes[1]))
+      if (!scanner.scan(closingTagRe))
         throw new Error('Unclosed tag at ' + scanner.pos);
 
       token = [ type, value, start, scanner.pos ];
@@ -202,7 +202,7 @@
         nonSpace = true;
       } else if (type === '=') {
         // Set the tags for the next time around.
-        tagRes = escapeTags(tags = value.split(spaceRe));
+        compileTags(value);
       }
     }
 
