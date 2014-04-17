@@ -358,9 +358,11 @@
    * up the context hierarchy if the value is absent in this context's view.
    */
   Context.prototype.lookup = function (name) {
+    var cache = this.cache;
+
     var value;
-    if (name in this.cache) {
-      value = this.cache[name];
+    if (name in cache) {
+      value = cache[name];
     } else {
       var context = this, names, index;
 
@@ -382,7 +384,7 @@
         context = context.parent;
       }
 
-      this.cache[name] = value;
+      cache[name] = value;
     }
 
     if (isFunction(value))
