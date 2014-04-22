@@ -5,19 +5,13 @@
 
 /*global define: false*/
 
-(function (root, factory) {
+(function (global, factory) {
   if (typeof exports === "object" && exports) {
     factory(exports); // CommonJS
+  } else if (typeof define === "function" && define.amd) {
+    define(factory({})); // AMD
   } else {
-    var mustache = {};
-
-    factory(mustache);
-
-    if (typeof define === "function" && define.amd) {
-      define(mustache); // AMD
-    } else {
-      root.Mustache = mustache; // <script>
-    }
+    global.Mustache = factory({}); // <script>
   }
 }(this, function (mustache) {
 
@@ -580,5 +574,7 @@
   mustache.Scanner = Scanner;
   mustache.Context = Context;
   mustache.Writer = Writer;
+
+  return mustache;
 
 }));
