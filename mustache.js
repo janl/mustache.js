@@ -355,8 +355,13 @@
   /**
    * Returns the value of the given name in this context, traversing
    * up the context hierarchy if the value is absent in this context's view.
+   *
+   * Accepts an optional second-argument; when true, the view is permitted to
+   * pass mustache.SafeValues through to the caller of this function. (Usually,
+   * this will be set to true when the caller is planning to mustache.escape the
+   * result; giving the view the opportunity to declare its content safe.
    */
-  Context.prototype.lookup = function (name) {
+  Context.prototype.lookup = function (name, preserve_wrapper) {
     var value;
     if (name in this.cache) {
       value = this.cache[name];
@@ -387,8 +392,31 @@
       value = value.call(this.view);
     }
 
+    if (!preserve_wrapper && typeof value.unwrap === 'function') {
+      value = value.unwrap();
+    }
+
     return value;
   };
+
+  /**
+   * A SafeValue is a wrapper for an object, the wrapping of which instructs
+   * mustache not to try to HTML- (or otherwise-)escape the contents thereof.
+   * It's intended for helper functions to be able to produce known-safe HTML,
+   * which can then be included by the template-writer with double-brackets
+   * instead of triples.
+   *
+   * This is merely a convenience constructor: any object with an `unwrap()`
+   * method will be automatically unwrapped as necessary. It's not necessary for
+   * values to inherit from SafeValue.
+   */
+  function SafeValue(value) {
+    this.unwrap = function () {
+      return value
+    }
+
+    this.safe = true
+  }
 
   /**
    * A Writer knows how to take a stream of tokens and render them to a
@@ -455,7 +483,7 @@
       return self.render(template, context, partials);
     }
 
-    var token, value;
+    var token, value, safe;
     for (var i = 0, len = tokens.length; i < len; ++i) {
       token = tokens[i];
 
@@ -504,8 +532,12 @@
         if (value != null) buffer += value;
         break;
       case 'name':
-        value = context.lookup(token[1]);
-        if (value != null) buffer += mustache.escape(value);
+        value = context.lookup(token[1], true);
+        if (value != null) { safe = value.safe;
+          value = typeof value.unwrap === 'function' ? value.unwrap() : value;
+          if (!safe) value = mustache.escape(value);
+          buffer += value;
+        }
         break;
       case 'text':
         buffer += token[1];
@@ -566,5 +598,6 @@
   mustache.Scanner = Scanner;
   mustache.Context = Context;
   mustache.Writer = Writer;
+  mustache.SafeString = SafeString
 
 }));
