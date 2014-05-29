@@ -9,9 +9,9 @@
   if (typeof exports === "object" && exports) {
     factory(exports); // CommonJS
   } else if (typeof define === "function" && define.amd) {
-    define(factory({})); // AMD
+    define(['exports'], factory); // AMD
   } else {
-    global.Mustache = factory({}); // <script>
+    factory(global.Mustache = {}); // <script>
   }
 }(this, function (mustache) {
 
@@ -39,7 +39,7 @@
   function isWhitespace(string) {
     return !testRegExp(nonSpaceRe, string);
   }
-  
+
   var entityMap = {
     "&": "&amp;",
     "<": "&lt;",
@@ -574,7 +574,5 @@
   mustache.Scanner = Scanner;
   mustache.Context = Context;
   mustache.Writer = Writer;
-
-  return mustache;
 
 }));
