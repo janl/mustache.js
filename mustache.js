@@ -380,7 +380,7 @@
 
           while (value != null && index < names.length)
             value = value[names[index++]];
-        } else {
+        } else if (typeof context.view == 'object') {
           value = context.view[name];
         }
 
