@@ -551,8 +551,8 @@
       };
 
   mustache.name = "mustache.js";
-  mustache.version = "0.8.1";
-  mustache.tags = ["{{", "}}"];
+  mustache.version = "0.8.2";
+  mustache.tags = [ "{{", "}}" ];
 
   // All high-level mustache.* functions use this writer.
   var defaultWriter = new Writer();
