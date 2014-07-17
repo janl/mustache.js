@@ -1,5 +1,7 @@
 <script>
   var s = 'This is my\u2028string"\'.',
       a = ['abc\u2028',1.1,[2,3,true],'z'],
-      o = {'key\u2028':false,'otherkey':true,'finalkey':3};
+      o = {'key\u2028':false,'otherkey':true,'finalkey':3},
+      n = null,
+      u = undefined;
 </script>

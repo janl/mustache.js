@@ -103,6 +103,10 @@
       s = o ? 'true' : 'false';
     } else if (typeof o === 'number') {
       s = '' + o;
+    } else if (typeof o === 'undefined') {
+      s = 'undefined';
+    } else if (o === null) {
+      s = 'null';
     } else {
       s += '{';
 
@@ -571,7 +575,7 @@
         break;
       case '$':
         value = context.lookup(token[1]);
-        if (value != null) buffer += mustache.escapeJs(value);
+        buffer += mustache.escapeJs(value);
         break;
       case 'name':
         value = context.lookup(token[1]);
