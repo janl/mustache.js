@@ -1,5 +1,4 @@
 {
-  "name": "mustache.js",
-  "scripts: ["mustache.js"],
+  "scripts": ["mustache.js"],
   "main": "mustache.js"
 }
