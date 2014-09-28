@@ -6,7 +6,7 @@
 /*global define: false*/
 
 (function (global, factory) {
-  if (typeof module === "object" && module) {
+  if (typeof module === "object") {
     factory(module.exports);
   } else if (typeof exports === "object" && exports) {
     factory(exports); // CommonJS
