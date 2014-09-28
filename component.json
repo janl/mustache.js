@@ -1,5 +1,6 @@
 {
   "name": "mustache.js",
   "scripts": ["mustache.js"],
-  "main": "mustache.js"
+  "main": "mustache.js",
+  "version": "1.0.0"
 }
