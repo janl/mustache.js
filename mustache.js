@@ -73,6 +73,10 @@
           s += "\\'";
         } else if (c == '\\') {
           s += '\\\\';
+        } else if (c == '<') {
+          s += '\\x3c';
+        } else if (c == '/') {
+          s += '\\x2f';
         } else if (n < 32 || n > 122) {
           var code = n.toString(16);
 

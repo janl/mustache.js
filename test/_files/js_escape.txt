@@ -1,5 +1,6 @@
 <script>
   var s = 'This is my\u2028string"\'.',
+      b = 'This is my string with a \x3c\x2fscript> tag.',
       a = ['abc\u2028',1.1,[2,3,true],'z'],
       o = {'key\u2028':false,'otherkey':true,'finalkey':3},
       n = null,
