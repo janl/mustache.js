@@ -9,7 +9,7 @@
   if (typeof exports === "object" && exports) {
     factory(exports); // CommonJS
   } else if (typeof define === "function" && define.amd) {
-    define(["exports"], factory); // AMD
+    define(['exports'], factory); // AMD
   } else {
     factory(global.Mustache = {}); // <script>
   }
@@ -17,11 +17,11 @@
 
   var Object_toString = Object.prototype.toString;
   var isArray = Array.isArray || function(object) {
-        return Object_toString.call(object) === "[object Array]";
+        return Object_toString.call(object) === '[object Array]';
       };
 
   function isFunction(object) {
-    return typeof object === "function";
+    return typeof object === 'function';
   }
 
   function escapeRegExp(string) {
@@ -46,13 +46,13 @@
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;",
-    "/": "&#x2F;"
+    '"': '&quot;',
+    "'": '&#39;',
+    "/": '&#x2F;'
   };
 
   function escapeHtml(string) {
-    return String(string).replace(/[&<>''\/]/g, function(s) {
+    return String(string).replace(/[&<>"'\/]/g, function(s) {
       return entityMap[s];
     });
   }
