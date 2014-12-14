@@ -32,6 +32,8 @@ mustache.js is a mature project, but it continues to actively invite maintainers
 - make a website
 - write a tutorial
 
+* * *
+
 ## Usage
 
 Below is quick example how to use mustache.js:
