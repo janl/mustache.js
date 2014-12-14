@@ -24,7 +24,7 @@ An updated list of mustache.js users is kept [on the Github wiki](http://wiki.gi
 
 mustache.js is a mature project, but it continues to actively invite maintainers. You can help out a high-profile project that is used in a lot of places on the web. There is [plenty](https://github.com/janl/mustache.js/issues) of [work](https://github.com/janl/mustache.js/pulls) to do. No big commitment required, if all you do is review a single [Pull Request](https://github.com/janl/mustache.js/pulls), you are a maintainer. And a hero.
 
-### How to get started
+### Your First Contribution
 
 - review a [Pull Request](https://github.com/janl/mustache.js/pulls)
 - fix an [Issue](https://github.com/janl/mustache.js/issues)
