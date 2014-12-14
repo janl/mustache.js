@@ -20,6 +20,18 @@ mustache.js ships with support for both the [CommonJS](http://www.commonjs.org/)
 
 An updated list of mustache.js users is kept [on the Github wiki](http://wiki.github.com/janl/mustache.js/beard-competition). Add yourself or your company if you use mustache.js!
 
+## Contributing
+
+mustache.js is a mature project, but it continues to actively invite maintainers. You can help out a high-profile project that is used in a lot of places on the web. There is [plenty](https://github.com/janl/mustache.js/issues) of [work](https://github.com/janl/mustache.js/pulls) to do. No big commitment required, if all you do is review a single [Pull Request](https://github.com/janl/mustache.js/pulls), you are a maintainer. And a hero.
+
+### How to get started
+
+- review a [Pull Request](https://github.com/janl/mustache.js/pulls)
+- fix an [Issue](https://github.com/janl/mustache.js/issues)
+- update the [documentation](https://github.com/janl/mustache.js#usage)
+- make a website
+- write a tutorial
+
 ## Usage
 
 Below is quick example how to use mustache.js:
