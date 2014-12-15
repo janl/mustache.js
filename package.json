@@ -7,15 +7,20 @@
     "type": "git",
     "url": "https://github.com/janl/mustache.js.git"
   },
-  "keywords": ["mustache", "template", "templates", "ejs"],
+  "keywords": [
+    "mustache",
+    "template",
+    "templates",
+    "ejs"
+  ],
   "main": "./mustache.js",
-  "devDependencies": {
-    "mocha": "1.5.0"
-  },
   "volo": {
     "url": "https://raw.github.com/janl/mustache.js/{version}/mustache.js"
   },
   "scripts": {
-    "test": "mocha test"
+    "test": "mocha --reporter spec test"
+  },
+  "devDependencies": {
+    "mocha": "2.0.1"
   }
 }
