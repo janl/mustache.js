@@ -17,5 +17,12 @@
   },
   "scripts": {
     "test": "mocha test"
+  },
+  "spm": {
+    "main": "mustache.js",
+    "ignore": [
+      "test",
+      "wrappers"
+    ]
   }
 }
