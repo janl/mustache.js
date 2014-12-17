@@ -22,5 +22,12 @@
   },
   "devDependencies": {
     "mocha": "2.0.1"
+  },
+  "spm": {
+    "main": "mustache.js",
+    "ignore": [
+      "test",
+      "wrappers"
+    ]
   }
 }
