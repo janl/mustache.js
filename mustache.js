@@ -334,7 +334,7 @@
    * maintaining a reference to the parent context.
    */
   function Context(view, parentContext) {
-    this.view = view == null ? {} : view;
+    this.view = view;
     this.cache = { '.': this.view };
     this.parent = parentContext;
   }
@@ -358,7 +358,7 @@
     if (name in cache) {
       value = cache[name];
     } else {
-      var context = this, names, index;
+      var context = this, names, index, lookupHit = false;
 
       while (context) {
         if (name.indexOf('.') > 0) {
@@ -366,13 +366,29 @@
           names = name.split('.');
           index = 0;
 
-          while (value != null && index < names.length)
+          /**
+           * Using the dot notion path in `name`, we descend through the
+           * nested objects.
+           *
+           * To be certain that the lookup has been successful, we have to
+           * check if the last object in the path actually has the property
+           * we are looking for. We store the result in `lookupHit`.
+           *
+           * This is specially necessary for when the value has been set to
+           * `undefined` and we want to avoid looking up parent contexts.
+           **/
+          while (value != null && index < names.length) {
+            if (index === names.length - 1 && value != null)
+              lookupHit = (typeof value === 'object') &&
+                value.hasOwnProperty(names[index]);
             value = value[names[index++]];
-        } else if (typeof context.view == 'object') {
+          }
+        } else if (context.view != null && typeof context.view === 'object') {
           value = context.view[name];
+          lookupHit = context.view.hasOwnProperty(name);
         }
 
-        if (value != null)
+        if (lookupHit)
           break;
 
         context = context.parent;
