@@ -329,12 +329,14 @@
     return match;
   };
 
+  var NULL = {};
+
   /**
    * Represents a rendering context by wrapping a view object and
    * maintaining a reference to the parent context.
    */
   function Context(view, parentContext) {
-    this.view = view == null ? {} : view;
+    this.view = view === null ? NULL : view;
     this.cache = { '.': this.view };
     this.parent = parentContext;
   }
@@ -372,7 +374,7 @@
           value = context.view[name];
         }
 
-        if (value != null)
+        if (value !== null)
           break;
 
         context = context.parent;
@@ -574,5 +576,6 @@
   mustache.Scanner = Scanner;
   mustache.Context = Context;
   mustache.Writer = Writer;
+  mustache.NULL = NULL;
 
 }));
