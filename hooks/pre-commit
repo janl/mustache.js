@@ -1,0 +1,116 @@
+#!/usr/bin/env ruby
+
+require 'json'
+
+def puts_c(color, str)
+	puts "\x1b[#{color}m#{str}\x1b[0m"
+end
+
+# for tracking if bump was needed
+$bumped = false
+def did_bump
+	if !$bumped
+		puts "bump detected!"
+		if `which uglifyjs`.empty?
+			puts_c 31, "you need uglifyjs installed"
+			puts "run `sudo npm install -g uglify-js`"
+			exit 1
+		end
+	end
+	$bumped = true
+end
+
+
+
+# get package.json version
+pckg_path = 'package.json'
+package = JSON.parse File.read pckg_path
+v = package['version']
+
+
+
+# check/bump version in `mustache.js` file
+
+mjs_path = 'mustache.js'
+mjs = File.read mjs_path
+mjs_re = /mustache.version = "([\d\.]*)"/
+
+if match = mjs.match(mjs_re)
+	mjs_v = match.captures[0]
+	if v != mjs_v then
+		did_bump
+		puts "> bumping version in file 'mustache.js': #{mjs_v} -> #{v}..."
+		mjs.gsub! mjs_re, "mustache.version = \"#{v}\""
+		File.open(mjs_path, 'w') {|f| f.write(mjs) }
+	end
+else
+	puts_c 31, "ERROR: Can't find 'mustache.version = \"x.x.x\"' in mustache.js"
+	exit 1
+end
+
+
+
+# check/bump version in `mustache.js.nuspec` file
+
+nspc_path = 'mustache.js.nuspec'
+nspc = File.read nspc_path
+nspc_re = /<version>([\d\.]*)<\/version>/
+if match = nspc.match(nspc_re)
+	nspc_v = match.captures[0]
+	if v != nspc_v then
+		did_bump
+		puts "> bumping version in file 'mustache.js.nuspec': #{nspc_v} -> #{v}..."
+		nspc.gsub! nspc_re, "<version>#{v}</version>"
+		File.open(nspc_path, 'w') {|f| f.write(nspc) }
+	end
+else
+	puts_c 31, "ERROR: Can't find '<version>x.x.x</version>' in mustache.js.nuspec"
+	exit 1
+end
+
+
+# check/bump version in `bower.json` file
+
+bwr_path = 'bower.json'
+bwr = File.read bwr_path
+bwr_re = /"version": "([\d\.]*)"/
+
+if match = bwr.match(bwr_re)
+	bwr_v = match.captures[0]
+	if v != bwr_v
+		did_bump
+		puts "> bumping version in file 'bower.json': #{bwr_v} -> #{v}..."
+		bwr.gsub! bwr_re, "\"version\": \"#{v}\""
+		File.open(bwr_path, 'w') {|f| f.write(bwr) }
+	end
+else
+	puts_c 31, "ERROR: Can't find '\"version\": \"x.x.x\"' in 'bower.json'"
+	exit 1
+end
+
+
+
+# if bumped, do extra stuff and notify the user
+
+if $bumped
+
+	# minify `mustache.js` using the Rakefile task
+	puts "> minifying `mustache.js`..."
+	`rake minify`
+
+	# stage files for commit
+	`git add #{pckg_path}`
+	`git add #{mjs_path}`
+	`git add #{nspc_path}`
+	`git add #{bwr_path}`
+	`git add mustache.min.js`
+	`git commit -m "bump to version #{v}"`
+
+	# notify codemonkey
+	puts "staged bumped files and created commit"
+	puts_c 32, "successfully bumped version to #{v}!"
+	puts_c 33, "don't forget to `npm publish` and `spm publish`!"
+	exit 1
+
+end
+exit 0
