@@ -25,7 +25,7 @@
   }
 
   function escapeRegExp(string) {
-    return string.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, "\\$&");
+    return string.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&');
   }
 
   // Workaround for https://issues.apache.org/jira/browse/COUCHDB-577
@@ -43,12 +43,12 @@
   }
 
   var entityMap = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
     '"': '&quot;',
     "'": '&#39;',
-    "/": '&#x2F;'
+    '/': '&#x2F;'
   };
 
   function escapeHtml(string) {
@@ -63,7 +63,7 @@
   var curlyRe = /\s*\}/;
   var tagRe = /#|\^|\/|>|\{|&|=|!/;
 
-   /**
+  /**
    * Breaks up the given `template` string into a tree of tokens. If the `tags`
    * argument is given here it must be an array with two string values: the
    * opening and closing tags used in the template (e.g. [ "<%", "%>" ]). Of
@@ -75,8 +75,8 @@
    * all text that appears outside a symbol this element is "text".
    *
    * The second element of a token is its "value". For mustache tags this is
-   * whatever else was inside the tag besides the opening symbol. For text tokens
-   * this is the text itself.
+   * whatever else was inside the tag besides the opening symbol.
+   * For text tokens this is the text itself.
    *
    * The third and fourth elements of the token are the start and end indices,
    * respectively, of the token in the original template.
@@ -112,15 +112,15 @@
     var openingTagRe, closingTagRe, closingCurlyRe;
 
     function compileTags(tags) {
-      if (typeof tags === "string")
+      if (typeof tags === 'string')
         tags = tags.split(spaceRe, 2);
 
       if (!isArray(tags) || tags.length !== 2)
-        throw new Error("Invalid tags: " + tags);
+        throw new Error('Invalid tags: ' + tags);
 
-      openingTagRe = new RegExp(escapeRegExp(tags[0]) + "\\s*");
-      closingTagRe = new RegExp("\\s*" + escapeRegExp(tags[1]));
-      closingCurlyRe = new RegExp("\\s*" + escapeRegExp("}" + tags[1]));
+      openingTagRe = new RegExp(escapeRegExp(tags[0]) + '\\s*');
+      closingTagRe = new RegExp('\\s*' + escapeRegExp(tags[1]));
+      closingCurlyRe = new RegExp('\\s*' + escapeRegExp('}' + tags[1]));
     }
 
     compileTags(tags || mustache.tags);
@@ -144,11 +144,11 @@
             nonSpace = true;
           }
 
-          tokens.push(["text", chr, start, start + 1]);
+          tokens.push(['text', chr, start, start + 1]);
           start += 1;
 
           // Check for whitespace on the current line.
-          if (chr === "\n")
+          if (chr === '\n')
             stripSpace();
         }
       }
@@ -160,33 +160,33 @@
       hasTag = true;
 
       // Get the tag type.
-      type = scanner.scan(tagRe) || "name";
+      type = scanner.scan(tagRe) || 'name';
       scanner.scan(whiteRe);
 
       // Get the tag value.
-      if (type === "=") {
+      if (type === '=') {
         value = scanner.scanUntil(equalsRe);
         scanner.scan(equalsRe);
         scanner.scanUntil(closingTagRe);
-      } else if (type === "{") {
+      } else if (type === '{') {
         value = scanner.scanUntil(closingCurlyRe);
         scanner.scan(curlyRe);
         scanner.scanUntil(closingTagRe);
-        type = "&";
+        type = '&';
       } else {
         value = scanner.scanUntil(closingTagRe);
       }
 
       // Match the closing tag.
       if (!scanner.scan(closingTagRe))
-        throw new Error("Unclosed tag at " + scanner.pos);
+        throw new Error('Unclosed tag at ' + scanner.pos);
 
       token = [type, value, start, scanner.pos];
       tokens.push(token);
 
-      if (type === "#" || type === "^") {
+      if (type === '#' || type === '^') {
         sections.push(token);
-      } else if (type === "/") {
+      } else if (type === '/') {
         // Check section nesting.
         openSection = sections.pop();
 
@@ -226,7 +226,7 @@
       token = tokens[i];
 
       if (token) {
-        if (token[0] === "text" && lastToken && lastToken[0] === "text") {
+        if (token[0] === 'text' && lastToken && lastToken[0] === 'text') {
           lastToken[1] += token[1];
           lastToken[3] = token[3];
         } else {
@@ -255,13 +255,13 @@
       token = tokens[i];
 
       switch (token[0]) {
-        case "#":
-        case "^":
+        case '#':
+        case '^':
           collector.push(token);
           sections.push(token);
           collector = token[4] = [];
           break;
-        case "/":
+        case '/':
           section = sections.pop();
           section[5] = token[2];
           collector = sections.length > 0 ? sections[sections.length - 1][4] :
@@ -291,7 +291,7 @@
    * Returns `true` if the tail is empty (end of string).
    */
   Scanner.prototype.eos = function() {
-    return this.tail === "";
+    return this.tail === '';
   };
 
   /**
@@ -302,7 +302,7 @@
     var match = this.tail.match(re);
 
     if (!match || match.index !== 0)
-      return "";
+      return '';
 
     var string = match[0];
 
@@ -322,10 +322,10 @@
     switch (index) {
       case -1:
         match = this.tail;
-        this.tail = "";
+        this.tail = '';
         break;
       case 0:
-        match = "";
+        match = '';
         break;
       default:
         match = this.tail.substring(0, index);
@@ -347,7 +347,7 @@
    */
   function Context(view, opt_parentContext) {
     this.view = view == null ? {} : view;
-    this.cache = {".": this.view};
+    this.cache = {'.': this.view};
     this.parent = opt_parentContext;
   }
 
@@ -373,9 +373,9 @@
       var context = this, names, index;
 
       while (context) {
-        if (name.indexOf(".") > 0) {
+        if (name.indexOf('.') > 0) {
           value = context.view;
-          names = name.split(".");
+          names = name.split('.');
           index = 0;
 
           while (value != null && index < names.length)
@@ -460,7 +460,7 @@
    */
   Writer.prototype.renderTokens =
       function(tokens, context, partials, originalTemplate) {
-        var buffer = "";
+        var buffer = '';
 
         // This function is used to render an arbitrary template
         // in the current context by higher-order sections.
@@ -475,7 +475,7 @@
           token = tokens[i];
 
           switch (token[0]) {
-            case "#":
+            case '#':
               value = context.lookup(token[1]);
 
               if (!value)
@@ -486,13 +486,13 @@
                   buffer += this.renderTokens(token[4], context.push(value[j]),
                       partials, originalTemplate);
                 }
-              } else if (typeof value === "object" || typeof value === "string") {
+              } else if (typeof value === 'object' || typeof value === 'string') {
                 buffer += this.renderTokens(token[4], context.push(value),
                     partials, originalTemplate);
               } else if (isFunction(value)) {
-                if (typeof originalTemplate !== "string")
-                  throw new Error("Cannot use higher-order sections without " +
-                  "the original template");
+                if (typeof originalTemplate !== 'string')
+                  throw new Error('Cannot use higher-order sections without ' +
+                  'the original template');
 
                 value = value.call(context.view, originalTemplate.slice(token[3],
                     token[5]), subRender);
@@ -505,7 +505,7 @@
               }
 
               break;
-            case "^":
+            case '^':
               value = context.lookup(token[1]);
 
               // Use JavaScript's definition of falsy. Include empty arrays.
@@ -515,7 +515,7 @@
                     originalTemplate);
 
               break;
-            case ">":
+            case '>':
               if (!partials)
                 continue;
 
@@ -527,21 +527,21 @@
                     value);
 
               break;
-            case "&":
+            case '&':
               value = context.lookup(token[1]);
 
               if (value != null)
                 buffer += value;
 
               break;
-            case "name":
+            case 'name':
               value = context.lookup(token[1]);
 
               if (value != null)
                 buffer += mustache.escape(value);
 
               break;
-            case "text":
+            case 'text':
               buffer += token[1];
               break;
           }
