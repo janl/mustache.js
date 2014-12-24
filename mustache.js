@@ -380,7 +380,7 @@
 
           while (value != null && index < names.length)
             value = value[names[index++]];
-        } else {
+        } else if (typeof context.view == 'object') {
           value = context.view[name];
         }
 
@@ -551,8 +551,8 @@
       };
 
   mustache.name = "mustache.js";
-  mustache.version = "0.8.1";
-  mustache.tags = ["{{", "}}"];
+  mustache.version = "1.0.0";
+  mustache.tags = [ "{{", "}}" ];
 
   // All high-level mustache.* functions use this writer.
   var defaultWriter = new Writer();

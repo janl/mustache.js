@@ -1,7 +1,7 @@
 {
   "name": "mustache.js",
   "main": "mustache.js",
-  "version": "0.8.2",
+  "version": "1.0.0",
   "homepage": "https://github.com/janl/mustache.js",
   "authors": [
     "mustache.js Authors <http://github.com/janl/mustache.js>"
