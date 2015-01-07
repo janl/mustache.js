@@ -444,84 +444,96 @@
   Writer.prototype.renderTokens = function (tokens, context, partials, originalTemplate) {
     var buffer = '';
 
+    var token, tokenRenderer;
+    for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) {
+      token = tokens[i];
+      tokenRenderer = this._getTokenRenderer(token[0]);
+
+      if (tokenRenderer)
+        buffer += tokenRenderer.call(this, token, context, partials, originalTemplate);
+    }
+
+    return buffer;
+  };
+
+  Writer.prototype._getTokenRenderer = function(tokenSymbol) {
+    return {
+      '#': this._renderSection,
+      '^': this._renderInverted,
+      '>': this._renderPartial,
+      '&': this._unescapedValue,
+      'name': this._escapedValue,
+      'text': this._rawValue
+    }[tokenSymbol];
+  };
+
+  Writer.prototype._renderSection = function (token, context, partials, originalTemplate) {
+    var self = this;
+    var buffer = '';
+    var value = context.lookup(token[1]);
+
     // This function is used to render an arbitrary template
     // in the current context by higher-order sections.
-    var self = this;
     function subRender(template) {
       return self.render(template, context, partials);
     }
 
-    var token, value;
-    for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) {
-      token = tokens[i];
+    if (!value)
+      return '';
 
-      switch (token[0]) {
-      case '#':
-        value = context.lookup(token[1]);
-
-        if (!value)
-          continue;
-
-        if (isArray(value)) {
-          for (var j = 0, valueLength = value.length; j < valueLength; ++j) {
-            buffer += this.renderTokens(token[4], context.push(value[j]), partials, originalTemplate);
-          }
-        } else if (typeof value === 'object' || typeof value === 'string') {
-          buffer += this.renderTokens(token[4], context.push(value), partials, originalTemplate);
-        } else if (isFunction(value)) {
-          if (typeof originalTemplate !== 'string')
-            throw new Error('Cannot use higher-order sections without the original template');
-
-          // Extract the portion of the original template that the section contains.
-          value = value.call(context.view, originalTemplate.slice(token[3], token[5]), subRender);
-
-          if (value != null)
-            buffer += value;
-        } else {
-          buffer += this.renderTokens(token[4], context, partials, originalTemplate);
-        }
-
-        break;
-      case '^':
-        value = context.lookup(token[1]);
-
-        // Use JavaScript's definition of falsy. Include empty arrays.
-        // See https://github.com/janl/mustache.js/issues/186
-        if (!value || (isArray(value) && value.length === 0))
-          buffer += this.renderTokens(token[4], context, partials, originalTemplate);
-
-        break;
-      case '>':
-        if (!partials)
-          continue;
-
-        value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
-
-        if (value != null)
-          buffer += this.renderTokens(this.parse(value), context, partials, value);
-
-        break;
-      case '&':
-        value = context.lookup(token[1]);
-
-        if (value != null)
-          buffer += value;
-
-        break;
-      case 'name':
-        value = context.lookup(token[1]);
-
-        if (value != null)
-          buffer += mustache.escape(value);
-
-        break;
-      case 'text':
-        buffer += token[1];
-        break;
+    if (isArray(value)) {
+      for (var j = 0, valueLength = value.length; j < valueLength; ++j) {
+        buffer += this.renderTokens(token[4], context.push(value[j]), partials, originalTemplate);
       }
+    } else if (typeof value === 'object' || typeof value === 'string') {
+      buffer += this.renderTokens(token[4], context.push(value), partials, originalTemplate);
+    } else if (isFunction(value)) {
+      if (typeof originalTemplate !== 'string')
+        throw new Error('Cannot use higher-order sections without the original template');
+
+      // Extract the portion of the original template that the section contains.
+      value = value.call(context.view, originalTemplate.slice(token[3], token[5]), subRender);
+
+      if (value != null)
+        buffer += value;
+    } else {
+      buffer += this.renderTokens(token[4], context, partials, originalTemplate);
     }
 
     return buffer;
+  };
+
+  Writer.prototype._renderInverted = function(token, context, partials, originalTemplate) {
+    var value = context.lookup(token[1]);
+
+    // Use JavaScript's definition of falsy. Include empty arrays.
+    // See https://github.com/janl/mustache.js/issues/186
+    if (!value || (isArray(value) && value.length === 0))
+      return this.renderTokens(token[4], context, partials, originalTemplate);
+
+    return '';
+  };
+
+  Writer.prototype._renderPartial = function(token, context, partials, originalTemplate) {
+    if (!partials)
+      return '';
+
+    var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
+    return (value != null) ? this.renderTokens(this.parse(value), context, partials, value) : '';
+  };
+
+  Writer.prototype._unescapedValue = function(token, context) {
+    var value = context.lookup(token[1]);
+    return (value != null) ? value : '';
+  };
+
+  Writer.prototype._escapedValue = function(token, context) {
+    var value = context.lookup(token[1]);
+    return (value != null) ? mustache.escape(value) : '';
+  };
+
+  Writer.prototype._rawValue = function(token) {
+    return token[1];
   };
 
   mustache.name = "mustache.js";
