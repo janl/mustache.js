@@ -94,7 +94,7 @@
     var nonSpace = false;  // Is there a non-space char on the current line?
 
     // Strips all whitespace tokens array for the current line
-    // if there was a {{#tag}} on it and otherwise only space.
+    // if there was a {{tag}} on it and otherwise only space.
     function stripSpace() {
       if (hasTag && !nonSpace) {
         while (spaces.length)
