@@ -444,27 +444,24 @@
   Writer.prototype.renderTokens = function (tokens, context, partials, originalTemplate) {
     var buffer = '';
 
-    var token, tokenRenderer;
+    var token, symbol, value;
     for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) {
+      value = undefined;
       token = tokens[i];
-      tokenRenderer = this._getTokenRenderer(token[0]);
+      symbol = token[0];
 
-      if (tokenRenderer)
-        buffer += tokenRenderer.call(this, token, context, partials, originalTemplate);
+      if (symbol === '#') value = this._renderSection(token, context, partials, originalTemplate);
+      else if (symbol === '^') value = this._renderInverted(token, context, partials, originalTemplate);
+      else if (symbol === '>') value = this._renderPartial(token, context, partials, originalTemplate);
+      else if (symbol === '&') value = this._unescapedValue(token, context);
+      else if (symbol === 'name') value = this._escapedValue(token, context);
+      else if (symbol === 'text') value = this._rawValue(token);
+
+      if (value !== undefined)
+        buffer += value;
     }
 
     return buffer;
-  };
-
-  Writer.prototype._getTokenRenderer = function(tokenSymbol) {
-    return {
-      '#': this._renderSection,
-      '^': this._renderInverted,
-      '>': this._renderPartial,
-      '&': this._unescapedValue,
-      'name': this._escapedValue,
-      'text': this._rawValue
-    }[tokenSymbol];
   };
 
   Writer.prototype._renderSection = function (token, context, partials, originalTemplate) {
@@ -478,8 +475,7 @@
       return self.render(template, context, partials);
     }
 
-    if (!value)
-      return '';
+    if (!value) return;
 
     if (isArray(value)) {
       for (var j = 0, valueLength = value.length; j < valueLength; ++j) {
@@ -499,7 +495,6 @@
     } else {
       buffer += this.renderTokens(token[4], context, partials, originalTemplate);
     }
-
     return buffer;
   };
 
@@ -510,26 +505,26 @@
     // See https://github.com/janl/mustache.js/issues/186
     if (!value || (isArray(value) && value.length === 0))
       return this.renderTokens(token[4], context, partials, originalTemplate);
-
-    return '';
   };
 
   Writer.prototype._renderPartial = function(token, context, partials, originalTemplate) {
-    if (!partials)
-      return '';
+    if (!partials) return;
 
     var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
-    return (value != null) ? this.renderTokens(this.parse(value), context, partials, value) : '';
+    if (value != null)
+      return this.renderTokens(this.parse(value), context, partials, value);
   };
 
   Writer.prototype._unescapedValue = function(token, context) {
     var value = context.lookup(token[1]);
-    return (value != null) ? value : '';
+    if (value != null)
+      return value;
   };
 
   Writer.prototype._escapedValue = function(token, context) {
     var value = context.lookup(token[1]);
-    return (value != null) ? mustache.escape(value) : '';
+    if (value != null)
+      return mustache.escape(value);
   };
 
   Writer.prototype._rawValue = function(token) {
