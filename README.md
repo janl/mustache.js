@@ -16,7 +16,7 @@ You can use mustache.js to render mustache templates anywhere you can use JavaSc
 
 mustache.js ships with support for both the [CommonJS](http://www.commonjs.org/) module API and the [Asynchronous Module Definition](https://github.com/amdjs/amdjs-api/wiki/AMD) API, or AMD.
 
-And this will be your templates after you use Mustache: 
+And this will be your templates after you use Mustache:
 
 !['stache](http://d24w6bsrhbeh9d.cloudfront.net/photo/aZPNGon_460sa.gif)
 
@@ -461,18 +461,20 @@ These may be built using [Rake](http://rake.rubyforge.org/) and one of the follo
 
 ## Testing
 
-The mustache.js test suite uses the [mocha](http://visionmedia.github.com/mocha/) testing framework. In order to run the tests you'll need to install [node](http://nodejs.org/). Once that's done you can install mocha using [npm](http://npmjs.org/).
-
-    $ npm install -g mocha
+In order to run the tests you'll need to install [node](http://nodejs.org/).
 
 You also need to install the sub module containing [Mustache specifications](http://github.com/mustache/spec) in the project root.
 
     $ git submodule init
     $ git submodule update
 
+Install dependencies.
+
+    $ npm install
+
 Then run the tests.
 
-    $ mocha test
+    $ npm test
 
 The test suite consists of both unit and integration tests. If a template isn't rendering correctly for you, you can make a test for it by doing the following:
 
@@ -486,7 +488,7 @@ The test suite consists of both unit and integration tests. If a template isn't 
 
 Then, you can run the test with:
 
-    $ TEST=mytest mocha test/render-test.js
+    $ TEST=mytest npm run test-render
 
 ## Thanks
 

@@ -18,7 +18,8 @@
     "url": "https://raw.github.com/janl/mustache.js/{version}/mustache.js"
   },
   "scripts": {
-    "test": "mocha --reporter spec test"
+    "test": "mocha --reporter spec",
+    "test-render": "mocha  --reporter spec test/render-test"
   },
   "devDependencies": {
     "mocha": "2.0.1"
