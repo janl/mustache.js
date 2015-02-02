@@ -507,7 +507,7 @@
       return this.renderTokens(token[4], context, partials, originalTemplate);
   };
 
-  Writer.prototype._renderPartial = function(token, context, partials, originalTemplate) {
+  Writer.prototype._renderPartial = function(token, context, partials) {
     if (!partials) return;
 
     var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];

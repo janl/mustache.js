@@ -17,12 +17,17 @@
   "volo": {
     "url": "https://raw.github.com/janl/mustache.js/{version}/mustache.js"
   },
+  "engines": {
+    "npm": ">=1.4.0"
+  },
   "scripts": {
+    "pretest": "jshint mustache.js",
     "test": "mocha --reporter spec",
     "test-render": "mocha  --reporter spec test/render-test"
   },
   "devDependencies": {
-    "mocha": "2.0.1"
+    "jshint": "~2.4.4",
+    "mocha": "~2.1.0"
   },
   "spm": {
     "main": "mustache.js",
