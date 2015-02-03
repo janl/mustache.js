@@ -1,5 +1,7 @@
 # mustache.js - Logic-less {{mustache}} templates with JavaScript
 
+[![Join the chat at https://gitter.im/janl/mustache.js](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/janl/mustache.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 > What could be more logical awesome than no logic at all?
 
 [mustache.js](http://github.com/janl/mustache.js) is an implementation of the [mustache](http://mustache.github.com/) template system in JavaScript.
