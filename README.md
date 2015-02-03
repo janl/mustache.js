@@ -490,6 +490,14 @@ Then, you can run the test with:
 
     $ TEST=mytest npm run test-render
 
+### Troubleshooting
+
+#### npm install fails
+
+Ensure to have a recent version of npm installed. While developing this project requires npm with support for `^` version ranges.
+
+    $ npm install -g npm
+
 ## Thanks
 
 mustache.js wouldn't kick ass if it weren't for these fine souls:
