@@ -461,6 +461,36 @@ These may be built using [Rake](http://rake.rubyforge.org/) and one of the follo
     $ rake yui3
     $ rake qooxdoo
 
+## Command line tool
+
+mustache.js is shipped with a node based command line tool. It might be installed as a global tool on your computer to render a mustache template of some kind
+
+```bash
+$ npm install -g mustache
+$ mustache dataView.json myTemplate.mustache > output.html
+
+# also supports stdin
+$ cat dataView.json | mustache - myTemplate.mustache > output.html
+```
+
+or as a package.json `devDependency` in a build process maybe?
+
+```bash
+$ npm install mustache --save-dev
+```
+```json
+{
+  "scripts": {
+    "build": "mustache dataView.json myTemplate.mustache > public/output.html"
+  }
+}
+```
+```bash
+$ npm run build
+```
+
+The command line tool is basically a wrapper around `Mustache.render` so you get all the aformentioned features.
+
 ## Testing
 
 In order to run the tests you'll need to install [node](http://nodejs.org/).
