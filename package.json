@@ -14,6 +14,9 @@
     "ejs"
   ],
   "main": "./mustache.js",
+  "bin": {
+    "mustache": "./bin/mustache"
+  },
   "volo": {
     "url": "https://raw.github.com/janl/mustache.js/{version}/mustache.js"
   },
