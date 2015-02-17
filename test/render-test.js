@@ -5,7 +5,11 @@ var path = require('path');
 var _files = path.join(__dirname, '_files');
 
 function getContents(testName, ext) {
-  return fs.readFileSync(path.join(_files, testName + '.' + ext), 'utf8');
+  try {
+    return fs.readFileSync(path.join(_files, testName + '.' + ext), 'utf8');
+  } catch (ex) {
+    return null;
+  }
 }
 
 function getView(testName) {
