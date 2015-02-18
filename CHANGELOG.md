@@ -1,3 +1,13 @@
+1.1.0 / 18 Feb 2015
+==================
+
+ * Refactor Writer.renderTokens() for better readability, by @phillipj.
+ * Cleanup tests section in readme, by @phillipj.
+ * Added JSHint to tests/CI, by @phillipj.
+ * Added node v0.12 on travis, by @phillipj.
+ * Created command line tool, by @phillipj.
+ * Added *falsy* to Inverted Sections description in README, by @kristijanmatic.
+
 1.0.0 / 20 Dec 2014
 ===================
 
