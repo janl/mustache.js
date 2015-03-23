@@ -17,6 +17,13 @@
   "bin": {
     "mustache": "./bin/mustache"
   },
+  "files": [
+    "mustache.js",
+    "mustache.min.js",
+    "bin",
+    "wrappers",
+    "LICENSE"
+  ],
   "volo": {
     "url": "https://raw.github.com/janl/mustache.js/{version}/mustache.js"
   },
