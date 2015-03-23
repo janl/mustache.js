@@ -481,7 +481,7 @@
       for (var j = 0, valueLength = value.length; j < valueLength; ++j) {
         buffer += this.renderTokens(token[4], context.push(value[j]), partials, originalTemplate);
       }
-    } else if (typeof value === 'object' || typeof value === 'string') {
+    } else if (typeof value === 'object' || typeof value === 'string' || typeof value === 'number') {
       buffer += this.renderTokens(token[4], context.push(value), partials, originalTemplate);
     } else if (isFunction(value)) {
       if (typeof originalTemplate !== 'string')
