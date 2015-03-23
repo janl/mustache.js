@@ -35,6 +35,13 @@ describe('Mustache CLI', function () {
     });
   });
 
+  it('writes module version into stdout when runned with -v', function(done){
+    exec('bin/mustache -v', function(err, stdout, stderr) {
+      assert.notEqual(stdout.indexOf(moduleVersion), -1);
+      done();
+    });
+  });
+
   it('writes rendered template into stdout when successfull', function(done) {
     exec('bin/mustache test/_files/cli.json test/_files/cli.mustache', function(err, stdout, stderr) {
       assert.equal(err, null);

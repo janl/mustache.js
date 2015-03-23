@@ -8,7 +8,7 @@ var pkg = require('../package');
 var viewArg = process.argv[2];
 var templateArg = process.argv[3];
 
-if (process.argv.indexOf('--version') > -1) {
+if (hasVersionArg()) {
   return console.log(pkg.version);
 }
 
@@ -86,4 +86,10 @@ function isStdin(viewArg) {
 
 function wasNotFound(err) {
   return err.code && err.code === 'ENOENT';
+}
+
+function hasVersionArg() {
+  return ['--version', '-v'].some(function(opt) {
+    return process.argv.indexOf(opt) > -1;
+  });
 }
