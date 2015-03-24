@@ -1,5 +1,12 @@
+1.2.0 / 24 Mar 2015
+===================
+
+ * Added -v option to CLI, by @phillipj.
+ * Bugfix for rendering Number when it serves as the Context, by @phillipj.
+ * Specified files in package.json for a cleaner install, by @phillipj.
+
 1.1.0 / 18 Feb 2015
-==================
+===================
 
  * Refactor Writer.renderTokens() for better readability, by @phillipj.
  * Cleanup tests section in readme, by @phillipj.
