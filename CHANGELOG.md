@@ -1,3 +1,9 @@
+2.0.0 / 27 Mar 2015
+==================
+
+ * Fixed lookup not stopping upon finding `undefined` or `null` values, by @dasilvacontin.
+ * Refactored pre-commit hook, by @dasilvacontin.
+
 1.2.0 / 24 Mar 2015
 ===================
 
