@@ -6,7 +6,9 @@
 /*global define: false*/
 
 (function (global, factory) {
-  if (typeof exports === "object" && exports) {
+  if (typeof module === "object") {
+    factory(module.exports);
+  } else if (typeof exports === "object" && exports) {
     factory(exports); // CommonJS
   } else if (typeof define === "function" && define.amd) {
     define(['exports'], factory); // AMD

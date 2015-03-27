@@ -1,0 +1,11 @@
+{
+  "name": "mustache.js",
+  "repository": "jmas/mustache.js",
+  "description": "mustache.js",
+  "version": "0.8.2",
+  "keywords": [
+    "mustache"
+  ],
+  "scripts": ["mustache.js"],
+  "main": "mustache.js"
+}
