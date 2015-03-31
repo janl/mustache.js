@@ -554,3 +554,4 @@ mustache.js wouldn't kick ass if it weren't for these fine souls:
   * Ben Cherry / bcherry
   * Michael Jackson / mjijackson
   * Phillip Johnsen / phillipj
+  * David da Silva Contín / dasilvacontin
