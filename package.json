@@ -31,12 +31,12 @@
     "npm": ">=1.4.0"
   },
   "scripts": {
-    "pretest": "jshint mustache.js",
+    "pretest": "eslint mustache.js",
     "test": "mocha --reporter spec",
     "test-render": "mocha  --reporter spec test/render-test"
   },
   "devDependencies": {
-    "jshint": "~2.4.4",
+    "eslint": "^0.20.0",
     "mocha": "~2.1.0"
   },
   "spm": {

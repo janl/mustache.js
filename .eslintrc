@@ -1,0 +1,19 @@
+{
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "rules": {
+    "func-names": 2,
+    "no-mixed-spaces-and-tabs": 2,
+    "quotes": [2, "single", "avoid-escape"],
+    "semi": 2,
+    "space-after-keywords": 2,
+    "space-before-function-paren": 2,
+
+    "curly": 0,
+    "consistent-return": 0,
+    "no-use-before-define": 0,
+    "strict": 0
+  }
+}
