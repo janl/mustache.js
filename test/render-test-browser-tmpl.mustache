@@ -1,0 +1,30 @@
+require('./helper');
+
+describe('Mustache.render', function () {
+  beforeEach(function () {
+    Mustache.clearCache();
+  });
+
+  var i;
+  var tests = {{{.}}};
+
+  for (i = 0; i < tests.length; i++) {
+
+    (function indexClosure(test) {
+        var view = eval(test.view);
+
+        it('knows how to render ' + test.name, function () {
+
+          var output;
+          if (test.partial) {
+            output = Mustache.render(test.template, view, { partial: test.partial });
+          } else {
+            output = Mustache.render(test.template, view);
+          }
+
+          assert.equal(output, test.expect);
+        });
+    })(tests[i]);
+
+  }
+});
