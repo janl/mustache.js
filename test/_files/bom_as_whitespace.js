@@ -1,1 +1,4 @@
-var bom_as_whitespace = {'tag': 'Tag name w/o BOM', '\uFEFFtag': 'Tag name with BOM'};
+({
+  'tag': 'Tag name w/o BOM',
+  '\uFEFFtag': 'Tag name with BOM'
+})
