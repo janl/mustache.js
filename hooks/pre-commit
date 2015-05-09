@@ -83,7 +83,7 @@ class Bumper
 end
 
 bumper = Bumper.new([
-	Source.new('mustache.js', /mustache.version = "([\d\.]*)"/),
+	Source.new('mustache.js', /mustache.version = '([\d\.]*)'/),
 	Source.new('mustache.js.nuspec', /<version>([\d\.]*)<\/version>/),
 	Source.new('bower.json', /"version": "([\d\.]*)"/)
 ])
