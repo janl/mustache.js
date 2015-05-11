@@ -2,16 +2,12 @@ language: node_js
 node_js:
   - 0.8
   - '0.10'
-  - 0.11
   - 0.12
 before_install:
-  - "test $TRAVIS_NODE_VERSION = '0.6' && npm install -g npm@1.3.26 || npm install -g npm"
+  - npm install -g npm
 script:
   - npm test
   - npm run test-browser
-matrix:
-  allow_failures:
-    - node_js: 0.11
 env:
   global:
     - secure: TKDF1BgAR3S1bqFvikN6O3nbcLk20PDkL6QUVS6IkqQNtL1wXK4+2+GKcvJzOjCZg4OnXAFFtF/rfh9bcNlrGtWCG9CFkuGjUM7iONSQJr0kvCn7jris2jGGBupoPkX7MKlxaqrg6bmbp1QgA42/Hu4AlsNPCBiuFjpvL67VSqg=
