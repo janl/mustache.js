@@ -522,6 +522,14 @@ Then, you can run the test with:
 
     $ TEST=mytest npm run test-render
 
+### Browser tests
+
+Browser tests are not included in `npm test` as they run for too long, although they are runned automatically on Travis upon commit. Run browser tests locally in any browser:
+
+    $ npm run test-browser-local
+
+then point your browser to `http://localhost:8080/__zuul`
+
 ### Troubleshooting
 
 #### npm install fails

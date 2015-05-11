@@ -6,3 +6,5 @@ yui3
 qooxdoo.mustache.js
 
 npm-debug.log
+
+test/render-test-browser.js
