@@ -7,8 +7,8 @@ before_install:
   - npm install -g npm
 script:
   - npm test
-  - npm run test-browser
+  - "test $TRAVIS_NODE_VERSION = '0.12' && npm run test-browser || true"
 env:
   global:
-    - secure: TKDF1BgAR3S1bqFvikN6O3nbcLk20PDkL6QUVS6IkqQNtL1wXK4+2+GKcvJzOjCZg4OnXAFFtF/rfh9bcNlrGtWCG9CFkuGjUM7iONSQJr0kvCn7jris2jGGBupoPkX7MKlxaqrg6bmbp1QgA42/Hu4AlsNPCBiuFjpvL67VSqg=
-    - secure: sOyIxcOBaiFFUoL0+NcHPRVZm2LnG8u6qOzkrr4gSHil/qd8t91KOdJYVkZHWanI3R+T9sv8yDeZGTBz3QS993Wp0S0D3BjB2LKu8e7QFlMIms8dBQD6IR868qF6H22Qyaz5SNVwPuWVsEs8p92dc2C2xw9AvGSP3kpNe8aMjCA=
+  - secure: L0dg0jr2fwkc2tPwP5svybILPBn2qdLzMrWc5tEXg3MPcy8D59Gvf+ri7INqo+ETPM20o5CsaDCH+LHUNS/V0G4VG1ajvsy7d8uh3hnb/K6VfVui/CjsHIqOcOZrbxVxgyX+iMXEXAj0+Syow9uDQHVhrz1qqad1n79likNCXa4=
+  - secure: J4vbGKivULEHWRWExAWDLkFk9EDU7E6Ny+iRc/oKxXHnBYn9oL2Hfc1J92fOttaFtUzpz7r5FaNa3DGlyAI0wimq5GY8KJQGcquoskerXucd8iJbLCs3nxDeShl4UwHpDIXF8xbH/rUIkrGSKnktf0McMRIyeN95hzug0nxOwAw=
