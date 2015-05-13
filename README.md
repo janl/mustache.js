@@ -524,7 +524,7 @@ Then, you can run the test with:
 
 ### Browser tests
 
-Browser tests are not included in `npm test` as they run for too long, although they are runned automatically on Travis upon commit. Run browser tests locally in any browser:
+Browser tests are not included in `npm test` as they run for too long, although they are runned automatically on Travis when merged into master. Run browser tests locally in any browser:
 
     $ npm run test-browser-local
 
