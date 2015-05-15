@@ -380,13 +380,13 @@
            **/
           while (value != null && index < names.length) {
             if (index === names.length - 1 && value != null)
-              lookupHit = (typeof value === 'object') &&
-                value.hasOwnProperty(names[index]);
+              lookupHit = (typeof value === 'object') && value[names[index]];
+
             value = value[names[index++]];
           }
         } else if (context.view != null && typeof context.view === 'object') {
           value = context.view[name];
-          lookupHit = context.view.hasOwnProperty(name);
+          lookupHit = context.view.hasOwnProperty(name) || Object.prototype[name] !== value;
         }
 
         if (lookupHit)
