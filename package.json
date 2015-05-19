@@ -49,5 +49,6 @@
       "test",
       "wrappers"
     ]
-  }
+  },
+  "license": "MIT"
 }
