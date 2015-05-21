@@ -46,8 +46,21 @@ function readView(cb) {
   var view = isStdin(viewArg) ? process.openStdin() : fs.createReadStream(viewArg);
 
   streamToStr(view, function(str) {
-    cb(JSON.parse(str));
+    cb(parseView(str));
   });
+}
+
+function parseView(str) {
+  try {
+    return JSON.parse(str);
+  } catch (ex) {
+    console.error(
+      'Shooot, could not parse view as JSON.\n'+
+      'Tips: functions are not valid JSON and keys / values must be surround with double quotes.\n\n'+
+      ex.stack);
+
+    process.exit(1);
+  }
 }
 
 function readTemplate(cb) {

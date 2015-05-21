@@ -28,6 +28,13 @@ describe('Mustache CLI', function () {
     });
   });
 
+  it('writes hints about JSON parsing errors when given invalid JSON', function(done) {
+    exec('echo {name:"lebron"} | bin/mustache - test/_files/cli.mustache', function(err, stdout, stderr) {
+      assert.notEqual(stderr.indexOf('Shooot, could not parse view as JSON'), -1);
+      done();
+    });
+  });
+
   it('writes module version into stdout when runned with --version', function(done){
     exec('bin/mustache --version', function(err, stdout, stderr) {
       assert.notEqual(stdout.indexOf(moduleVersion), -1);
