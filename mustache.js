@@ -3,7 +3,7 @@
  * http://github.com/janl/mustache.js
  */
 
-/*global define: false*/
+/*global define: false Mustache: true*/
 
 (function defineMustache (global, factory) {
   if (typeof exports === 'object' && exports) {
@@ -11,7 +11,8 @@
   } else if (typeof define === 'function' && define.amd) {
     define(['exports'], factory); // AMD
   } else {
-    factory(global.Mustache = {}); // <script>
+    Mustache = {};
+    factory(Mustache); // script, wsh, asp
   }
 }(this, function mustacheFactory (mustache) {
 
