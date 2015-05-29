@@ -1,3 +1,9 @@
 {{#fobject}}
 {{name}}'s twitter: {{#twitter}}{{.}}{{/twitter}}{{^twitter}}unknown{{/twitter}}.
 {{/fobject}}
+
+{{#mascot}}
+{{name}}'s favorite color: {{#favorites.color}}{{.}}{{/favorites.color}}{{^favorites.color}}no one{{/favorites.color}}.
+{{name}}'s favorite president: {{#favorites.president}}{{.}}{{/favorites.president}}{{^favorites.president}}no one{{/favorites.president}}.
+{{name}}'s favorite show: {{#favorites.show}}{{.}}{{/favorites.show}}{{^favorites.show}}none{{/favorites.show}}.
+{{/mascot}}
