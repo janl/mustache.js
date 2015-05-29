@@ -20,7 +20,7 @@ describe('Mustache.render', function () {
         output = Mustache.render(test.template, view);
       }
 
-      assert.equal(output, test.expect);
+      output.should.equal(test.expect);
     });
 
   });
