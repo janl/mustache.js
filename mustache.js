@@ -356,7 +356,7 @@
     var cache = this.cache;
 
     var value;
-    if (name in cache) {
+    if (cache.hasOwnProperty(name)) {
       value = cache[name];
     } else {
       var context = this, names, index, lookupHit = false;
