@@ -1,6 +1,6 @@
 {
   "name": "mustache",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Logic-less {{mustache}} templates with JavaScript",
   "author": "mustache.js Authors <http://github.com/janl/mustache.js>",
   "repository": {

@@ -1,5 +1,13 @@
+2.1.0 / 5 June 2015
+===================
+
+ * Added license attribute to package.json, by @pgilad.
+ * Minor changes to make mustache.js compatible with both WSH and ASP, by @nagaozen.
+ * Improve CLI view parsing error, by @phillipj.
+ * Bugfix for view context cache, by @phillipj.
+
 2.0.0 / 27 Mar 2015
-==================
+===================
 
  * Fixed lookup not stopping upon finding `undefined` or `null` values, by @dasilvacontin.
  * Refactored pre-commit hook, by @dasilvacontin.
