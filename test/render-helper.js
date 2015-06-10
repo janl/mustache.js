@@ -26,12 +26,12 @@ function getPartial(testName) {
 }
 
 // You can put the name of a specific test to run in the TEST environment
-// variable (e.g. TEST=backslashes vows test/render-test.js)
+// variable (e.g. TEST=backslashes mocha test/render-test.js)
 var testToRun = process.env.TEST;
 
 var testNames;
 if (testToRun) {
-  testNames = [testToRun];
+  testNames = testToRun.split(',');
 } else {
   testNames = fs.readdirSync(_files).filter(function (file) {
     return (/\.js$/).test(file);

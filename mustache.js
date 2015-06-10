@@ -29,6 +29,14 @@
     return string.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&');
   }
 
+  /**
+   * Null safe way of checking whether or not an object,
+   * including its prototype, has a given property
+   */
+  function hasProperty (obj, propName) {
+    return obj != null && typeof obj === 'object' && (propName in obj);
+  }
+
   // Workaround for https://issues.apache.org/jira/browse/COUCHDB-577
   // See https://github.com/janl/mustache.js/issues/189
   var regExpTest = RegExp.prototype.test;
@@ -379,14 +387,14 @@
            * `undefined` and we want to avoid looking up parent contexts.
            **/
           while (value != null && index < names.length) {
-            if (index === names.length - 1 && value != null)
-              lookupHit = (typeof value === 'object') &&
-                value.hasOwnProperty(names[index]);
+            if (index === names.length - 1)
+              lookupHit = hasProperty(value, names[index]);
+
             value = value[names[index++]];
           }
-        } else if (context.view != null && typeof context.view === 'object') {
+        } else {
           value = context.view[name];
-          lookupHit = context.view.hasOwnProperty(name);
+          lookupHit = hasProperty(context.view, name);
         }
 
         if (lookupHit)
