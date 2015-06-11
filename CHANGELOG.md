@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.1] / 11 June 2015
+
+### Added
+
+ * State that we use semver on the change log, by @dasilvacontin.
+ * Added version links to change log, by @dasilvacontin.
+
+### Fixed
+
+ * Bugfix for using values from view's context prototype, by @phillipj.
+ * Improve test with undefined/null lookup hit using dot notation, by @dasilvacontin.
+ * Bugfix for null/undefined lookup hit when using dot notation, by @phillipj.
+ * Remove moot `version` property from bower.json, by @kkirsche.
+ * bower.json doesn't require a version bump via hook, by @dasilvacontin.
+
+
 ## [2.1.0] / 5 June 2015
 
  * Added license attribute to package.json, by @pgilad.
@@ -98,6 +114,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   * Fixed a bug that clashed with QUnit (thanks @kannix).
   * Added volo support (thanks @guybedford).
 
+[2.1.1]: https://github.com/janl/mustache.js/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/janl/mustache.js/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/janl/mustache.js/compare/v1.2.0...v2.0.0
 [1.2.0]: https://github.com/janl/mustache.js/compare/v1.1.0...v1.2.0
