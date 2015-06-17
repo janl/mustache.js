@@ -11,7 +11,7 @@
   } else if (typeof define === 'function' && define.amd) {
     define(['exports'], factory); // AMD
   } else {
-    Mustache = {};
+    global.Mustache = {};
     factory(Mustache); // script, wsh, asp
   }
 }(this, function mustacheFactory (mustache) {
