@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.2] / 17 June 2015
+
+### Added
+
+ * Mustache global definition ([#466]) by [@yousefcisco].
+
 ## [2.1.1] / 11 June 2015
 
 ### Added
@@ -114,6 +120,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[2.1.2]: https://github.com/janl/mustache.js/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/janl/mustache.js/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/janl/mustache.js/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/janl/mustache.js/compare/v1.2.0...v2.0.0
@@ -138,6 +145,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [#267]: https://github.com/janl/mustache.js/issues/267
 [#270]: https://github.com/janl/mustache.js/issues/270
 [#274]: https://github.com/janl/mustache.js/issues/274
+[#466]: https://github.com/janl/mustache.js/issues/466
 
 [@TiddoLangerak]: https://github.com/TiddoLangerak
 [@afc163]: https://github.com/afc163
@@ -154,3 +162,4 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [@nagaozen]: https://github.com/nagaozen
 [@pgilad]: https://github.com/pgilad
 [@phillipj]: https://github.com/phillipj
+[@yousefcisco]: https://github.com/yousefcisco
