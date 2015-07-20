@@ -20,7 +20,7 @@ mustache.js ships with support for both the [CommonJS](http://www.commonjs.org/)
 
 And this will be your templates after you use Mustache:
 
-!['stache](http://d24w6bsrhbeh9d.cloudfront.net/photo/aZPNGon_460sa.gif)
+!['stache](https://cloud.githubusercontent.com/assets/288977/8779228/a3cf700e-2f02-11e5-869a-300312fb7a00.gif)
 
 ## Who uses mustache.js?
 
