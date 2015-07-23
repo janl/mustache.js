@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.3] / 23 July 2015
+
+### Added
+
+ * Throw error when providing .render() with invalid template type, by [@phillipj].
+ * Documents use of string literals containing double quotes, by [@jfmercer].
+
+### Changed
+
+ * Move mustache gif to githubusercontent, by [@Andersos].
+
+### Fixed
+
+ * Update UMD Shim to be resilient to HTMLElement global pollution, by [@mikesherov].
+
 ## [2.1.2] / 17 June 2015
 
 ### Added
@@ -120,6 +135,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[2.1.3]: https://github.com/janl/mustache.js/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/janl/mustache.js/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/janl/mustache.js/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/janl/mustache.js/compare/v2.0.0...v2.1.0
@@ -147,6 +163,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [#274]: https://github.com/janl/mustache.js/issues/274
 [#466]: https://github.com/janl/mustache.js/issues/466
 
+[@Andersos]: https://github.com/Andersos
 [@TiddoLangerak]: https://github.com/TiddoLangerak
 [@afc163]: https://github.com/afc163
 [@cmbuckley]: https://github.com/cmbuckley
@@ -154,10 +171,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [@dasilvacontin]: https://github.com/dasilvacontin
 [@fallenice]: https://github.com/fallenice
 [@guybedford]: https://github.com/guybedford
+[@jfmercer]: https://github.com/jfmercer
 [@jrburke]: https://github.com/jrburke
 [@kannix]: https://github.com/kannix
 [@kkirsche]: https://github.com/kkirsche
 [@kristijanmatic]: https://github.com/kristijanmatic
+[@mikesherov]: https://github.com/mikesherov
 [@mjackson]: https://github.com/mjackson
 [@nagaozen]: https://github.com/nagaozen
 [@pgilad]: https://github.com/pgilad
