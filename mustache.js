@@ -76,7 +76,7 @@
   var spaceRe = /\s+/;
   var equalsRe = /\s*=/;
   var curlyRe = /\s*\}/;
-  var tagRe = /#|\^|\/|>|\{|&|=|!/;
+  var tagRe = /#|\^|\/|>|\{|&|=|!|\$|</;
 
   /**
    * Breaks up the given `template` string into a tree of tokens. If the `tags`
@@ -198,7 +198,7 @@
       token = [ type, value, start, scanner.pos ];
       tokens.push(token);
 
-      if (type === '#' || type === '^') {
+      if (type === '#' || type === '^' || type === '$' || type === '<') {
         sections.push(token);
       } else if (type === '/') {
         // Check section nesting.
@@ -267,6 +267,8 @@
       token = tokens[i];
 
       switch (token[0]) {
+      case '$':
+      case '<':
       case '#':
       case '^':
         collector.push(token);
@@ -352,6 +354,7 @@
    */
   function Context (view, parentContext) {
     this.view = view;
+    this.blocks = {};
     this.cache = { '.': this.view };
     this.parent = parentContext;
   }
@@ -362,6 +365,42 @@
    */
   Context.prototype.push = function push (view) {
     return new Context(view, this);
+  };
+
+  /**
+   * Set a value in the current block context.
+   */
+  Context.prototype.setBlockVar = function set (name, value) {
+    var blocks = this.blocks;
+
+    blocks[name] = value;
+
+    return value;
+  };
+
+  /**
+   * Clear all current block vars.
+   */
+  Context.prototype.clearBlockVars = function clearBlockVars () {
+    this.blocks = {};
+  };
+
+  /**
+   * Get a value only from the current block context.
+   */
+  Context.prototype.getBlockVar = function getBlockVar (name) {
+    var blocks = this.blocks;
+
+    var value;
+    if (blocks.hasOwnProperty(name)) {
+      value = blocks[name];
+    } else {
+      if (this.parent) {
+        value = this.parent.getBlockVar(name);
+      }
+    }
+    // Can return undefined.
+    return value;
   };
 
   /**
@@ -486,6 +525,8 @@
       if (symbol === '#') value = this.renderSection(token, context, partials, originalTemplate);
       else if (symbol === '^') value = this.renderInverted(token, context, partials, originalTemplate);
       else if (symbol === '>') value = this.renderPartial(token, context, partials, originalTemplate);
+      else if (symbol === '<') value = this.renderBlock(token, context, partials, originalTemplate);
+      else if (symbol === '$') value = this.renderBlockVariable(token, context, partials, originalTemplate);
       else if (symbol === '&') value = this.unescapedValue(token, context);
       else if (symbol === 'name') value = this.escapedValue(token, context);
       else if (symbol === 'text') value = this.rawValue(token);
@@ -546,6 +587,34 @@
     var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
     if (value != null)
       return this.renderTokens(this.parse(value), context, partials, value);
+  };
+
+  Writer.prototype.renderBlock = function renderBlock (token, context, partials, originalTemplate) {
+    if (!partials) return;
+
+    var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
+    if (value != null)
+      // Ignore any wrongly set block vars before we started.
+      context.clearBlockVars();
+      // We are only rendering to record the default block variables.
+      this.renderTokens(token[4], context, partials, originalTemplate);
+      // Now we render and return the result.
+      var result = this.renderTokens(this.parse(value), context, partials, value);
+      // Don't leak the block variables outside this include.
+      context.clearBlockVars();
+      return result;
+  };
+
+  Writer.prototype.renderBlockVariable = function renderBlockVariable (token, context, partials, originalTemplate) {
+    var value = token[1];
+
+    var exists = context.getBlockVar(value);
+    if (!exists) {
+      context.setBlockVar(value, originalTemplate.slice(token[3], token[5]));
+      return this.renderTokens(token[4], context, partials, originalTemplate);
+    } else {
+      return this.renderTokens(this.parse(exists), context, partials, exists);
+    }
   };
 
   Writer.prototype.unescapedValue = function unescapedValue (token, context) {
