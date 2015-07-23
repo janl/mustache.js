@@ -1,0 +1,1 @@
+{{content}}<{{#nodes}}{{>partial}}{{/nodes}}>
