@@ -106,7 +106,7 @@ The most basic tag type is a simple variable. A `{{name}}` tag renders the value
 
 All variables are HTML-escaped by default. If you want to render unescaped HTML, use the triple mustache: `{{{name}}}`. You can also use `&` to unescape a variable.
 
-To print `{{name}}` as a string literal, the default delimiters must be changed. See the ["Set Delimiter'](https://github.com/janl/mustache.js#set-delimiter) section for more information about custom delimiters.
+If you want `{{name}}` _not_ to be interpreted as a mustache tag, but rather to appear exactly as `{{name}}` in the output, you must change and then restore the default delimiter. See the ["Set Delimiter'](https://github.com/janl/mustache.js#set-delimiter) section for more information about custom delimiters.
 
 View:
 
