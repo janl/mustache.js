@@ -8,7 +8,9 @@ describe('Mustache.render', function () {
   it('requires template to be a string', function () {
     assert.throws(function () {
       Mustache.render(['dummy template'], ['foo', 'bar']);
-    }, TypeError, 'Invalid template! Template should be a "string" but "array" was given');
+    }, TypeError, 'Invalid template! Template should be a "string" but ' +
+                  '"array" was given as the first argument ' +
+                  'for mustache#render(template, view, partials)');
   });
 
   var i;
