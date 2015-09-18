@@ -3,8 +3,9 @@ node_js:
   - 0.8
   - '0.10'
   - 0.12
+  - 4
 before_install:
-  - npm install -g npm
+  - npm install -g npm@2.x
 script:
   - npm test
   - "test $TRAVIS_PULL_REQUEST != 'false' || test $TRAVIS_NODE_VERSION != '0.12' || npm run test-browser"
