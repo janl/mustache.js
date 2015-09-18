@@ -496,7 +496,7 @@ $ npm install mustache --save-dev
 $ npm run build
 ```
 
-The command line tool is basically a wrapper around `Mustache.render` so you get all the aformentioned features.
+The command line tool is basically a wrapper around `Mustache.render` so you get all the aforementioned features.
 
 ## Testing
 
