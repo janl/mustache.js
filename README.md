@@ -22,6 +22,54 @@ And this will be your templates after you use Mustache:
 
 !['stache](https://cloud.githubusercontent.com/assets/288977/8779228/a3cf700e-2f02-11e5-869a-300312fb7a00.gif)
 
+## Install
+
+You can get Mustache via npm.
+
+```bash
+$ npm install mustache --save
+```
+or install with bower:
+
+```bash
+$ bower install --save mustache
+```
+
+## Command line tool
+
+mustache.js is shipped with a node based command line tool. It might be installed as a global tool on your computer to render a mustache template of some kind
+
+```bash
+$ npm install -g mustache
+
+$ mustache dataView.json myTemplate.mustache > output.html
+```
+
+also supports stdin.
+
+```bash
+$ cat dataView.json | mustache - myTemplate.mustache > output.html
+```
+
+or as a package.json `devDependency` in a build process maybe?
+
+```bash
+$ npm install mustache --save-dev
+```
+
+```json
+{
+  "scripts": {
+    "build": "mustache dataView.json myTemplate.mustache > public/output.html"
+  }
+}
+```
+```bash
+$ npm run build
+```
+
+The command line tool is basically a wrapper around `Mustache.render` so you get all the features.
+
 ## Who uses mustache.js?
 
 An updated list of mustache.js users is kept [on the Github wiki](http://wiki.github.com/janl/mustache.js/beard-competition). Add yourself or your company if you use mustache.js!
@@ -467,36 +515,6 @@ These may be built using [Rake](http://rake.rubyforge.org/) and one of the follo
     $ rake dojo
     $ rake yui3
     $ rake qooxdoo
-
-## Command line tool
-
-mustache.js is shipped with a node based command line tool. It might be installed as a global tool on your computer to render a mustache template of some kind
-
-```bash
-$ npm install -g mustache
-$ mustache dataView.json myTemplate.mustache > output.html
-
-# also supports stdin
-$ cat dataView.json | mustache - myTemplate.mustache > output.html
-```
-
-or as a package.json `devDependency` in a build process maybe?
-
-```bash
-$ npm install mustache --save-dev
-```
-```json
-{
-  "scripts": {
-    "build": "mustache dataView.json myTemplate.mustache > public/output.html"
-  }
-}
-```
-```bash
-$ npm run build
-```
-
-The command line tool is basically a wrapper around `Mustache.render` so you get all the aforementioned features.
 
 ## Testing
 
