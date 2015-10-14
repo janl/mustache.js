@@ -1,9 +1,18 @@
 #!/usr/bin/env node
 
-var fs = require('fs');
+var fs = require('fs'),
+    path = require('path');
 
 var Mustache = require('..');
 var pkg = require('../package');
+var partials = {};
+
+var partialsPaths = [];
+var partialArgIndex = -1;
+
+while((partialArgIndex = process.argv.indexOf("-p")) > -1){
+  partialsPaths.push(process.argv.splice(partialArgIndex, 2)[1]);
+}
 
 var viewArg = process.argv[2];
 var templateArg = process.argv[3];
@@ -17,7 +26,7 @@ if (!templateArg || !viewArg) {
   process.exit(1);
 }
 
-run(readView, readTemplate, render, toStdout);
+run(readPartials, readView, readTemplate, render, toStdout);
 
 /**
  * Runs a list of functions as a waterfall.
@@ -63,13 +72,23 @@ function parseView(str) {
   }
 }
 
+function readPartials(cb) {
+  if(!partialsPaths.length) return cb();
+  var partialPath = partialsPaths.pop();
+  var partial = fs.createReadStream(partialPath);
+  streamToStr(partial, function(str) {
+    partials[getPartialName(partialPath)] = str;
+    readPartials(cb);
+  });
+}
+
 function readTemplate(cb) {
   var template = fs.createReadStream(templateArg);
   streamToStr(template, cb);
 }
 
 function render(cb, templateStr, jsonView) {
-  cb(Mustache.render(templateStr, jsonView));
+  cb(Mustache.render(templateStr, jsonView, partials));
 }
 
 function toStdout(cb, str) {
@@ -105,4 +124,8 @@ function hasVersionArg() {
   return ['--version', '-v'].some(function(opt) {
     return process.argv.indexOf(opt) > -1;
   });
+}
+
+function getPartialName(filename) {
+  return path.basename(filename, '.mustache')
 }

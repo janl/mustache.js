@@ -70,6 +70,12 @@ $ npm run build
 
 The command line tool is basically a wrapper around `Mustache.render` so you get all the features.
 
+If your templates use partials you should pass paths to partials using `-p` flag:
+
+```bash
+$ mustache -p path/to/partial1.mustache -p path/to/partial2.mustache dataView.json myTemplate.mustache
+```
+
 ## Who uses mustache.js?
 
 An updated list of mustache.js users is kept [on the Github wiki](http://wiki.github.com/janl/mustache.js/beard-competition). Add yourself or your company if you use mustache.js!
