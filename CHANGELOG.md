@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.2.0] / 15 October 2015
+
+### Added
+
+ * Add Partials support to CLI, by [@palkan].
+
+## Changed
+
+ * Move install instructions to README's top, by [@mateusortiz]
+ * Improved devhook install output, by [@ShashankaNataraj].
+ * Clarifies and improves language in documentation, by [@jfmercer].
+ * Linting CLI tool, by [@phillipj].
+ * npm 2.x and node v4 on Travis, by [@phillipj].
+
+## Fixes
+
+ * Fix README spelling error to "aforementioned", by [@djchie].
+ * Equal error message test in .render() for server and browser, by [@phillipj].
+
+## Dependencies
+
+ * chai -> 3.3.0
+ * eslint -> 1.6.0
+
 ## [2.1.3] / 23 July 2015
 
 ### Added
@@ -135,6 +159,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[2.2.0]: https://github.com/janl/mustache.js/compare/v2.1.3...v2.2.0
 [2.1.3]: https://github.com/janl/mustache.js/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/janl/mustache.js/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/janl/mustache.js/compare/v2.1.0...v2.1.1
@@ -163,12 +188,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [#274]: https://github.com/janl/mustache.js/issues/274
 [#466]: https://github.com/janl/mustache.js/issues/466
 
-[@Andersos]: https://github.com/Andersos
-[@TiddoLangerak]: https://github.com/TiddoLangerak
 [@afc163]: https://github.com/afc163
+[@Andersos]: https://github.com/Andersos
 [@cmbuckley]: https://github.com/cmbuckley
 [@cweider]: https://github.com/cweider
 [@dasilvacontin]: https://github.com/dasilvacontin
+[@djchie]: https://github.com/djchie
 [@fallenice]: https://github.com/fallenice
 [@guybedford]: https://github.com/guybedford
 [@jfmercer]: https://github.com/jfmercer
@@ -176,9 +201,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [@kannix]: https://github.com/kannix
 [@kkirsche]: https://github.com/kkirsche
 [@kristijanmatic]: https://github.com/kristijanmatic
+[@mateusortiz]: https://github.com/mateusortiz
 [@mikesherov]: https://github.com/mikesherov
 [@mjackson]: https://github.com/mjackson
 [@nagaozen]: https://github.com/nagaozen
+[@palkan]: https://github.com/palkan
 [@pgilad]: https://github.com/pgilad
 [@phillipj]: https://github.com/phillipj
+[@ShashankaNataraj]: https://github.com/ShashankaNataraj
+[@TiddoLangerak]: https://github.com/TiddoLangerak
 [@yousefcisco]: https://github.com/yousefcisco
