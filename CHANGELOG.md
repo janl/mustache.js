@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
  * Add Partials support to CLI, by [@palkan].
 
-## Changed
+### Changed
 
  * Move install instructions to README's top, by [@mateusortiz]
  * Improved devhook install output, by [@ShashankaNataraj].
@@ -17,12 +17,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
  * Linting CLI tool, by [@phillipj].
  * npm 2.x and node v4 on Travis, by [@phillipj].
 
-## Fixes
+### Fixes
 
  * Fix README spelling error to "aforementioned", by [@djchie].
  * Equal error message test in .render() for server and browser, by [@phillipj].
 
-## Dependencies
+### Dependencies
 
  * chai -> 3.3.0
  * eslint -> 1.6.0
