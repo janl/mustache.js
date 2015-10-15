@@ -10,7 +10,7 @@ var partials = {};
 var partialsPaths = [];
 var partialArgIndex = -1;
 
-while((partialArgIndex = process.argv.indexOf("-p")) > -1){
+while ((partialArgIndex = process.argv.indexOf('-p')) > -1) {
   partialsPaths.push(process.argv.splice(partialArgIndex, 2)[1]);
 }
 
@@ -34,75 +34,75 @@ run(readPartials, readView, readTemplate, render, toStdout);
  * function the returned values of all the previously invoked functions.
  * Each function is expected to exit the process if an error occurs.
  */
-function run(/*args*/) {
+function run (/*args*/) {
   var values = [];
   var fns = Array.prototype.slice.call(arguments);
 
-  function invokeNextFn(val) {
+  function invokeNextFn (val) {
     values.unshift(val);
-    if (fns.length == 0) return;
+    if (fns.length === 0) return;
     invoke(fns.shift());
   }
 
-  function invoke(fn) {
+  function invoke (fn) {
     fn.apply(null, [invokeNextFn].concat(values));
   }
 
   invoke(fns.shift());
 }
 
-function readView(cb) {
+function readView (cb) {
   var view = isStdin(viewArg) ? process.openStdin() : fs.createReadStream(viewArg);
 
-  streamToStr(view, function(str) {
+  streamToStr(view, function onDone (str) {
     cb(parseView(str));
   });
 }
 
-function parseView(str) {
+function parseView (str) {
   try {
     return JSON.parse(str);
   } catch (ex) {
     console.error(
-      'Shooot, could not parse view as JSON.\n'+
-      'Tips: functions are not valid JSON and keys / values must be surround with double quotes.\n\n'+
+      'Shooot, could not parse view as JSON.\n' +
+      'Tips: functions are not valid JSON and keys / values must be surround with double quotes.\n\n' +
       ex.stack);
 
     process.exit(1);
   }
 }
 
-function readPartials(cb) {
-  if(!partialsPaths.length) return cb();
+function readPartials (cb) {
+  if (!partialsPaths.length) return cb();
   var partialPath = partialsPaths.pop();
   var partial = fs.createReadStream(partialPath);
-  streamToStr(partial, function(str) {
+  streamToStr(partial, function onDone (str) {
     partials[getPartialName(partialPath)] = str;
     readPartials(cb);
   });
 }
 
-function readTemplate(cb) {
+function readTemplate (cb) {
   var template = fs.createReadStream(templateArg);
   streamToStr(template, cb);
 }
 
-function render(cb, templateStr, jsonView) {
+function render (cb, templateStr, jsonView) {
   cb(Mustache.render(templateStr, jsonView, partials));
 }
 
-function toStdout(cb, str) {
+function toStdout (cb, str) {
   cb(process.stdout.write(str));
 }
 
-function streamToStr(stream, cb) {
+function streamToStr (stream, cb) {
   var data = '';
 
-  stream.on('data', function(chunk) {
+  stream.on('data', function onData (chunk) {
     data += chunk;
-  }).once('end', function() {
+  }).once('end', function onEnd () {
     cb(data.toString());
-  }).on('error', function(err) {
+  }).on('error', function onError (err) {
     if (wasNotFound(err)) {
       console.error('Could not find file:', err.path);
     } else {
@@ -112,20 +112,20 @@ function streamToStr(stream, cb) {
   });
 }
 
-function isStdin(viewArg) {
-  return viewArg === '-';
+function isStdin (view) {
+  return view === '-';
 }
 
-function wasNotFound(err) {
+function wasNotFound (err) {
   return err.code && err.code === 'ENOENT';
 }
 
-function hasVersionArg() {
-  return ['--version', '-v'].some(function(opt) {
+function hasVersionArg () {
+  return ['--version', '-v'].some(function matchInArgs (opt) {
     return process.argv.indexOf(opt) > -1;
   });
 }
 
-function getPartialName(filename) {
-  return path.basename(filename, '.mustache')
+function getPartialName (filename) {
+  return path.basename(filename, '.mustache');
 }

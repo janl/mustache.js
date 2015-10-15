@@ -32,7 +32,7 @@
     "npm": ">=1.4.0"
   },
   "scripts": {
-    "pretest": "eslint mustache.js",
+    "pretest": "eslint mustache.js bin/mustache",
     "test": "mocha --reporter spec test/*-test.js",
     "test-render": "mocha  --reporter spec test/render-test",
     "pre-test-browser": "node test/create-browser-suite.js",
