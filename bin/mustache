@@ -16,13 +16,14 @@ while ((partialArgIndex = process.argv.indexOf('-p')) > -1) {
 
 var viewArg = process.argv[2];
 var templateArg = process.argv[3];
+var outputArg = process.argv[4];
 
 if (hasVersionArg()) {
   return console.log(pkg.version);
 }
 
 if (!templateArg || !viewArg) {
-  console.error('Syntax: mustache <view> <template>');
+  console.error('Syntax: mustache <view> <template> [output]');
   process.exit(1);
 }
 
@@ -92,7 +93,11 @@ function render (cb, templateStr, jsonView) {
 }
 
 function toStdout (cb, str) {
-  cb(process.stdout.write(str));
+  if (outputArg) {
+    cb(fs.writeFileSync(outputArg, str));
+  } else {
+    cb(process.stdout.write(str));
+  }
 }
 
 function streamToStr (stream, cb) {
