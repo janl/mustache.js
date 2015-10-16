@@ -591,6 +591,6 @@ mustache.js wouldn't kick ass if it weren't for these fine souls:
   * Ross Boucher / boucher
   * Matt Sanford / mzsanford
   * Ben Cherry / bcherry
-  * Michael Jackson / mjijackson
+  * Michael Jackson / mjackson
   * Phillip Johnsen / phillipj
   * David da Silva Contín / dasilvacontin
