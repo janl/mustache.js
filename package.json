@@ -43,7 +43,7 @@
     "chai": "3.4.0",
     "eslint": "1.7.3",
     "mocha": "^2.1.0",
-    "zuul": "^3.7.0"
+    "zuul": "^3.7.1"
   },
   "spm": {
     "main": "mustache.js",
