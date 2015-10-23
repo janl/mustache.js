@@ -414,8 +414,13 @@
       cache[name] = value;
     }
 
-    if (isFunction(value))
-      value = value.call(this.view);
+    if (isFunction(value)){
+      if (names && names.length > 1 && typeof Object.getPrototypeOf(names[names.length-2])[names[names.length-1]] === 'function'){
+        value = value.call(names[names.length-2]);
+      } else {
+        value = value.call(this.view);
+      }
+    }
 
     return value;
   };
