@@ -96,7 +96,7 @@ mustache.js is a mature project, but it continues to actively invite maintainers
 
 ## Usage
 
-Below is quick example how to use mustache.js:
+Below is a quick example how to use mustache.js:
 
 ```js
 var view = {
