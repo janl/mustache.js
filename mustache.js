@@ -57,6 +57,7 @@
     return !testRegExp(nonSpaceRe, string);
   }
 
+  // Urlencoding / escaping map
   var entityMap = {
     '&': '&amp;',
     '<': '&lt;',
@@ -65,13 +66,14 @@
     "'": '&#39;',
     '/': '&#x2F;'
   };
-
+  
+  // Escapes urls
   function escapeHtml (string) {
     return String(string).replace(/[&<>"'\/]/g, function fromEntityMap (s) {
       return entityMap[s];
     });
   }
-
+  
   var whiteRe = /\s*/;
   var spaceRe = /\s+/;
   var equalsRe = /\s*=/;
