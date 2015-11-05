@@ -173,7 +173,7 @@ View:
 
 Template:
 
-```html
+```
 * {{name}}
 * {{age}}
 * {{company}}
