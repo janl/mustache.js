@@ -550,8 +550,12 @@
 
   Writer.prototype.unescapedValue = function unescapedValue (token, context) {
     var value = context.lookup(token[1]);
-    if (value != null)
+    if (value != null) {
+      if (mustache.sanitizeUnescaped) {
+        return mustache.sanitizeUnescaped(value);
+      }
       return value;
+    }
   };
 
   Writer.prototype.escapedValue = function escapedValue (token, context) {
@@ -618,6 +622,12 @@
   // Export the escaping function so that the user may override it.
   // See https://github.com/janl/mustache.js/issues/244
   mustache.escape = escapeHtml;
+
+  // Export the sanitizing function for unescaped values.
+  mustache.sanitizeUnescaped = null;
+  mustache.setUnescapedSanitizier = function setUnescapedSanitizier (sanitizeUnescaped) {
+    mustache.sanitizeUnescaped = sanitizeUnescaped;
+  };
 
   // Export these mainly for testing, but also for advanced usage.
   mustache.Scanner = Scanner;
