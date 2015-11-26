@@ -12,7 +12,7 @@
     define(['exports'], factory); // AMD
   } else {
     global.Mustache = {};
-    factory(Mustache); // script, wsh, asp
+    factory(global.Mustache); // script, wsh, asp
   }
 }(this, function mustacheFactory (mustache) {
 
