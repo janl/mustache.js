@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.2.1] / 13 December 2015
+
+### Fixes
+
+ * Improve HTML escaping, by [@phillipj].
+ * Fix inconsistency in defining global mustache object, by [@simast].
+ * Fix switch-case indent error, by [@norfish].
+ * Unpin chai and eslint versions, by [@dasilvacontin].
+ * Update README.md with proper grammar, by [@EvanLovely].
+ * Update mjackson username in README, by [@mjackson].
+ * Remove syntax highlighting in README code sample, by [@imagentleman].
+ * Fix typo in README, by [@Xcrucifier].
+ * Fix link typo in README, by [@keirog].
+
 ## [2.2.0] / 15 October 2015
 
 ### Added
@@ -159,6 +173,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[2.2.1]: https://github.com/janl/mustache.js/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/janl/mustache.js/compare/v2.1.3...v2.2.0
 [2.1.3]: https://github.com/janl/mustache.js/compare/v2.1.2...v2.1.3
 [2.1.2]: https://github.com/janl/mustache.js/compare/v2.1.1...v2.1.2
@@ -194,20 +209,26 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [@cweider]: https://github.com/cweider
 [@dasilvacontin]: https://github.com/dasilvacontin
 [@djchie]: https://github.com/djchie
+[@EvanLovely]: https://github.com/EvanLovely
 [@fallenice]: https://github.com/fallenice
 [@guybedford]: https://github.com/guybedford
+[@imagentleman]: https://github.com/imagentleman
 [@jfmercer]: https://github.com/jfmercer
 [@jrburke]: https://github.com/jrburke
 [@kannix]: https://github.com/kannix
+[@keirog]: https://github.com/keirog
 [@kkirsche]: https://github.com/kkirsche
 [@kristijanmatic]: https://github.com/kristijanmatic
 [@mateusortiz]: https://github.com/mateusortiz
 [@mikesherov]: https://github.com/mikesherov
 [@mjackson]: https://github.com/mjackson
 [@nagaozen]: https://github.com/nagaozen
+[@norfish]: https://github.com/norfish
 [@palkan]: https://github.com/palkan
 [@pgilad]: https://github.com/pgilad
 [@phillipj]: https://github.com/phillipj
 [@ShashankaNataraj]: https://github.com/ShashankaNataraj
+[@simast]: https://github.com/simast
 [@TiddoLangerak]: https://github.com/TiddoLangerak
+[@Xcrucifier]: https://github.com/Xcrucifier
 [@yousefcisco]: https://github.com/yousefcisco
