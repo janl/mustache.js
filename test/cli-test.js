@@ -67,6 +67,7 @@ describe('Mustache CLI', function () {
         assert.equal(stderr, '');
         assert.equal(stdout, '');
         assert.equal(fs.readFileSync(outputFile), expectedOutput);
+        fs.unlink('test/_files/cli_output.txt');
         done();
       });
     });
