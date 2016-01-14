@@ -60,6 +60,18 @@ describe('Mustache CLI', function () {
       });
     });
 
+    it('writes rendered template into the file specified by the third argument', function(done) {
+      var outputFile = 'test/_files/cli_output.txt';
+      exec('bin/mustache test/_files/cli.json test/_files/cli.mustache ' + outputFile, function(err, stdout, stderr) {
+        assert.equal(err, null);
+        assert.equal(stderr, '');
+        assert.equal(stdout, '');
+        assert.equal(fs.readFileSync(outputFile), expectedOutput);
+        fs.unlink('test/_files/cli_output.txt');
+        done();
+      });
+    });
+
     it('reads view data from stdin when first argument equals "-"', function(done){
       exec('cat test/_files/cli.json | bin/mustache - test/_files/cli.mustache', function(err, stdout, stderr) {
         assert.equal(err, null);
