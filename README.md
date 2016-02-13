@@ -479,7 +479,7 @@ Set Delimiter tags start with an equals sign and change the tag delimiters from 
 
 Consider the following contrived example:
 
-```
+```html+erb
 * {{ default_tags }}
 {{=<% %>=}}
 * <% erb_style_tags %>
@@ -515,30 +515,30 @@ mustache.js may be built specifically for several different client libraries, in
   - [qooxdoo](http://qooxdoo.org/)
 
 These may be built using [Rake](http://rake.rubyforge.org/) and one of the following commands:
-
-    $ rake jquery
-    $ rake mootools
-    $ rake dojo
-    $ rake yui3
-    $ rake qooxdoo
-
+```bash
+$ rake jquery
+$ rake mootools
+$ rake dojo
+$ rake yui3
+$ rake qooxdoo
+```
 ## Testing
 
 In order to run the tests you'll need to install [node](http://nodejs.org/).
 
 You also need to install the sub module containing [Mustache specifications](http://github.com/mustache/spec) in the project root.
-
-    $ git submodule init
-    $ git submodule update
-
+```bash
+$ git submodule init
+$ git submodule update
+```
 Install dependencies.
-
-    $ npm install
-
+```bash
+$ npm install
+```
 Then run the tests.
-
-    $ npm test
-
+```bash
+$ npm test
+```
 The test suite consists of both unit and integration tests. If a template isn't rendering correctly for you, you can make a test for it by doing the following:
 
   1. Create a template file named `mytest.mustache` in the `test/_files`
@@ -550,15 +550,15 @@ The test suite consists of both unit and integration tests. If a template isn't 
      directory.
 
 Then, you can run the test with:
-
-    $ TEST=mytest npm run test-render
-
+```bash
+$ TEST=mytest npm run test-render
+```
 ### Browser tests
 
 Browser tests are not included in `npm test` as they run for too long, although they are ran automatically on Travis when merged into master. Run browser tests locally in any browser:
-
-    $ npm run test-browser-local
-
+```bash
+$ npm run test-browser-local
+```
 then point your browser to `http://localhost:8080/__zuul`
 
 ### Troubleshooting
@@ -566,9 +566,9 @@ then point your browser to `http://localhost:8080/__zuul`
 #### npm install fails
 
 Ensure to have a recent version of npm installed. While developing this project requires npm with support for `^` version ranges.
-
-    $ npm install -g npm
-
+```bash
+$ npm install -g npm
+```
 ## Thanks
 
 mustache.js wouldn't kick ass if it weren't for these fine souls:
