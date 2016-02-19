@@ -8,7 +8,7 @@
     "no-mixed-spaces-and-tabs": 2,
     "quotes": [2, "single", "avoid-escape"],
     "semi": 2,
-    "space-after-keywords": 2,
+    "keyword-spacing": 2,
     "space-before-function-paren": 2,
 
     "curly": 0,
