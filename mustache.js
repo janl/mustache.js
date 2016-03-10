@@ -551,9 +551,7 @@
   };
 
   Writer.prototype.unescapedValue = function unescapedValue (token, context) {
-    var value = context.lookup(token[1]);
-    if (value != null)
-      return value;
+    return context.lookup(token[1]);
   };
 
   Writer.prototype.escapedValue = function escapedValue (token, context) {
