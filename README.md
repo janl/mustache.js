@@ -613,3 +613,6 @@ mustache.js wouldn't kick ass if it weren't for these fine souls:
   * Michael Jackson / mjackson
   * Phillip Johnsen / phillipj
   * David da Silva Contín / dasilvacontin
+
+
+I love mustache!
