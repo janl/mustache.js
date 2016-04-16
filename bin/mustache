@@ -78,13 +78,7 @@ function readPartials (cb) {
   var partialPath = partialsPaths.pop();
   var partial = fs.createReadStream(partialPath);
   streamToStr(partial, function onDone (str) {
-
-    var keysArray = getPartialNames(partialPath);
-
-    keysArray.forEach(function addPartialNames (key) {
-      partials[key] = str;
-    });
-
+    partials[getPartialName(partialPath)] = str;
     readPartials(cb);
   });
 }
@@ -137,27 +131,6 @@ function hasVersionArg () {
   });
 }
 
-function getPartialNames (filename) {
-
-  // get path relative to the template file
-  // in order to use e.g. {{> ../common/footer }}
-
-  // before, {{> footer }} used the first -p file with the filename 'footer'
-  
-  // the second replace is for a consistent form between platforms
-  // without it, you would have to use {{> ..\\common\\footer }} for windows
-  // and {{> ../common/footer }} for *nix
-
-  // this can be extended to the mustache API by using the relative path as
-  // the key in the partials object
-  // e.g. mustache.render(template, view, { '../../common/footer': '...' })
-  var relativePath = path.
-    relative(templateArg, filename).
-    replace('.mustache', '').
-    replace(/\\{1,2}/g, '/');
-
-  return [
-      path.basename(filename, '.mustache'),
-      relativePath
-    ];
+function getPartialName (filename) {
+  return path.basename(filename, '.mustache');
 }
