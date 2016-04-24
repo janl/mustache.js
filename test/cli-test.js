@@ -2,12 +2,28 @@ require('./helper');
 
 var fs = require('fs');
 var path = require('path');
+var child_process = require('child_process');
 var _files = path.join(__dirname, '_files');
 var cliTxt = path.resolve(_files, 'cli.txt');
 var cliPartialsTxt = path.resolve(_files, 'cli_with_partials.txt');
 var moduleVersion = require('../package').version;
 
-var exec = require('child_process').exec;
+function changeForOS(command) {
+
+  if(process.platform === 'win32') {
+    return command
+      .replace(/bin\/mustache/g, 'node bin\\mustache')
+      .replace(/\bcat\b/g, 'type')
+      .replace(/\//g, '\\');
+  }
+
+  return command;
+}
+
+function exec() {
+  arguments[0] = changeForOS(arguments[0]);
+  return child_process.exec.apply(child_process, arguments);
+}
 
 describe('Mustache CLI', function () {
 
@@ -83,14 +99,14 @@ describe('Mustache CLI', function () {
 
     it('writes it couldnt find template into stderr when second argument doesnt resolve to a file', function(done) {
       exec('bin/mustache test/_files/cli.json test/_files/non-existing-template.mustache', function(err, stdout, stderr) {
-        assert.notEqual(stderr.indexOf('Could not find file: test/_files/non-existing-template.mustache'), -1);
+        assert.isOk(/Could not find file: .+non-existing-template\.mustache/.test(stderr));
         done();
       });
     });
 
     it('writes it couldnt find view into stderr when first argument doesnt resolve to a file', function(done) {
       exec('bin/mustache test/_files/non-existing-view.json test/_files/cli.mustache', function(err, stdout, stderr) {
-        assert.notEqual(stderr.indexOf('Could not find file: test/_files/non-existing-view.json'), -1);
+        assert.isOk(/Could not find file: .+non-existing-view\.json/.test(stderr));
         done();
       });
     });
