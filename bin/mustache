@@ -78,7 +78,13 @@ function readPartials (cb) {
   var partialPath = partialsPaths.pop();
   var partial = fs.createReadStream(partialPath);
   streamToStr(partial, function onDone (str) {
-    partials[getPartialName(partialPath)] = str;
+
+    var keysArray = getPartialNames(partialPath);
+
+    keysArray.forEach(function addPartialNames (key) {
+      partials[key] = str;
+    });
+
     readPartials(cb);
   });
 }
@@ -131,6 +137,32 @@ function hasVersionArg () {
   });
 }
 
-function getPartialName (filename) {
-  return path.basename(filename, '.mustache');
+function getPartialNames (filename) {
+  // get path relative to the template file
+  // in order to use e.g. {{> ../common/footer }}
+
+  // before, {{> footer }} used the -p file whose streamToStr happened to
+  // finish first, as seen above in readPartials
+
+  // this can be extended to the mustache API by using the relative path as
+  // the key in the partials object
+  // e.g. mustache.render(template, view, { '../common/footer': '...' })
+  var relativePath = path
+    .relative(templateArg, filename)
+    // without this, you would have to use {{> ..\\common\\footer }} for windows
+    // and {{> ../common/footer }} for *nix
+    .replace(/\\{1,2}/g, '/')
+    // since path.relative shows paths relative to the file, and not the
+    // directory (i.e. what everyone is used to), change the reference to the
+    // current directory from '../' to './'
+    .replace(/^\.\.\//, './')
+    // obviously if we want parents of the current directory, we want '../../'
+    // as opposed to './../../', so this replace fixes that
+    .replace(/^\.\/\.\.\//, '../')
+    .replace('.mustache', '');
+
+  return [
+      path.basename(filename, '.mustache'),
+      relativePath
+    ];
 }
