@@ -508,7 +508,7 @@ Consider the following contrived example:
 
 Here we have a list with three items. The first item uses the default tag style, the second uses ERB style as defined by the Set Delimiter tag, and the third returns to the default style after yet another Set Delimiter declaration.
 
-According to [ctemplates](http://google-ctemplate.googlecode.com/svn/trunk/doc/howto.html), this "is useful for languages like TeX, where double-braces may occur in the text and are awkward to use for markup."
+According to [ctemplates](https://htmlpreview.github.io/?https://raw.githubusercontent.com/OlafvdSpek/ctemplate/master/doc/howto.html), this "is useful for languages like TeX, where double-braces may occur in the text and are awkward to use for markup."
 
 Custom delimiters may not contain whitespace or the equals sign.
 
