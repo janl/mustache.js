@@ -498,7 +498,7 @@ Custom delimiters can be used in place of `{{` and `}}` by setting the new value
 
 #### Setting in JavaScript
 
-The `tags` property of the `Mustache` object holds an array consisting of the opening and closing tag values. Set custom values by passing a new array of tags to `parse()`, which gets honored over the default values, or by overriding the `tags` property itself:
+The `Mustache.tags` property holds an array consisting of the opening and closing tag values. Set custom values by passing a new array of tags to `parse()`, which gets honored over the default values, or by overriding the `tags` property itself:
 
 ```js
 var customTags = [ '<%', '%>' ];
@@ -513,7 +513,6 @@ Mustache.parse(template, customTags);
 ```js
 Mustache.tags = customTags;
 // Subsequent parse() and render() calls will use customTags
-```
 ```
 
 #### Setting in Templates
