@@ -179,7 +179,7 @@ The most basic tag type is a simple variable. A `{{name}}` tag renders the value
 
 All variables are HTML-escaped by default. If you want to render unescaped HTML, use the triple mustache: `{{{name}}}`. You can also use `&` to unescape a variable.
 
-If you want `{{name}}` _not_ to be interpreted as a mustache tag, but rather to appear exactly as `{{name}}` in the output, you must change and then restore the default delimiter. See the ["Set Delimiter"](https://github.com/janl/mustache.js#set-delimiter) section for more information about custom delimiters.
+If you want `{{name}}` _not_ to be interpreted as a mustache tag, but rather to appear exactly as `{{name}}` in the output, you must change and then restore the default delimiter. See the [Custom Delimiters](#custom-delimiters) section for more information.
 
 View:
 
@@ -492,7 +492,31 @@ Mustache.render(template, view, {
 });
 ```
 
-### Set Delimiter
+### Custom Delimiters
+
+Custom delimiters can be used in place of `{{` and `}}` by setting the new values in JavaScript or in templates.
+
+#### Setting in JavaScript
+
+The `tags` property of the `Mustache` object holds an array consisting of the opening and closing tag values. Set custom values by passing a new array of tags to `parse()`, which gets honored over the default values, or by overriding the `tags` property itself:
+
+```js
+var customTags = [ '<%', '%>' ];
+```
+
+##### Pass Value into Parse Method
+```js
+Mustache.parse(template, customTags);
+```
+
+##### Override Tags Property
+```js
+Mustache.tags = customTags;
+// Subsequent parse() and render() calls will use customTags
+```
+```
+
+#### Setting in Templates
 
 Set Delimiter tags start with an equals sign and change the tag delimiters from `{{` and `}}` to custom strings.
 
