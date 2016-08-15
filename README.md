@@ -142,7 +142,7 @@ If you need a template for a dynamic part in a static website, you can consider 
 
 ```html
 <html>
-<body onload="loadUser">
+<body onload="loadUser()">
 <div id="target">Loading...</div>
 <script id="template" type="x-tmpl-mustache">
 Hello {{ name }}!
