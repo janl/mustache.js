@@ -626,4 +626,5 @@
   mustache.Context = Context;
   mustache.Writer = Writer;
 
+  return mustache;
 }));
