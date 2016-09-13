@@ -8,7 +8,7 @@ before_install:
   - npm install -g npm@2.x
 script:
   - npm test
-  - "test $TRAVIS_PULL_REQUEST != 'false' || test $TRAVIS_NODE_VERSION != '0.12' || npm run test-browser"
+  - "test $TRAVIS_PULL_REQUEST != 'false' || test $TRAVIS_NODE_VERSION != '4' || npm run test-browser"
 env:
   global:
   - secure: L0dg0jr2fwkc2tPwP5svybILPBn2qdLzMrWc5tEXg3MPcy8D59Gvf+ri7INqo+ETPM20o5CsaDCH+LHUNS/V0G4VG1ajvsy7d8uh3hnb/K6VfVui/CjsHIqOcOZrbxVxgyX+iMXEXAj0+Syow9uDQHVhrz1qqad1n79likNCXa4=
