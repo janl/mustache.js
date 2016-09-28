@@ -141,6 +141,7 @@ There are several techniques that can be used to load templates and hand them to
 If you need a template for a dynamic part in a static website, you can consider including the template in the static HTML file to avoid loading templates separately. Here's a small example using `jQuery`:
 
 ```html
+<!DOCTYPE HTML>
 <html>
 <body onload="loadUser()">
 <div id="target">Loading...</div>
