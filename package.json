@@ -52,7 +52,7 @@
       "wrappers"
     ]
   },
-  "greenkeper": {
+  "greenkeeper": {
     "ignore": ["eslint"]
   },
   "license": "MIT"
