@@ -626,4 +626,33 @@
   mustache.Context = Context;
   mustache.Writer = Writer;
 
+  // Worker bee, conditional load as Worker support
+  if ( self.WorkerGlobalScope && self instanceof WorkerGlobalScope ) {
+    var _Partials = {};
+    self.addEventListener( 'message', function( evt ) {
+        var data = evt.data,
+            t, tokens, template,
+            result = { };
+
+        if ( data.clearPartials )
+            _Partials = {};
+
+        if ( ( t = data.partials ) )
+            for ( var i in t )
+                _Partials[i] = t[i];
+
+        if ( data.clearCache )
+            defaultWriter.clearCache();
+
+        if ( ( template = data.template ) && ( tokens = defaultWriter.parse( template, data.tags ) ) ) {
+            if ( ( t = data.view ) )
+                result.content = defaultWriter.render( template, t, ( t = data.partials ) === true ? _Partials : t );
+            else
+                result.tokens = tokens;
+        }
+
+        self.postMessage( result );
+    }, false );
+}
+
 }));
