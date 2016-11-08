@@ -3,6 +3,35 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.3.0] / 8 November 2016
+
+### Minor
+
+ * [#540]: Add optional `output` argument to mustache CLI, by [@wizawu].
+ * [#597]: Add compatibility with amdclean, by [@mightyplow].
+
+### Dev
+
+ * [#553]: Assert `null` lookup when rendering an unescaped value, by [@dasilvacontin].
+ * [#580], [#610]: Ignore eslint for greenkeeper updates, by [@phillipj].
+ * [#560]: Fix CLI tests for Windows, by [@kookookchoozeus].
+ * Run browser tests w/node v4, by [@phillipj].
+
+### Docs
+
+ * [#542]: Add API documentation to README, by [@tomekwi].
+ * [#546]: Add missing syntax highlighting to README code blocks, by [@pra85].
+ * [#569]: Update Ctemplate links in README, by [@mortonfox].
+ * [#592]: Change "loadUser" to "loadUser()" in README, by [@Flaque].
+ * [#593]: Adding doctype to HTML code example in README, by [@calvinf].
+
+### Dependencies
+
+ * eslint -> 2.2.0. Breaking changes fix by [@phillipj]. [#548]
+ * eslint -> 2.5.1.
+ * mocha -> 3.0.2.
+ * zuul -> 3.11.0.
+
 ## [2.2.1] / 13 December 2015
 
 ### Fixes
@@ -173,6 +202,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[2.3.0]: https://github.com/janl/mustache.js/compare/v2.2.1...v2.3.0
 [2.2.1]: https://github.com/janl/mustache.js/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/janl/mustache.js/compare/v2.1.3...v2.2.0
 [2.1.3]: https://github.com/janl/mustache.js/compare/v2.1.2...v2.1.3
@@ -202,15 +232,29 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [#270]: https://github.com/janl/mustache.js/issues/270
 [#274]: https://github.com/janl/mustache.js/issues/274
 [#466]: https://github.com/janl/mustache.js/issues/466
+[#540]: https://github.com/janl/mustache.js/issues/540
+[#542]: https://github.com/janl/mustache.js/issues/542
+[#546]: https://github.com/janl/mustache.js/issues/546
+[#548]: https://github.com/janl/mustache.js/issues/548
+[#553]: https://github.com/janl/mustache.js/issues/553
+[#560]: https://github.com/janl/mustache.js/issues/560
+[#569]: https://github.com/janl/mustache.js/issues/569
+[#580]: https://github.com/janl/mustache.js/issues/580
+[#592]: https://github.com/janl/mustache.js/issues/592
+[#593]: https://github.com/janl/mustache.js/issues/593
+[#597]: https://github.com/janl/mustache.js/issues/597
+[#610]: https://github.com/janl/mustache.js/issues/610
 
 [@afc163]: https://github.com/afc163
 [@Andersos]: https://github.com/Andersos
+[@calvinf]: https://github.com/calvinf
 [@cmbuckley]: https://github.com/cmbuckley
 [@cweider]: https://github.com/cweider
 [@dasilvacontin]: https://github.com/dasilvacontin
 [@djchie]: https://github.com/djchie
 [@EvanLovely]: https://github.com/EvanLovely
 [@fallenice]: https://github.com/fallenice
+[@Flaque]: https://github.com/Flaque
 [@guybedford]: https://github.com/guybedford
 [@imagentleman]: https://github.com/imagentleman
 [@jfmercer]: https://github.com/jfmercer
@@ -218,17 +262,23 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [@kannix]: https://github.com/kannix
 [@keirog]: https://github.com/keirog
 [@kkirsche]: https://github.com/kkirsche
+[@kookookchoozeus]: https://github.com/kookookchoozeus
 [@kristijanmatic]: https://github.com/kristijanmatic
 [@mateusortiz]: https://github.com/mateusortiz
+[@mightyplow]: https://github.com/mightyplow
 [@mikesherov]: https://github.com/mikesherov
 [@mjackson]: https://github.com/mjackson
+[@mortonfox]: https://github.com/mortonfox
 [@nagaozen]: https://github.com/nagaozen
 [@norfish]: https://github.com/norfish
 [@palkan]: https://github.com/palkan
 [@pgilad]: https://github.com/pgilad
 [@phillipj]: https://github.com/phillipj
+[@pra85]: https://github.com/pra85
 [@ShashankaNataraj]: https://github.com/ShashankaNataraj
 [@simast]: https://github.com/simast
 [@TiddoLangerak]: https://github.com/TiddoLangerak
+[@tomekwi]: https://github.com/tomekwi
+[@wizawu]: https://github.com/wizawu
 [@Xcrucifier]: https://github.com/Xcrucifier
 [@yousefcisco]: https://github.com/yousefcisco

@@ -1,6 +1,6 @@
 {
   "name": "mustache",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "Logic-less {{mustache}} templates with JavaScript",
   "author": "mustache.js Authors <http://github.com/janl/mustache.js>",
   "homepage": "https://github.com/janl/mustache.js",
@@ -53,7 +53,9 @@
     ]
   },
   "greenkeeper": {
-    "ignore": ["eslint"]
+    "ignore": [
+      "eslint"
+    ]
   },
   "license": "MIT"
 }
