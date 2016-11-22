@@ -446,7 +446,7 @@
     var cache = this.cache;
     var tokens = cache[template];
 
-    if (tokens == null)
+    if (!tokens)
       tokens = cache[template] = parseTemplate(template, tags);
 
     return tokens;
