@@ -58,7 +58,6 @@
   }
 
   var entityMap = {
-    '&': '&amp;',
     '<': '&lt;',
     '>': '&gt;',
     '"': '&quot;',
@@ -67,11 +66,10 @@
     '`': '&#x60;',
     '=': '&#x3D;'
   };
-
-  function escapeHtml (string) {
-    return String(string).replace(/[&<>"'`=\/]/g, function fromEntityMap (s) {
-      return entityMap[s];
-    });
+  function escapeHtml(string) {
+    return String(string)
+      .replace(/[<>"'\/]/g, function (s) { return entityMap[s]; }) 
+      .replace(/&(?![A-Za-z0-9#][A-Za-z0-9]+;)+/g, '&amp;'); 
   }
 
   var whiteRe = /\s*/;
