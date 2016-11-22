@@ -10,7 +10,7 @@
 
 We call it "logic-less" because there are no if statements, else clauses, or for loops. Instead there are only tags. Some tags are replaced with a value, some nothing, and others a series of values.
 
-For a language-agnostic overview of mustache's template syntax, see the `mustache(5)` [manpage](http://mustache.github.com/mustache.5.html).
+For a language-agnostic overview of mustache's template syntax, see the `mustache(5)` [main page](http://mustache.github.com/mustache.5.html).
 
 ## Where to use mustache.js?
 
