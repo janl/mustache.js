@@ -525,11 +525,7 @@
       // Extract the portion of the original template that the section contains.
       value = value.call(context.view, originalTemplate.slice(token[3], token[5]), subRender);
 
-      if (value != null)
-        buffer += value;
-    } else {
-      buffer += this.renderTokens(token[4], context, partials, originalTemplate);
-    }
+    buffer += (value != null) ? value : this.renderTokens(token[4], context, partials, originalTemplate);
     return buffer;
   };
 
@@ -551,15 +547,11 @@
   };
 
   Writer.prototype.unescapedValue = function unescapedValue (token, context) {
-    var value = context.lookup(token[1]);
-    if (value != null)
-      return value;
+    return (value != null) ? value : context.lookup(token[1]);
   };
 
   Writer.prototype.escapedValue = function escapedValue (token, context) {
-    var value = context.lookup(token[1]);
-    if (value != null)
-      return mustache.escape(value);
+    return (value != null) ? mustache.escape(value) : context.lookup(token[1]);
   };
 
   Writer.prototype.rawValue = function rawValue (token) {
