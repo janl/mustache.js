@@ -16,8 +16,7 @@ var skipTests = {
   ],
   partials: [
     'Standalone Without Previous Line',
-    'Standalone Without Newline',
-    'Standalone Indentation'
+    'Standalone Without Newline'
   ],
   sections: [
     'Standalone Without Newline'

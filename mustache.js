@@ -101,6 +101,10 @@
    * Tokens that are the root node of a subtree contain two more elements: 1) an
    * array of tokens in the subtree and 2) the index in the original template at
    * which the closing tag for that section begins.
+   *
+   * Tokens for partials also contain two more elements: 1) a string value of
+   * indendation prior to that tag and 2) the index of that tag on that line -
+   * eg a value of 2 indicates the partial is the third tag on this line.
    */
   function parseTemplate (template, tags) {
     if (!template)
@@ -111,6 +115,8 @@
     var spaces = [];       // Indices of whitespace tokens on the current line
     var hasTag = false;    // Is there a {{tag}} on the current line?
     var nonSpace = false;  // Is there a non-space char on the current line?
+    var indentation = '';  // Tracks indentation for tags that use it
+    var tagIndex = 0;      // Stores a count of number of tags encountered on a line
 
     // Strips all whitespace tokens array for the current line
     // if there was a {{#tag}} on it and otherwise only space.
@@ -156,6 +162,8 @@
 
           if (isWhitespace(chr)) {
             spaces.push(tokens.length);
+            if (!nonSpace)
+              indentation += chr;
           } else {
             nonSpace = true;
           }
@@ -164,8 +172,11 @@
           start += 1;
 
           // Check for whitespace on the current line.
-          if (chr === '\n')
+          if (chr === '\n') {
             stripSpace();
+            indentation = '';
+            tagIndex = 0;
+          }
         }
       }
 
@@ -197,7 +208,12 @@
       if (!scanner.scan(closingTagRe))
         throw new Error('Unclosed tag at ' + scanner.pos);
 
-      token = [ type, value, start, scanner.pos ];
+      if (type == '>') {
+        token = [ type, value, start, scanner.pos, indentation, tagIndex ];
+      } else {
+        token = [ type, value, start, scanner.pos ];
+      }
+      tagIndex++;
       tokens.push(token);
 
       if (type === '#' || type === '^') {
@@ -542,12 +558,30 @@
       return this.renderTokens(token[4], context, partials, originalTemplate);
   };
 
+  Writer.prototype.indentPartial = function indentPartial (partial, indentation) {
+    var filteredIndentation = indentation.replace(/[^ \t]/g, '');
+    var partialByNl = partial.split('\n');
+    for (var i = 0; i < partialByNl.length; i++) {
+      if (partialByNl[i].length) {
+        partialByNl[i] = filteredIndentation + partialByNl[i];
+      }
+    }
+    return partialByNl.join('\n');
+  };
+
   Writer.prototype.renderPartial = function renderPartial (token, context, partials) {
     if (!partials) return;
 
     var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
-    if (value != null)
-      return this.renderTokens(this.parse(value), context, partials, value);
+    if (value != null) {
+      var tagIndex = token[5];
+      var indentation = token[4];
+      var indentedValue = value;
+      if (tagIndex == 0 && indentation) {
+        var indentedValue = this.indentPartial(value, indentation);
+      }
+      return this.renderTokens(this.parse(indentedValue), context, partials, value);
+    }
   };
 
   Writer.prototype.unescapedValue = function unescapedValue (token, context) {
