@@ -377,11 +377,11 @@
     if (cache.hasOwnProperty(name)) {
       value = cache[name];
     } else {
-      var context = this, names, index, lookupHit = false;
+      var context = this, intermediateValue, names, index, lookupHit = false;
 
       while (context) {
         if (name.indexOf('.') > 0) {
-          value = context.view;
+          intermediateValue = context.view;
           names = name.split('.');
           index = 0;
 
@@ -396,19 +396,21 @@
            * This is specially necessary for when the value has been set to
            * `undefined` and we want to avoid looking up parent contexts.
            **/
-          while (value != null && index < names.length) {
+          while (intermediateValue != null && index < names.length) {
             if (index === names.length - 1)
-              lookupHit = hasProperty(value, names[index]);
+              lookupHit = hasProperty(intermediateValue, names[index]);
 
-            value = value[names[index++]];
+            intermediateValue = intermediateValue[names[index++]];
           }
         } else {
-          value = context.view[name];
+          intermediateValue = context.view[name];
           lookupHit = hasProperty(context.view, name);
         }
 
-        if (lookupHit)
+        if (lookupHit) {
+          value = intermediateValue;
           break;
+        }
 
         context = context.parent;
       }

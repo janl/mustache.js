@@ -7,3 +7,4 @@
 <h2>Test truthy false values:</h2>
 <p>Zero: 0</p>
 <p>False: false</p>
+<p>length of string should not be rendered: </p>
