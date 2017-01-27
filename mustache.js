@@ -545,7 +545,9 @@
   Writer.prototype.renderPartial = function renderPartial (token, context, partials) {
     if (!partials) return;
 
-    var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
+    var value = isFunction(partials)
+      ? partials(token[1], context.view)
+      : partials[token[1]];
     if (value != null)
       return this.renderTokens(this.parse(value), context, partials, value);
   };
