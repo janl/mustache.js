@@ -171,7 +171,7 @@ Output:
 
 ### Sections
 
-Sections render blocks of text one or more times, depending on the value of the key in the current context.
+Sections render blocks of text 0 or more times, depending on the value of the key in the current context.
 
 A section begins with a pound and ends with a slash. That is, `{{#person}}` begins a `person` section, while `{{/person}}` ends it. The text between the two tags is referred to as that section's "block".
 
