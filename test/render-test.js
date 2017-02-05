@@ -23,7 +23,13 @@ describe('Mustache.render', function () {
     it('knows how to render ' + test.name, function () {
       var output;
       if (test.partial) {
-        output = Mustache.render(test.template, view, { partial: test.partial });
+        // Ensure partials can be retreived via an object or a function
+        // See Writer.prototype.renderPartial
+        var partial = test.name === 'partial_function'
+          ? function (partial, context) { return test.partial }
+          : { partial: test.partial };
+
+        output = Mustache.render(test.template, view, partial);
       } else {
         output = Mustache.render(test.template, view);
       }
