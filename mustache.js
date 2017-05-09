@@ -42,7 +42,7 @@
    * including its prototype, has a given property
    */
   function hasProperty (obj, propName) {
-    return obj != null && typeof obj === 'object' && (propName in obj);
+    return obj != null && (propName in obj);
   }
 
   // Workaround for https://issues.apache.org/jira/browse/COUCHDB-577
