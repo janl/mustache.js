@@ -19,5 +19,6 @@
   truthy: {
     zero: 0,
     notTrue: false
-  }
+  },
+  singletonList: [{singletonItem: "singleton item"}]
 })
