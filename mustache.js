@@ -42,9 +42,19 @@
    * including its prototype, has a given property
    */
   function hasProperty (obj, propName) {
+    return obj != null && typeof obj === 'object' && (propName in obj);
+  }
+
+  /**
+   * Safe way of detecting whether or not the given thing is a primitive and
+   * whether it has the given property
+   */
+  function primitiveHasOwnProperty (primitive, propName) {  
     return (
-      (obj != null && typeof obj === 'object' && (propName in obj))
-      || (obj !== undefined && obj.hasOwnProperty(propName))
+      typeof primitive !== 'object' 
+      && primitive !== undefined
+      && primitive.hasOwnProperty
+      && primitive.hasOwnProperty(propName)
     );
   }
 
@@ -401,7 +411,10 @@
            **/
           while (intermediateValue != null && index < names.length) {
             if (index === names.length - 1)
-              lookupHit = hasProperty(intermediateValue, names[index]);
+              lookupHit = (
+                hasProperty(intermediateValue, names[index]) 
+                || primitiveHasOwnProperty(intermediateValue, names[index])
+              );
 
             intermediateValue = intermediateValue[names[index++]];
           }
