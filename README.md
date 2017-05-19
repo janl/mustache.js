@@ -493,6 +493,40 @@ Mustache.render(template, view, {
 });
 ```
 
+#### Note on Partials - No Context Support (Yet!)
+
+The wording above with regard to partials "thought of as a single, expanded template", is exact.
+
+That is, partial view data is not nested as expected with other view rendering engines.
+
+In other words, `Contexts` are currently not supported.
+
+For example,
+
+```
+var view = {
+   name: 'test name 1',
+   names: [
+      { name: 'test name 2' },
+      { name: 'test name 3' }
+   ],
+   partial: {
+      names: [
+         { name: 'test name 4' },
+         { name: 'test name 5' }
+      ]
+   }
+};
+
+var template = '{{#names}}Hi, {{name}}!{{/names}} PARTIAL TEST : {{> partial}}'
+var partial = '{{#names}}Hello, my name is {{name}}.{{/names}}'
+console.log(Mustache.render(template, view, { partial: partial}));
+```
+
+does not output the expected `test name 4` or `test name 5`.
+
+Therefore, the JSON object must be flat / flattened when using partials with no key conflicts.
+
 ### Custom Delimiters
 
 Custom delimiters can be used in place of `{{` and `}}` by setting the new values in JavaScript or in templates.
