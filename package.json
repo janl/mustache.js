@@ -40,7 +40,7 @@
     "test-browser-local": "npm run pre-test-browser && zuul --local 8080 -- test/context-test.js test/scanner-test.js test/parse-test.js test/render-test-browser.js"
   },
   "devDependencies": {
-    "chai": "^3.4.0",
+    "chai": "^4.0.1",
     "eslint": "^2.5.1",
     "mocha": "^3.0.2",
     "zuul": "^3.11.0"
