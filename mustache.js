@@ -428,16 +428,23 @@
           intermediateValue = context.view[name];
 
           /**
-           * Only checking against hasProperty, which always returns false if
-           * context.view is not an object. Deliberately omitting the check
-           * against primitiveHasOwnProperty if dot notation is not used.
+           * Only checking against `hasProperty`, which always returns `false` if
+           * `context.view` is not an object. Deliberately omitting the check
+           * against `primitiveHasOwnProperty` if dot notation is not used.
            *
            * Consider this example:
-           * Mustache.render("{{#length}}{{length}}{{/length}}", {length: "hello"})
+           * ```
+           * Mustache.render("The length of a football field is {{#length}}{{length}}{{/length}}.", {length: "100 yards"})
+           * ```
            *
-           * If we were to check also against primitiveHasOwnProperty, as we do
-           * in the dot notation case, then render call would return 5, rather
-           * than the expected "hello".
+           * If we were to check also against `primitiveHasOwnProperty`, as we do
+           * in the dot notation case, then render call would return:
+           *
+           * "The length of a football field is 9."
+           *
+           * rather than the expected:
+           *
+           * "The length of a football field is 100 yards."
            **/
           lookupHit = hasProperty(context.view, name);
         }
