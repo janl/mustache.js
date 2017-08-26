@@ -447,7 +447,7 @@
     var tokens = cache[template];
 
     if (tokens == null)
-      tokens = cache[template] = parseTemplate(template, tags);
+      tokens = cache[template + ':' + (tags || mustache.tags).join(':')] = parseTemplate(template, tags);
 
     return tokens;
   };
