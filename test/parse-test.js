@@ -124,7 +124,7 @@ describe('Mustache.parse', function () {
   describe('when parsing a template after already having parsed that template with a different Mustache.tags', function() {
     it('returns different tokens for the latter parse', function() {
       var template = "{{foo}}[bar]";
-      var parsedWithBraces = Mustache.parse(template, ['(', ')']);
+      var parsedWithBraces = Mustache.parse(template);
 
       var oldTags = Mustache.tags;
       Mustache.tags = ['[', ']'];
