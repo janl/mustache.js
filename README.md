@@ -125,9 +125,12 @@ Mustache.render(
 Mustache.parse(
   template              : String,
   tags = ['{{', '}}']   : Tags,
-) => String
+) => Token[]
+
+interface Token [String, String, Number, Number, Token[]?, Number?]
 
 interface Tags [String, String]
+
 ```
 
 ## Templates
