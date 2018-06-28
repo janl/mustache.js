@@ -181,9 +181,10 @@
 
       // Get the tag value.
       if (type === '=') {
-        value = scanner.scanUntil(equalsRe);
-        scanner.scan(equalsRe);
-        scanner.scanUntil(closingTagRe);
+        value = scanner.scanUntil(closingTagRe);
+        if (value.charAt(value.length - 1) !== '=')
+          throw new Error('Setting in template failure');
+        value = value.slice(0, -1).trim();
       } else if (type === '{') {
         value = scanner.scanUntil(closingCurlyRe);
         scanner.scan(curlyRe);
