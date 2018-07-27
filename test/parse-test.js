@@ -53,6 +53,10 @@ var expectations = {
                                             : [ [ '#', 'foo', 0, 8, [ [ '#', 'a', 11, 17, [ [ 'text', '    ', 18, 22 ], [ 'name', 'b', 22, 27 ], [ 'text', '\n', 27, 28 ] ], 30 ] ], 37 ] ]
 };
 
+beforeEach(function (){
+  Mustache.clearCache();
+});
+
 describe('Mustache.parse', function () {
 
   for (var template in expectations) {
@@ -132,6 +136,17 @@ describe('Mustache.parse', function () {
       Mustache.tags = oldTags;
 
       assert.notDeepEqual(parsedWithBrackets, parsedWithBraces);
+    });
+  });
+
+  describe('when parsing a template with the same tags second time, return the cached tokens', function () {
+    it('returns the same tokens for the latter parse', function () {
+      var template = '{{foo}}[bar]';
+      var parsedResult1 = Mustache.parse(template);
+      var parsedResult2 = Mustache.parse(template);
+
+      assert.deepEqual(parsedResult1, parsedResult2);
+      assert.ok(parsedResult1 === parsedResult2);
     });
   });
 
