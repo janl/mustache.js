@@ -7,31 +7,19 @@ def minified_file
   ENV['FILE'] || 'mustache.min.js'
 end
 
-task :install_mocha do
-  sh "npm install -g mocha" if `which mocha`.empty?
-end
-
-task :install_uglify do
-  sh "npm install -g uglify-js" if `which uglifyjs`.empty?
-end
-
-task :install_jshint do
-  sh "npm install -g jshint" if `which jshint`.empty?
-end
-
 desc "Run all tests"
 task :test => :install_mocha do
-  sh "mocha test"
+  sh "./node_modules/.bin/mocha test"
 end
 
 desc "Make a compressed build in #{minified_file}"
 task :minify => :install_uglify do
-  sh "uglifyjs mustache.js > #{minified_file}"
+  sh "./node_modules/.bin/uglifyjs mustache.js > #{minified_file}"
 end
 
 desc "Run JSHint"
 task :hint => :install_jshint do
-  sh "jshint mustache.js"
+  sh "./node_modules/.bin/jshint mustache.js"
 end
 
 # Creates a task that uses the various template wrappers to make a wrapped
