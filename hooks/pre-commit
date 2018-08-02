@@ -72,11 +72,6 @@ class Bumper
 	def did_bump
 		if !@bumped
 			puts 'bump detected!'
-			if `which uglifyjs`.empty?
-				puts_c 31, 'you need uglifyjs installed'
-				puts 'run `sudo npm install -g uglify-js`'
-				exit 1
-			end
 		end
 		@bumped = true
 	end
