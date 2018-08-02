@@ -6,7 +6,7 @@ node_js:
   - 4
   - 6
 before_install:
-  - npm install -g npm@2.x
+  - "test $TRAVIS_NODE_VERSION != '0.8' || npm install -g npm@2.x"
 script:
   - npm test
   - "test $TRAVIS_PULL_REQUEST != 'false' || test $TRAVIS_NODE_VERSION != '6' || npm run test-browser"
