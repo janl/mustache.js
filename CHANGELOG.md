@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.3.1] / 2 August 2018
+
+### Minor
+
+ * [#643]: `Writer.prototype.parse` to cache by tags in addition to template string, by [@raymond-lam].
+ * [#664]: Fix `Writer.prototype.parse` cache, by [@seminaoki].
+
+### Dev
+
+ * [#666]: Install release tools with npm rather than pre-commit hook & `Rakefile`, by [@phillipj].
+ * [#667], [#668]: Stabilize browser test suite, by [@phillipj].
+
+### Docs
+
+ * [#644]: Document global Mustache.escape overriding capacity, by [@paultopia].
+ * [#657]: Correct `Mustache.parse()` return type documentation, by [@bbrooks].
+
 ## [2.3.0] / 8 November 2016
 
 ### Minor
@@ -202,6 +219,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[2.3.1]: https://github.com/janl/mustache.js/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/janl/mustache.js/compare/v2.2.1...v2.3.0
 [2.2.1]: https://github.com/janl/mustache.js/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/janl/mustache.js/compare/v2.1.3...v2.2.0
@@ -244,9 +262,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [#593]: https://github.com/janl/mustache.js/issues/593
 [#597]: https://github.com/janl/mustache.js/issues/597
 [#610]: https://github.com/janl/mustache.js/issues/610
+[#643]: https://github.com/janl/mustache.js/issues/643
+[#644]: https://github.com/janl/mustache.js/issues/644
+[#657]: https://github.com/janl/mustache.js/issues/657
+[#664]: https://github.com/janl/mustache.js/issues/664
+[#666]: https://github.com/janl/mustache.js/issues/666
+[#667]: https://github.com/janl/mustache.js/issues/667
+[#668]: https://github.com/janl/mustache.js/issues/668
 
 [@afc163]: https://github.com/afc163
 [@Andersos]: https://github.com/Andersos
+[@bbrooks]: https://github.com/bbrooks
 [@calvinf]: https://github.com/calvinf
 [@cmbuckley]: https://github.com/cmbuckley
 [@cweider]: https://github.com/cweider
@@ -272,9 +298,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [@nagaozen]: https://github.com/nagaozen
 [@norfish]: https://github.com/norfish
 [@palkan]: https://github.com/palkan
+[@paultopia]: https://github.com/paultopia
 [@pgilad]: https://github.com/pgilad
 [@phillipj]: https://github.com/phillipj
 [@pra85]: https://github.com/pra85
+[@raymond-lam]: https://github.com/raymond-lam
+[@seminaoki]: https://github.com/seminaoki
 [@ShashankaNataraj]: https://github.com/ShashankaNataraj
 [@simast]: https://github.com/simast
 [@TiddoLangerak]: https://github.com/TiddoLangerak
