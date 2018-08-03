@@ -6,3 +6,7 @@ browsers:
     version: latest
   - name: ie
     version: 9..latest
+concurrency: 1
+tunnel:
+  type: ngrok
+  bind_tls: false
