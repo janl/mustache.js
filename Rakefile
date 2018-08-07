@@ -8,17 +8,17 @@ def minified_file
 end
 
 desc "Run all tests"
-task :test => :install_mocha do
+task :test do
   sh "./node_modules/.bin/mocha test"
 end
 
 desc "Make a compressed build in #{minified_file}"
-task :minify => :install_uglify do
+task :minify do
   sh "./node_modules/.bin/uglifyjs mustache.js > #{minified_file}"
 end
 
 desc "Run JSHint"
-task :hint => :install_jshint do
+task :hint do
   sh "./node_modules/.bin/jshint mustache.js"
 end
 
