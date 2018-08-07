@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.3.1] / 2 August 2018
+## [2.3.1] / 7 August 2018
 
 ### Minor
 
