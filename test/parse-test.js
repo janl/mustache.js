@@ -53,6 +53,10 @@ var expectations = {
                                             : [ [ '#', 'foo', 0, 8, [ [ '#', 'a', 11, 17, [ [ 'text', '    ', 18, 22 ], [ 'name', 'b', 22, 27 ], [ 'text', '\n', 27, 28 ] ], 30 ] ], 37 ] ]
 };
 
+beforeEach(function (){
+  Mustache.clearCache();
+});
+
 describe('Mustache.parse', function () {
 
   for (var template in expectations) {
@@ -100,6 +104,49 @@ describe('Mustache.parse', function () {
       assert.throws(function () {
         Mustache.parse('A template {{=<%=}}');
       }, /invalid tags/i);
+    });
+  });
+
+  describe('when parsing a template without tags specified followed by the same template with tags specified', function() {
+    it('returns different tokens for the latter parse', function() {
+      var template = "{{foo}}[bar]";
+      var parsedWithBraces = Mustache.parse(template);
+      var parsedWithBrackets = Mustache.parse(template, ['[', ']']);
+      assert.notDeepEqual(parsedWithBrackets, parsedWithBraces);
+    });
+  });
+
+  describe('when parsing a template with tags specified followed by the same template with different tags specified', function() {
+    it('returns different tokens for the latter parse', function() {
+      var template = "(foo)[bar]";
+      var parsedWithParens = Mustache.parse(template, ['(', ')']);
+      var parsedWithBrackets = Mustache.parse(template, ['[', ']']);
+      assert.notDeepEqual(parsedWithBrackets, parsedWithParens);
+    });
+  });
+
+  describe('when parsing a template after already having parsed that template with a different Mustache.tags', function() {
+    it('returns different tokens for the latter parse', function() {
+      var template = "{{foo}}[bar]";
+      var parsedWithBraces = Mustache.parse(template);
+
+      var oldTags = Mustache.tags;
+      Mustache.tags = ['[', ']'];
+      var parsedWithBrackets = Mustache.parse(template);
+      Mustache.tags = oldTags;
+
+      assert.notDeepEqual(parsedWithBrackets, parsedWithBraces);
+    });
+  });
+
+  describe('when parsing a template with the same tags second time, return the cached tokens', function () {
+    it('returns the same tokens for the latter parse', function () {
+      var template = '{{foo}}[bar]';
+      var parsedResult1 = Mustache.parse(template);
+      var parsedResult2 = Mustache.parse(template);
+
+      assert.deepEqual(parsedResult1, parsedResult2);
+      assert.ok(parsedResult1 === parsedResult2);
     });
   });
 
