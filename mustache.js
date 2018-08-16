@@ -439,15 +439,17 @@
   };
 
   /**
-   * Parses and caches the given `template` and returns the array of tokens
+   * Parses and caches the given `template` according to the given `tags` or
+   * `mustache.tags` if `tags` is omitted,  and returns the array of tokens
    * that is generated from the parse.
    */
   Writer.prototype.parse = function parse (template, tags) {
     var cache = this.cache;
-    var tokens = cache[template];
+    var cacheKey = template + ':' + (tags || mustache.tags).join(':');
+    var tokens = cache[cacheKey];
 
     if (tokens == null)
-      tokens = cache[template] = parseTemplate(template, tags);
+      tokens = cache[cacheKey] = parseTemplate(template, tags);
 
     return tokens;
   };
