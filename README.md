@@ -117,9 +117,10 @@ Following is an [rtype](https://git.io/rtype) signature of the most commonly use
 
 ```js
 Mustache.render(
-  template  : String,
-  view      : Object,
-  partials? : Object,
+  template            : String,
+  view                : Object,
+  partials?           : Object,
+  tags = ['{{', '}}'] : Tags,
 ) => String
 
 Mustache.parse(
@@ -504,15 +505,15 @@ Custom delimiters can be used in place of `{{` and `}}` by setting the new value
 
 #### Setting in JavaScript
 
-The `Mustache.tags` property holds an array consisting of the opening and closing tag values. Set custom values by passing a new array of tags to `parse()`, which gets honored over the default values, or by overriding the `tags` property itself:
+The `Mustache.tags` property holds an array consisting of the opening and closing tag values. Set custom values by passing a new array of tags to `render()`, which gets honored over the default values, or by overriding the `tags` property itself:
 
 ```js
 var customTags = [ '<%', '%>' ];
 ```
 
-##### Pass Value into Parse Method
+##### Pass Value into Render Method
 ```js
-Mustache.parse(template, customTags);
+Mustache.render(template, view, {}, customTags);
 ```
 
 ##### Override Tags Property

@@ -461,9 +461,13 @@
    * names and templates of partials that are used in the template. It may
    * also be a function that is used to load partial templates on the fly
    * that takes a single argument: the name of the partial.
+   *
+   * If the optional `tags` argument is given here it must be an array with two
+   * string values: the opening and closing tags used in the template (e.g.
+   * [ "<%", "%>" ]). The default is to mustache.tags.
    */
-  Writer.prototype.render = function render (template, view, partials) {
-    var tokens = this.parse(template);
+  Writer.prototype.render = function render (template, view, partials, tags) {
+    var tokens = this.parse(template, tags);
     var context = (view instanceof Context) ? view : new Context(view);
     return this.renderTokens(tokens, context, partials, template);
   };
@@ -592,16 +596,18 @@
 
   /**
    * Renders the `template` with the given `view` and `partials` using the
-   * default writer.
+   * default writer. If the optional `tags` argument is given here it must be an
+   * array with two string values: the opening and closing tags used in the
+   * template (e.g. [ "<%", "%>" ]). The default is to mustache.tags.
    */
-  mustache.render = function render (template, view, partials) {
+  mustache.render = function render (template, view, partials, tags) {
     if (typeof template !== 'string') {
       throw new TypeError('Invalid template! Template should be a "string" ' +
                           'but "' + typeStr(template) + '" was given as the first ' +
                           'argument for mustache#render(template, view, partials)');
     }
 
-    return defaultWriter.render(template, view, partials);
+    return defaultWriter.render(template, view, partials, tags);
   };
 
   // This is here for backwards compatibility with 0.4.x.,
