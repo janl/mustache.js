@@ -117,9 +117,10 @@ Following is an [rtype](https://git.io/rtype) signature of the most commonly use
 
 ```js
 Mustache.render(
-  template  : String,
-  view      : Object,
-  partials? : Object,
+  template            : String,
+  view                : Object,
+  partials?           : Object,
+  tags = ['{{', '}}'] : Tags,
 ) => String
 
 Mustache.parse(
@@ -181,7 +182,7 @@ function loadUser() {
 
 The most basic tag type is a simple variable. A `{{name}}` tag renders the value of the `name` key in the current context. If there is no such key, nothing is rendered.
 
-All variables are HTML-escaped by default. If you want to render unescaped HTML, use the triple mustache: `{{{name}}}`. You can also use `&` to unescape a variable. 
+All variables are HTML-escaped by default. If you want to render unescaped HTML, use the triple mustache: `{{{name}}}`. You can also use `&` to unescape a variable.
 
 If you'd like to change HTML-escaping behavior globally (for example, to template non-HTML formats), you can override Mustache's escape function. For example, to disable all escaping: `Mustache.escape = function(text) {return text;};`.
 
@@ -504,10 +505,15 @@ Custom delimiters can be used in place of `{{` and `}}` by setting the new value
 
 #### Setting in JavaScript
 
-The `Mustache.tags` property holds an array consisting of the opening and closing tag values. Set custom values by setting this property.
+The `Mustache.tags` property holds an array consisting of the opening and closing tag values. Set custom values by passing a new array of tags to `render()`, which gets honored over the default values, or by overriding the `Mustache.tags` property itself:
 
 ```js
 var customTags = [ '<%', '%>' ];
+```
+
+##### Pass Value into Render Method
+```js
+Mustache.render(template, view, {}, customTags);
 ```
 
 ##### Override Tags Property
