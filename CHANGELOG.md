@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.3.2] / 17 August 2018
+
+This release is made to revert changes introduced in [2.3.1] that caused unexpected behaviour for several users.
+
+### Minor
+
+ * [#670]: Rollback template cache causing unexpected behaviour, by [@raymond-lam].
+
 ## [2.3.1] / 7 August 2018
 
 ### Minor
@@ -219,6 +227,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[2.3.2]: https://github.com/janl/mustache.js/compare/v2.3.1...v2.3.2
 [2.3.1]: https://github.com/janl/mustache.js/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/janl/mustache.js/compare/v2.2.1...v2.3.0
 [2.2.1]: https://github.com/janl/mustache.js/compare/v2.2.0...v2.2.1
@@ -269,6 +278,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 [#666]: https://github.com/janl/mustache.js/issues/666
 [#667]: https://github.com/janl/mustache.js/issues/667
 [#668]: https://github.com/janl/mustache.js/issues/668
+[#670]: https://github.com/janl/mustache.js/issues/670
 
 [@afc163]: https://github.com/afc163
 [@Andersos]: https://github.com/Andersos
