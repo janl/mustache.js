@@ -444,11 +444,10 @@
    */
   Writer.prototype.parse = function parse (template, tags) {
     var cache = this.cache;
-    var cacheKey = template + ':' + (tags || mustache.tags).join(':');
-    var tokens = cache[cacheKey];
+    var tokens = cache[template];
 
     if (tokens == null)
-      tokens = cache[cacheKey] = parseTemplate(template, tags);
+      tokens = cache[template] = parseTemplate(template, tags);
 
     return tokens;
   };
