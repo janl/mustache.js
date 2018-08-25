@@ -7,3 +7,6 @@
 <h2>Test truthy false values:</h2>
 <p>Zero: 0</p>
 <p>False: false</p>
+<p>length of string should be rendered: 3</p>
+<p>length of string in a list should be rendered: 14</p>
+<p>length of an array should be rendered: 2</p>
