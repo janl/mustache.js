@@ -3,6 +3,62 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.0.0] / x August 2018
+
+We are very happy to announce a new major version of mustache.js. We want to be very careful not to break projects
+out in the wild, and adhering to [Semantic Versioning](http://semver.org/) we have therefore cut this new major version.
+
+The changes introduced will likely not require any actions for most using projects, the things to look out for that
+might cause unexpected rendering results are described in the migration guide below.
+
+### Major
+
+* [#618]: Allow rendering properties of primitive types that are not objects, by [@raymond-lam].
+* [#643]: `Writer.prototype.parse` to cache by tags in addition to template string, by [@raymond-lam].
+* [#664]: Fix `Writer.prototype.parse` cache, by [@seminaoki].
+
+### Minor
+
+* [#673]: Add `tags` parameter to `Mustache.render()`, by [@raymond-lam].
+
+### Migrating from mustache.js v2.x to v3.x
+
+#### Rendering properties of primitive types
+
+We now allow properties of primitive types to be rendered, that means `Array.length`, `String.length` and similar. A
+corner case where this could cause unexpected output follows:
+
+View:
+```
+{
+  length: 13,
+  stooges: [
+    { name: "Moe" },
+    { name: "Larry" },
+    { name: "Curly" }
+  ]
+}
+```
+
+Template:
+```
+There are {{stooges.length}} Stooges!
+```
+
+Output with v3.0:
+```
+There are 3 Stooges!
+```
+
+Output with v2.x:
+```
+There are 13 Stooges!
+```
+
+#### Caching for templates with custom tags
+
+
+
 ## [2.3.2] / 17 August 2018
 
 This release is made to revert changes introduced in [2.3.1] that caused unexpected behaviour for several users.
@@ -227,6 +283,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[3.0.0]: https://github.com/janl/mustache.js/compare/v2.3.2...v3.0.0
 [2.3.2]: https://github.com/janl/mustache.js/compare/v2.3.1...v2.3.2
 [2.3.1]: https://github.com/janl/mustache.js/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/janl/mustache.js/compare/v2.2.1...v2.3.0
@@ -279,6 +336,8 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [#667]: https://github.com/janl/mustache.js/issues/667
 [#668]: https://github.com/janl/mustache.js/issues/668
 [#670]: https://github.com/janl/mustache.js/issues/670
+[#618]: https://github.com/janl/mustache.js/issues/618
+[#673]: https://github.com/janl/mustache.js/issues/673
 
 [@afc163]: https://github.com/afc163
 [@Andersos]: https://github.com/Andersos
