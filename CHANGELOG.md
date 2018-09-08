@@ -85,8 +85,8 @@ console.log(
 >> TEST 1
 ```
 
-The above illustrates the fact that `Mustache.parse()` cached the template without considering the custom delimiters provided.
-This is no longer true.
+The above illustrates the fact that `Mustache.parse()` made mustache.js cache the template without considering 
+the custom delimiters provided. This is no longer true.
 
 We don't longer encourage using `Mustache.parse()` for this purpose, but have rather added a fourth argument to
 `Mustache.render()` letting you provide custom delimiters when rendering.
