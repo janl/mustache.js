@@ -60,9 +60,39 @@ Output with v2.x:
   Curly:  characters
 ```
 
-#### Caching for templates with custom tags
+#### Caching for templates with custom delimiters
 
+We have improved the templates cache to ensure custom delimiters are taken into consideration for the cache.
+This improvement might cause unexpected rendering behaviour for using projects actively using the custom delimiters functionality.
 
+Previously it was possible to use `Mustache.parse()` in a means to set global custom delimiters. If custom
+delimiters were provided as an argument, it would affect all following calls to `Mustache.render()`.
+Consider the following:
+
+```js
+const template = "[[item.title]] [[item.value]]";
+mustache.parse(template, ["[[", "]]"]);
+
+console.log(
+  mustache.render(template, {
+    item: {
+      title: "TEST",
+      value: 1
+    }
+  })
+);
+
+>> TEST 1
+```
+
+The above illustrates the fact that `Mustache.parse()` cached the template without considering the custom delimiters provided.
+This is no longer true.
+
+We don't longer encourage using `Mustache.parse()` for this purpose, but have rather added a fourth argument to
+`Mustache.render()` letting you provide custom delimiters when rendering.
+
+If you still need the pre-parse the template and use custom delimiters at the same time, ensure to provide
+the custom delimiters as argument to `Mustache.render()` as well.
 
 ## [2.3.2] / 17 August 2018
 
