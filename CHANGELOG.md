@@ -25,13 +25,12 @@ might cause unexpected rendering results are described in the migration guide be
 
 #### Rendering properties of primitive types
 
-We now allow properties of primitive types to be rendered, that means `Array.length`, `String.length` and similar. A
-corner case where this could cause unexpected output follows:
+We have ensured properties of primitive types can be rendered at all times, that means `Array.length`, `String.length`
+and similar. A corner case where this could cause unexpected output follows:
 
 View:
 ```
 {
-  length: 13,
   stooges: [
     { name: "Moe" },
     { name: "Larry" },
@@ -42,17 +41,23 @@ View:
 
 Template:
 ```
-There are {{stooges.length}} Stooges!
+{{#stooges}}
+  {{name}}: {{name.length}} characters
+{{/stooges}}
 ```
 
 Output with v3.0:
 ```
-There are 3 Stooges!
+  Moe: 3 characters
+  Larry: 5 characters
+  Curly: 5 characters
 ```
 
 Output with v2.x:
 ```
-There are 13 Stooges!
+  Moe:  characters
+  Larry:  characters
+  Curly:  characters
 ```
 
 #### Caching for templates with custom tags
