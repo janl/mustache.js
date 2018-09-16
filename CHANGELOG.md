@@ -3,13 +3,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [3.0.0] / x August 2018
+## [3.0.0] / 16 September 2018
 
 We are very happy to announce a new major version of mustache.js. We want to be very careful not to break projects
 out in the wild, and adhering to [Semantic Versioning](http://semver.org/) we have therefore cut this new major version.
 
 The changes introduced will likely not require any actions for most using projects. The things to look out for that
 might cause unexpected rendering results are described in the migration guide below.
+
+A big shout out and thanks to [@raymond-lam] for this release! Without his contributions with code and issue triaging,
+this release would never have happened.
 
 ### Major
 
