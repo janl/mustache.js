@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 We are very happy to announce a new major version of mustache.js. We want to be very careful not to break projects
 out in the wild, and adhering to [Semantic Versioning](http://semver.org/) we have therefore cut this new major version.
 
-The changes introduced will likely not require any actions for most using projects, the things to look out for that
+The changes introduced will likely not require any actions for most using projects. The things to look out for that
 might cause unexpected rendering results are described in the migration guide below.
 
 ### Major
@@ -25,7 +25,7 @@ might cause unexpected rendering results are described in the migration guide be
 
 #### Rendering properties of primitive types
 
-We have ensured properties of primitive types can be rendered at all times, that means `Array.length`, `String.length`
+We have ensured properties of primitive types can be rendered at all times. That means `Array.length`, `String.length`
 and similar. A corner case where this could cause unexpected output follows:
 
 View:
@@ -65,7 +65,7 @@ Output with v2.x:
 We have improved the templates cache to ensure custom delimiters are taken into consideration for the cache.
 This improvement might cause unexpected rendering behaviour for using projects actively using the custom delimiters functionality.
 
-Previously it was possible to use `Mustache.parse()` in a means to set global custom delimiters. If custom
+Previously it was possible to use `Mustache.parse()` as a means to set global custom delimiters. If custom
 delimiters were provided as an argument, it would affect all following calls to `Mustache.render()`.
 Consider the following:
 
@@ -88,7 +88,7 @@ console.log(
 The above illustrates the fact that `Mustache.parse()` made mustache.js cache the template without considering 
 the custom delimiters provided. This is no longer true.
 
-We don't longer encourage using `Mustache.parse()` for this purpose, but have rather added a fourth argument to
+We no longer encourage using `Mustache.parse()` for this purpose, but have rather added a fourth argument to
 `Mustache.render()` letting you provide custom delimiters when rendering.
 
 If you still need the pre-parse the template and use custom delimiters at the same time, ensure to provide
