@@ -3,6 +3,97 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.0.0] / x August 2018
+
+We are very happy to announce a new major version of mustache.js. We want to be very careful not to break projects
+out in the wild, and adhering to [Semantic Versioning](http://semver.org/) we have therefore cut this new major version.
+
+The changes introduced will likely not require any actions for most using projects. The things to look out for that
+might cause unexpected rendering results are described in the migration guide below.
+
+### Major
+
+* [#618]: Allow rendering properties of primitive types that are not objects, by [@raymond-lam].
+* [#643]: `Writer.prototype.parse` to cache by tags in addition to template string, by [@raymond-lam].
+* [#664]: Fix `Writer.prototype.parse` cache, by [@seminaoki].
+
+### Minor
+
+* [#673]: Add `tags` parameter to `Mustache.render()`, by [@raymond-lam].
+
+### Migrating from mustache.js v2.x to v3.x
+
+#### Rendering properties of primitive types
+
+We have ensured properties of primitive types can be rendered at all times. That means `Array.length`, `String.length`
+and similar. A corner case where this could cause unexpected output follows:
+
+View:
+```
+{
+  stooges: [
+    { name: "Moe" },
+    { name: "Larry" },
+    { name: "Curly" }
+  ]
+}
+```
+
+Template:
+```
+{{#stooges}}
+  {{name}}: {{name.length}} characters
+{{/stooges}}
+```
+
+Output with v3.0:
+```
+  Moe: 3 characters
+  Larry: 5 characters
+  Curly: 5 characters
+```
+
+Output with v2.x:
+```
+  Moe:  characters
+  Larry:  characters
+  Curly:  characters
+```
+
+#### Caching for templates with custom delimiters
+
+We have improved the templates cache to ensure custom delimiters are taken into consideration for the cache.
+This improvement might cause unexpected rendering behaviour for using projects actively using the custom delimiters functionality.
+
+Previously it was possible to use `Mustache.parse()` as a means to set global custom delimiters. If custom
+delimiters were provided as an argument, it would affect all following calls to `Mustache.render()`.
+Consider the following:
+
+```js
+const template = "[[item.title]] [[item.value]]";
+mustache.parse(template, ["[[", "]]"]);
+
+console.log(
+  mustache.render(template, {
+    item: {
+      title: "TEST",
+      value: 1
+    }
+  })
+);
+
+>> TEST 1
+```
+
+The above illustrates the fact that `Mustache.parse()` made mustache.js cache the template without considering 
+the custom delimiters provided. This is no longer true.
+
+We no longer encourage using `Mustache.parse()` for this purpose, but have rather added a fourth argument to
+`Mustache.render()` letting you provide custom delimiters when rendering.
+
+If you still need the pre-parse the template and use custom delimiters at the same time, ensure to provide
+the custom delimiters as argument to `Mustache.render()` as well.
+
 ## [2.3.2] / 17 August 2018
 
 This release is made to revert changes introduced in [2.3.1] that caused unexpected behaviour for several users.
@@ -227,6 +318,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[3.0.0]: https://github.com/janl/mustache.js/compare/v2.3.2...v3.0.0
 [2.3.2]: https://github.com/janl/mustache.js/compare/v2.3.1...v2.3.2
 [2.3.1]: https://github.com/janl/mustache.js/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/janl/mustache.js/compare/v2.2.1...v2.3.0
@@ -279,6 +371,8 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [#667]: https://github.com/janl/mustache.js/issues/667
 [#668]: https://github.com/janl/mustache.js/issues/668
 [#670]: https://github.com/janl/mustache.js/issues/670
+[#618]: https://github.com/janl/mustache.js/issues/618
+[#673]: https://github.com/janl/mustache.js/issues/673
 
 [@afc163]: https://github.com/afc163
 [@Andersos]: https://github.com/Andersos
