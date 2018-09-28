@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.0.1] / 28 September 2018
+
+ * [#678]: Fix partials were not rendering tokens when not using default tags, by [@stackchain].
+
+
 ## [3.0.0] / 16 September 2018
 
 We are very happy to announce a new major version of mustache.js. We want to be very careful not to break projects

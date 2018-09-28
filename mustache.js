@@ -514,7 +514,7 @@
   Writer.prototype.render = function render (template, view, partials, tags) {
     var tokens = this.parse(template, tags);
     var context = (view instanceof Context) ? view : new Context(view);
-    return this.renderTokens(tokens, context, partials, template);
+    return this.renderTokens(tokens, context, partials, template, tags);
   };
 
   /**
@@ -526,7 +526,7 @@
    * If the template doesn't use higher-order sections, this argument may
    * be omitted.
    */
-  Writer.prototype.renderTokens = function renderTokens (tokens, context, partials, originalTemplate) {
+  Writer.prototype.renderTokens = function renderTokens (tokens, context, partials, originalTemplate, tags) {
     var buffer = '';
 
     var token, symbol, value;
@@ -537,7 +537,7 @@
 
       if (symbol === '#') value = this.renderSection(token, context, partials, originalTemplate);
       else if (symbol === '^') value = this.renderInverted(token, context, partials, originalTemplate);
-      else if (symbol === '>') value = this.renderPartial(token, context, partials, originalTemplate);
+      else if (symbol === '>') value = this.renderPartial(token, context, partials, tags);
       else if (symbol === '&') value = this.unescapedValue(token, context);
       else if (symbol === 'name') value = this.escapedValue(token, context);
       else if (symbol === 'text') value = this.rawValue(token);
@@ -592,12 +592,12 @@
       return this.renderTokens(token[4], context, partials, originalTemplate);
   };
 
-  Writer.prototype.renderPartial = function renderPartial (token, context, partials) {
+  Writer.prototype.renderPartial = function renderPartial (token, context, partials, tags) {
     if (!partials) return;
 
     var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
     if (value != null)
-      return this.renderTokens(this.parse(value), context, partials, value);
+      return this.renderTokens(this.parse(value, tags), context, partials, value);
   };
 
   Writer.prototype.unescapedValue = function unescapedValue (token, context) {
