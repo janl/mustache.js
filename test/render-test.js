@@ -17,37 +17,47 @@ describe('Mustache.render', function () {
                   'for mustache#render(template, view, partials)');
   });
 
-  it('uses tags argument instead of Mustache.tags when given', function () {
-    var template = '<<placeholder>>bar{{placeholder}}';
+  describe('custom tags', function () {
+    it('uses tags argument instead of Mustache.tags when given', function () {
+      var template = '<<placeholder>>bar{{placeholder}}';
 
-    Mustache.tags = ['{{', '}}'];
-    assert.equal(Mustache.render(template, { placeholder: 'foo' }, {}, ['<<', '>>']), 'foobar{{placeholder}}');
-  });
+      Mustache.tags = ['{{', '}}'];
+      assert.equal(Mustache.render(template, { placeholder: 'foo' }, {}, ['<<', '>>']), 'foobar{{placeholder}}');
+    });
 
-  it('uses tags argument instead of Mustache.tags when given, even when it previous rendered the template using Mustache.tags', function () {
-    var template = '((placeholder))bar{{placeholder}}';
+    it('uses tags argument instead of Mustache.tags when given, even when it previous rendered the template using Mustache.tags', function () {
+      var template = '((placeholder))bar{{placeholder}}';
 
-    Mustache.tags = ['{{', '}}'];
-    Mustache.render(template, { placeholder: 'foo' });
-    assert.equal(Mustache.render(template, { placeholder: 'foo' }, {}, ['((', '))']), 'foobar{{placeholder}}');
-  });
+      Mustache.tags = ['{{', '}}'];
+      Mustache.render(template, { placeholder: 'foo' });
+      assert.equal(Mustache.render(template, { placeholder: 'foo' }, {}, ['((', '))']), 'foobar{{placeholder}}');
+    });
 
-  it('uses tags argument instead of Mustache.tags when given, even when it previous rendered the template using different tags', function () {
-    var template = '[[placeholder]]bar<<placeholder>>';
+    it('uses tags argument instead of Mustache.tags when given, even when it previous rendered the template using different tags', function () {
+      var template = '[[placeholder]]bar<<placeholder>>';
 
-    Mustache.render(template, { placeholder: 'foo' }, {}, ['<<', '>>']);
-    assert.equal(Mustache.render(template, { placeholder: 'foo' }, {}, ['[[', ']]']), 'foobar<<placeholder>>');
-  });
+      Mustache.render(template, { placeholder: 'foo' }, {}, ['<<', '>>']);
+      assert.equal(Mustache.render(template, { placeholder: 'foo' }, {}, ['[[', ']]']), 'foobar<<placeholder>>');
+    });
 
-  it('does not mutate Mustache.tags when given tags argument', function() {
-    var correctMustacheTags = ['{{', '}}'];
-    Mustache.tags = correctMustacheTags;
+    it('does not mutate Mustache.tags when given tags argument', function() {
+      var correctMustacheTags = ['{{', '}}'];
+      Mustache.tags = correctMustacheTags;
 
-    Mustache.render('((placeholder))', { placeholder: 'foo' }, {}, ['((', '))']);
+      Mustache.render('((placeholder))', { placeholder: 'foo' }, {}, ['((', '))']);
 
-    assert.equal(Mustache.tags, correctMustacheTags);
-    assert.deepEqual(Mustache.tags, ['{{', '}}']);
-  });
+      assert.equal(Mustache.tags, correctMustacheTags);
+      assert.deepEqual(Mustache.tags, ['{{', '}}']);
+    });
+
+    it('uses provided tags when rendering partials', function () {
+      var output = Mustache.render('<%> partial %>', { name: 'Santa Claus' }, {
+        partial: '<% name %>'
+      }, ['<%', '%>']);
+
+      assert.equal(output, 'Santa Claus');
+    })
+  })
 
   tests.forEach(function (test) {
     var view = eval(test.view);
