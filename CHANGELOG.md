@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.0.1] / 11 November 2018
+
+ * [#679]: Fix partials not rendering tokens when using custom tags, by [@stackchain].
+
 ## [3.0.0] / 16 September 2018
 
 We are very happy to announce a new major version of mustache.js. We want to be very careful not to break projects
@@ -88,7 +92,7 @@ console.log(
 >> TEST 1
 ```
 
-The above illustrates the fact that `Mustache.parse()` made mustache.js cache the template without considering 
+The above illustrates the fact that `Mustache.parse()` made mustache.js cache the template without considering
 the custom delimiters provided. This is no longer true.
 
 We no longer encourage using `Mustache.parse()` for this purpose, but have rather added a fourth argument to
@@ -321,6 +325,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[3.0.1]: https://github.com/janl/mustache.js/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/janl/mustache.js/compare/v2.3.2...v3.0.0
 [2.3.2]: https://github.com/janl/mustache.js/compare/v2.3.1...v2.3.2
 [2.3.1]: https://github.com/janl/mustache.js/compare/v2.3.0...v2.3.1
@@ -376,6 +381,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [#670]: https://github.com/janl/mustache.js/issues/670
 [#618]: https://github.com/janl/mustache.js/issues/618
 [#673]: https://github.com/janl/mustache.js/issues/673
+[#679]: https://github.com/janl/mustache.js/issues/679
 
 [@afc163]: https://github.com/afc163
 [@Andersos]: https://github.com/Andersos
@@ -413,6 +419,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [@seminaoki]: https://github.com/seminaoki
 [@ShashankaNataraj]: https://github.com/ShashankaNataraj
 [@simast]: https://github.com/simast
+[@stackchain]: https://github.com/stackchain
 [@TiddoLangerak]: https://github.com/TiddoLangerak
 [@tomekwi]: https://github.com/tomekwi
 [@wizawu]: https://github.com/wizawu
