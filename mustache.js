@@ -406,8 +406,8 @@
       .replace(new RegExp(spaceRe, "g"),'')
       .split(pipelineRe)
 
-    pipelines = replacedName.slice(1);
-    name = replacedName[0];
+    name = replacedName.shift();
+    pipelines = replacedName;
 
     var cache = this.cache;
     var value
