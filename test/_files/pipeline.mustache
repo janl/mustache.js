@@ -1,0 +1,50 @@
+-- Use |
+{{name | upper}}
+{{name |upper}}
+{{name| upper}}
+{{name|upper}}
+{{name|underscore}}
+{{name|underscore  }}
+{{name|lower}}
+{{name |     lower}}
+{{name             |lower}}
+{{name             |lower | upper}}
+{{name             |lower | upper | lower | upper}}
+{{name             |lower | firstUpper}}
+{{name             | upper | firstUpper}}
+{{job.name | upper}}
+{{job.name | lower | firstUpper}}
+{{#numbers}}
+{{. | sumOne}}
+{{/numbers}}
+{{#numbers}}
+{{. | sumOne | setNameFuncion}}
+{{/numbers}}
+{{#numbers}}
+{{. | sumOne | setNameFuncion | lower}}
+{{/numbers}}
+-- Use |>
+{{name |> upper}}
+{{name |>upper}}
+{{name|> upper}}
+{{name|>upper}}
+{{name|>underscore}}
+{{name|>underscore  }}
+{{name|>lower}}
+{{name |>     lower}}
+{{name             |>lower}}
+{{name             |>lower |> upper}}
+{{name             |>lower |> upper |> lower |> upper}}
+{{name             |>lower |> firstUpper}}
+{{name             |> upper |> firstUpper}}
+{{job.name |> upper}}
+{{job.name |> lower |> firstUpper}}
+{{#numbers}}
+{{. |> sumOne}}
+{{/numbers}}
+{{#numbers}}
+{{. |> sumOne |> setNameFuncion}}
+{{/numbers}}
+{{#numbers}}
+{{. |> sumOne |> setNameFuncion |> lower}}
+{{/numbers}}

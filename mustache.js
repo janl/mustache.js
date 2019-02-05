@@ -49,7 +49,7 @@
    * Safe way of detecting whether or not the given thing is a primitive and
    * whether it has the given property
    */
-  function primitiveHasOwnProperty (primitive, propName) {  
+  function primitiveHasOwnProperty (primitive, propName) {
     return (
       primitive != null
       && typeof primitive !== 'object'
@@ -92,6 +92,7 @@
   var equalsRe = /\s*=/;
   var curlyRe = /\s*\}/;
   var tagRe = /#|\^|\/|>|\{|&|=|!/;
+  var pipelineRe = /\|\>?/;
 
   /**
    * Breaks up the given `template` string into a tree of tokens. If the `tags`
@@ -379,14 +380,37 @@
     return new Context(view, this);
   };
 
+  Context.prototype.resolvePipelineOperator = function resolvePipelineOperator(value, pipelines){
+    var self = this;
+    return pipelines.reduce(function(val, func){
+      if(self.view.hasOwnProperty(func)){
+        return self.view[func](val);
+      }else if(self.parent && self.parent.view.hasOwnProperty(func)){
+        return self.parent.view[func](val);
+      }else{
+        return value;
+      }
+    }
+    ,value);
+  }
+
   /**
    * Returns the value of the given name in this context, traversing
    * up the context hierarchy if the value is absent in this context's view.
    */
   Context.prototype.lookup = function lookup (name) {
-    var cache = this.cache;
+    // {{variable | pipelineOne |> pipelineTwo}}
+    // output: [variable,pipelineOne, pipelineTwo ]
+    // Can use | or |>.
+    var replacedName = name
+      .replace(new RegExp(spaceRe, "g"),'')
+      .split(pipelineRe)
 
-    var value;
+    pipelines = replacedName.slice(1);
+    name = replacedName[0];
+
+    var cache = this.cache;
+    var value
     if (cache.hasOwnProperty(name)) {
       value = cache[name];
     } else {
@@ -418,7 +442,7 @@
           while (intermediateValue != null && index < names.length) {
             if (index === names.length - 1)
               lookupHit = (
-                hasProperty(intermediateValue, names[index]) 
+                hasProperty(intermediateValue, names[index])
                 || primitiveHasOwnProperty(intermediateValue, names[index])
               );
 
@@ -460,8 +484,13 @@
       cache[name] = value;
     }
 
+
     if (isFunction(value))
       value = value.call(this.view);
+
+    if(pipelines){
+      value = this.resolvePipelineOperator(value, pipelines);
+    }
 
     return value;
   };
