@@ -388,7 +388,7 @@
       } else if (self.parent && self.parent.view.hasOwnProperty(func)){
         return self.parent.view[func](val);
       } else {
-        return value;
+        return val;
       }
     };
     return pipelines.reduce(pipelineResolver,value);
