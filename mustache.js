@@ -380,19 +380,19 @@
     return new Context(view, this);
   };
 
-  Context.prototype.resolvePipelineOperator = function resolvePipelineOperator(value, pipelines){
+  Context.prototype.resolvePipelineOperator = function resolvePipelineOperator (value, pipelines){
     var self = this;
-    return pipelines.reduce(function(val, func){
-      if(self.view.hasOwnProperty(func)){
+    var pipelineResolver = function pipelineResolver (val, func){
+      if (self.view.hasOwnProperty(func)){
         return self.view[func](val);
-      }else if(self.parent && self.parent.view.hasOwnProperty(func)){
+      } else if (self.parent && self.parent.view.hasOwnProperty(func)){
         return self.parent.view[func](val);
-      }else{
+      } else {
         return value;
       }
-    }
-    ,value);
-  }
+    };
+    return pipelines.reduce(pipelineResolver,value);
+  };
 
   /**
    * Returns the value of the given name in this context, traversing
@@ -403,14 +403,14 @@
     // output: [variable,pipelineOne, pipelineTwo ]
     // Can use | or |>.
     var replacedName = name
-      .replace(new RegExp(spaceRe, "g"),'')
-      .split(pipelineRe)
+      .replace(new RegExp(spaceRe, 'g'),'')
+      .split(pipelineRe);
 
     name = replacedName.shift();
     pipelines = replacedName;
 
     var cache = this.cache;
-    var value
+    var value;
     if (cache.hasOwnProperty(name)) {
       value = cache[name];
     } else {
@@ -488,7 +488,7 @@
     if (isFunction(value))
       value = value.call(this.view);
 
-    if(pipelines){
+    if (pipelines){
       value = this.resolvePipelineOperator(value, pipelines);
     }
 
