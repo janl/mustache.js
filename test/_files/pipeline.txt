@@ -48,3 +48,8 @@ Developer
 2: this is a value
 3: this is a value
 4: this is a value
+-- Level Array
+GOOD
+OUTGOING
+GOOD
+SHY

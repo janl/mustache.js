@@ -3,6 +3,15 @@
   job: {
     name: 'Developer'
   },
+  attributes:[
+    {
+      name: 'good',
+      options: [
+        'outgoing',
+        'shy'
+      ]
+    }
+  ],
   numbers:[1,2,3],
   sumOne:(value)=>{
     return value + 1;

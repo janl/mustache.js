@@ -383,13 +383,16 @@
   Context.prototype.resolvePipelineOperator = function resolvePipelineOperator (value, pipelines){
     var self = this;
     var pipelineResolver = function pipelineResolver (val, func){
-      if (self.view.hasOwnProperty(func)){
-        return self.view[func](val);
-      } else if (self.parent && self.parent.view.hasOwnProperty(func)){
-        return self.parent.view[func](val);
-      } else {
-        return val;
+      var findFunction = function(instance, functionToFind, valueToPutInFindedFunction, depth){
+        if(depth <= 0 || !instance) return null;
+        if(instance.view.hasOwnProperty(functionToFind)) return instance.view[func](valueToPutInFindedFunction);
+
+        return findFunction(instance.parent, functionToFind, val, depth)
       }
+
+      var findedFunction = findFunction(self, func, val, 20)
+
+      return findedFunction ? findedFunction : val
     };
     return pipelines.reduce(pipelineResolver,value);
   };

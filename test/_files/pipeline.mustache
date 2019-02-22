@@ -48,3 +48,10 @@
 {{#numbers}}
 {{. |> sumOne |> setNameFuncion |> lower}}
 {{/numbers}}
+-- Level Array
+{{#attributes}}
+{{#options}}
+{{name |> upper}}
+{{. |> upper}}
+{{/options}}
+{{/attributes}}
