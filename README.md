@@ -78,7 +78,7 @@ $ mustache -p path/to/partial1.mustache -p path/to/partial2.mustache dataView.js
 
 ## Who uses mustache.js?
 
-An updated list of mustache.js users is kept [on the Github wiki](http://wiki.github.com/janl/mustache.js/beard-competition). Add yourself or your company if you use mustache.js!
+An updated list of mustache.js users is kept [on the Github wiki](https://github.com/janl/mustache.js/wiki/Beard-Competition). Add yourself or your company if you use mustache.js!
 
 ## Contributing
 
