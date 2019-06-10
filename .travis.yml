@@ -1,12 +1,9 @@
 language: node_js
 node_js:
-  - 0.8
   - '0.10'
   - 0.12
   - 4
   - 6
-before_install:
-  - "test $TRAVIS_NODE_VERSION != '0.8' || npm install -g npm@2.x"
 script:
   - npm test
   - "test $TRAVIS_PULL_REQUEST != 'false' || test $TRAVIS_NODE_VERSION != '6' || npm run test-browser"
