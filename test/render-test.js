@@ -17,6 +17,14 @@ describe('Mustache.render', function () {
                   'for mustache#render(template, view, partials)');
   });
 
+  describe('preserve indentation when using partials', function() {
+    it.only ('should preserve indentation', function() {
+      var template = 'line1\n  bla la  \t\r\f foo line2{{>p1}}';
+      var renderResult = Mustache.render(template, {}, {p1: 'l1\nl2'});      
+      assert.equal(renderResult, 'line1\n  bla la  \t\r\f foo line2l1\n          \t\r\f          l2');
+    });
+  });
+
   describe('custom tags', function () {
     it('uses tags argument instead of Mustache.tags when given', function () {
       var template = '<<placeholder>>bar{{placeholder}}';

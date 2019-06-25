@@ -528,6 +528,7 @@
    */
   Writer.prototype.renderTokens = function renderTokens (tokens, context, partials, originalTemplate, tags) {
     var buffer = '';
+    var indentationContext = {spacer: ''};
 
     var token, symbol, value;
     for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) {
@@ -537,16 +538,29 @@
 
       if (symbol === '#') value = this.renderSection(token, context, partials, originalTemplate);
       else if (symbol === '^') value = this.renderInverted(token, context, partials, originalTemplate);
-      else if (symbol === '>') value = this.renderPartial(token, context, partials, tags);
+      else if (symbol === '>') value = this.renderPartial(token, context, partials, tags, indentationContext);
       else if (symbol === '&') value = this.unescapedValue(token, context);
       else if (symbol === 'name') value = this.escapedValue(token, context);
       else if (symbol === 'text') value = this.rawValue(token);
 
-      if (value !== undefined)
+      if (value !== undefined) {
+        this.updateIndentationContext(indentationContext, value);
         buffer += value;
+      }
     }
-
     return buffer;
+  };
+
+  Writer.prototype.updateIndentationContext = function updateIndentationContext (indentationContext, value) {
+    for (var j = 0; j < value.length; j++) {
+      if (value[j] == '\n') {
+        indentationContext.spacer = '';
+      } else if (isWhitespace(value[j])) {
+        indentationContext.spacer += value[j];
+      } else {
+        indentationContext.spacer += ' ';
+      }
+    }
   };
 
   Writer.prototype.renderSection = function renderSection (token, context, partials, originalTemplate) {
@@ -592,12 +606,27 @@
       return this.renderTokens(token[4], context, partials, originalTemplate);
   };
 
-  Writer.prototype.renderPartial = function renderPartial (token, context, partials, tags) {
+  Writer.prototype.renderPartial = function renderPartial (token, context, partials, tags, indentationContext) {
     if (!partials) return;
 
     var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
-    if (value != null)
-      return this.renderTokens(this.parse(value, tags), context, partials, value);
+    if (value != null) {
+      var renderResult = this.renderTokens(this.parse(value, tags), context, partials, value);
+      return this.indent(renderResult, indentationContext);
+    }      
+  };
+
+  Writer.prototype.indent = function indent (value, indentationContext) {
+    var indentedValue = '';
+    var lines = value.split('\n');
+    for (var i=0; i<lines.length; i++) {
+      if (i == 0) {
+        indentedValue += lines[i];
+      } else {
+        indentedValue += ('\n' + indentationContext.spacer + lines[i]);
+      }
+    }
+    return indentedValue;
   };
 
   Writer.prototype.unescapedValue = function unescapedValue (token, context) {
