@@ -18,11 +18,13 @@ describe('Mustache.render', function () {
   });
 
   describe('preserve indentation when using partials', function() {
-    it.only ('should preserve indentation', function() {
-      var template = 'line1\n  bla la  \t\r\f foo line2{{>p1}}';
+
+    it ('should preserve indentation with whitespaces', function() {
+      var template = 'a\n  {{>p1}}';
       var renderResult = Mustache.render(template, {}, {p1: 'l1\nl2'});      
-      assert.equal(renderResult, 'line1\n  bla la  \t\r\f foo line2l1\n          \t\r\f          l2');
+      assert.equal(renderResult, 'a\n  l1\n  l2');
     });
+
   });
 
   describe('custom tags', function () {

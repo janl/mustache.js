@@ -130,7 +130,7 @@
     function stripSpace () {
       if (hasTag && !nonSpace) {
         while (spaces.length)
-          delete tokens[spaces.pop()];
+          delete tokens[spaces.pop()];          
       } else {
         spaces = [];
       }
@@ -168,7 +168,7 @@
           chr = value.charAt(i);
 
           if (isWhitespace(chr)) {
-            spaces.push(tokens.length);
+            spaces.push(tokens.length);                                 
           } else {
             nonSpace = true;
           }
@@ -185,11 +185,16 @@
       // Match the opening tag.
       if (!scanner.scan(openingTagRe))
         break;
-
+        
       hasTag = true;
 
       // Get the tag type.
       type = scanner.scan(tagRe) || 'name';
+
+      if (type == '>') {
+        spaces = [];
+      } 
+      
       scanner.scan(whiteRe);
 
       // Get the tag value.
@@ -238,7 +243,7 @@
     if (openSection)
       throw new Error('Unclosed section "' + openSection[1] + '" at ' + scanner.pos);
 
-    return nestTokens(squashTokens(tokens));
+      return nestTokens(squashTokens(tokens));
   }
 
   /**
@@ -528,7 +533,7 @@
    */
   Writer.prototype.renderTokens = function renderTokens (tokens, context, partials, originalTemplate, tags) {
     var buffer = '';
-    var indentationContext = {spacer: ''};
+    var indentationContext = {spacer: '', active: true};
 
     var token, symbol, value;
     for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) {
@@ -554,11 +559,15 @@
   Writer.prototype.updateIndentationContext = function updateIndentationContext (indentationContext, value) {
     for (var j = 0; j < value.length; j++) {
       if (value[j] == '\n') {
+        indentationContext.active = true;
         indentationContext.spacer = '';
       } else if (isWhitespace(value[j])) {
-        indentationContext.spacer += value[j];
+        if (indentationContext.active) {
+          indentationContext.spacer += value[j];
+        }    
       } else {
-        indentationContext.spacer += ' ';
+        indentationContext.active = false;
+        indentationContext.spacer = '';
       }
     }
   };
@@ -611,22 +620,25 @@
 
     var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
     if (value != null) {
-      var renderResult = this.renderTokens(this.parse(value, tags), context, partials, value);
-      return this.indent(renderResult, indentationContext);
+      var indentedValue = this.indent(value, indentationContext);
+      return this.renderTokens(this.parse(indentedValue, tags), context, partials, value);      
     }      
   };
 
   Writer.prototype.indent = function indent (value, indentationContext) {
     var indentedValue = '';
-    var lines = value.split('\n');
+    var val = value + '$';
+    var lines = val.split('\n');
     for (var i=0; i<lines.length; i++) {
       if (i == 0) {
         indentedValue += lines[i];
+      } else if (lines[i] == '$') {
+        indentedValue += '\n$';
       } else {
         indentedValue += ('\n' + indentationContext.spacer + lines[i]);
       }
     }
-    return indentedValue;
+    return indentedValue.substring(0, indentedValue.length-1); // remove the $
   };
 
   Writer.prototype.unescapedValue = function unescapedValue (token, context) {
