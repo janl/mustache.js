@@ -6,6 +6,7 @@ var child_process = require('child_process');
 var _files = path.join(__dirname, '_files');
 var cliTxt = path.resolve(_files, 'cli.txt');
 var cliPartialsTxt = path.resolve(_files, 'cli_with_partials.txt');
+var cliRelativePartialsTxt = path.resolve(_files, 'cli_with_relative_partials.txt');
 var moduleVersion = require('../package').version;
 
 function changeForOS(command) {
@@ -140,5 +141,25 @@ describe('Mustache CLI', function () {
         done();
       });
     });
-  })
+  });
+
+  describe('with relative partials', function () {
+    before(function(done) {
+      fs.readFile(cliRelativePartialsTxt, function onFsEnd(err, data) {
+        if (err) return done(err);
+
+        expectedOutput = data.toString();
+        done();
+      });
+    });
+
+    it('selects the file described with the relative path', function (done) {
+      exec(changeForOS('bin/mustache -p test/_files/alt/partial_with_relative_path.mustache -p test/_files/partial_with_relative_path.mustache test/_files/cli_with_relative_partials.json test/_files/cli_with_relative_partials.mustache'), function (err, stdout, stderr) {
+        assert.equal(err, null);
+        assert.equal(stderr, '');
+        assert.equal(stdout, expectedOutput);
+        done();
+      });
+    });
+  });
 });
