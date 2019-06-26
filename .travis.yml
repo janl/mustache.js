@@ -5,6 +5,8 @@ node_js:
   - 4
   - 6
   - 8
+  - 10
+  - 12
 script:
   - npm test
   - "test $TRAVIS_PULL_REQUEST != 'false' || test $TRAVIS_NODE_VERSION != '6' || npm run test-browser"
