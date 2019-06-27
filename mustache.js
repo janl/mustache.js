@@ -132,7 +132,7 @@
     function stripSpace () {
       if (hasTag && !nonSpace) {
         while (spaces.length)
-          delete tokens[spaces.pop()];          
+          delete tokens[spaces.pop()];
       } else {
         spaces = [];
       }
@@ -182,7 +182,7 @@
           start += 1;
 
           // Check for whitespace on the current line.
-          if (chr === '\n'){
+          if (chr === '\n') {
             stripSpace();
             indentation = '';
             tagIndex = 0;
@@ -193,12 +193,11 @@
       // Match the opening tag.
       if (!scanner.scan(openingTagRe))
         break;
-        
+
       hasTag = true;
 
       // Get the tag type.
       type = scanner.scan(tagRe) || 'name';
-
       scanner.scan(whiteRe);
 
       // Get the tag value.
@@ -224,9 +223,7 @@
       if (type == '>' && tagIndex == 0) {
         token.push(indentation);        
       }        
-
       tagIndex ++;
-
       tokens.push(token);
 
       if (type === '#' || type === '^') {
@@ -256,7 +253,7 @@
     if (openSection)
       throw new Error('Unclosed section "' + openSection[1] + '" at ' + scanner.pos);
 
-      return nestTokens(squashTokens(tokens));
+    return nestTokens(squashTokens(tokens));
   }
 
   /**
@@ -560,10 +557,10 @@
       else if (symbol === 'name') value = this.escapedValue(token, context);
       else if (symbol === 'text') value = this.rawValue(token);
 
-      if (value !== undefined) {
+      if (value !== undefined)
         buffer += value;
-      }
     }
+
     return buffer;
   };
 
