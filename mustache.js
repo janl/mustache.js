@@ -124,6 +124,8 @@
     var spaces = [];       // Indices of whitespace tokens on the current line
     var hasTag = false;    // Is there a {{tag}} on the current line?
     var nonSpace = false;  // Is there a non-space char on the current line?
+    var indentation = '';  // Tracks indentation for tags that use it
+    var tagIndex = 0;      // Stores a count of number of tags encountered on a line  
 
     // Strips all whitespace tokens array for the current line
     // if there was a {{#tag}} on it and otherwise only space.
@@ -168,17 +170,23 @@
           chr = value.charAt(i);
 
           if (isWhitespace(chr)) {
-            spaces.push(tokens.length);                                 
+            spaces.push(tokens.length);
+            if (!nonSpace)
+              indentation += chr;                               
           } else {
             nonSpace = true;
+            indentation = '';
           }
 
           tokens.push([ 'text', chr, start, start + 1 ]);
           start += 1;
 
           // Check for whitespace on the current line.
-          if (chr === '\n')
+          if (chr === '\n'){
             stripSpace();
+            indentation = '';
+            tagIndex = 0;
+          }
         }
       }
 
@@ -191,10 +199,6 @@
       // Get the tag type.
       type = scanner.scan(tagRe) || 'name';
 
-      if (type == '>') {
-        spaces = [];
-      } 
-      
       scanner.scan(whiteRe);
 
       // Get the tag value.
@@ -216,6 +220,13 @@
         throw new Error('Unclosed tag at ' + scanner.pos);
 
       token = [ type, value, start, scanner.pos ];
+
+      if (type == '>' && tagIndex == 0) {
+        token.push(indentation);        
+      }        
+
+      tagIndex ++;
+
       tokens.push(token);
 
       if (type === '#' || type === '^') {
@@ -236,6 +247,8 @@
         compileTags(value);
       }
     }
+
+    stripSpace();
 
     // Make sure there are no open sections when we're done.
     openSection = sections.pop();
@@ -533,7 +546,6 @@
    */
   Writer.prototype.renderTokens = function renderTokens (tokens, context, partials, originalTemplate, tags) {
     var buffer = '';
-    var indentationContext = {spacer: '', active: true};
 
     var token, symbol, value;
     for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) {
@@ -543,33 +555,16 @@
 
       if (symbol === '#') value = this.renderSection(token, context, partials, originalTemplate);
       else if (symbol === '^') value = this.renderInverted(token, context, partials, originalTemplate);
-      else if (symbol === '>') value = this.renderPartial(token, context, partials, tags, indentationContext);
+      else if (symbol === '>') value = this.renderPartial(token, context, partials, tags);
       else if (symbol === '&') value = this.unescapedValue(token, context);
       else if (symbol === 'name') value = this.escapedValue(token, context);
       else if (symbol === 'text') value = this.rawValue(token);
 
       if (value !== undefined) {
-        this.updateIndentationContext(indentationContext, value);
         buffer += value;
       }
     }
     return buffer;
-  };
-
-  Writer.prototype.updateIndentationContext = function updateIndentationContext (indentationContext, value) {
-    for (var j = 0; j < value.length; j++) {
-      if (value[j] == '\n') {
-        indentationContext.active = true;
-        indentationContext.spacer = '';
-      } else if (isWhitespace(value[j])) {
-        if (indentationContext.active) {
-          indentationContext.spacer += value[j];
-        }    
-      } else {
-        indentationContext.active = false;
-        indentationContext.spacer = '';
-      }
-    }
   };
 
   Writer.prototype.renderSection = function renderSection (token, context, partials, originalTemplate) {
@@ -615,30 +610,29 @@
       return this.renderTokens(token[4], context, partials, originalTemplate);
   };
 
-  Writer.prototype.renderPartial = function renderPartial (token, context, partials, tags, indentationContext) {
+  Writer.prototype.renderPartial = function renderPartial (token, context, partials, tags) {
     if (!partials) return;
 
     var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
     if (value != null) {
-      var indentedValue = this.indent(value, indentationContext);
-      return this.renderTokens(this.parse(indentedValue, tags), context, partials, value);      
+      var indentation = token[4];
+      var partialVal = this.indentPartial(value, indentation);
+      return this.renderTokens(this.parse(partialVal, tags), context, partials, value);      
     }      
   };
 
-  Writer.prototype.indent = function indent (value, indentationContext) {
-    var indentedValue = '';
-    var val = value + '$';
-    var lines = val.split('\n');
-    for (var i=0; i<lines.length; i++) {
-      if (i == 0) {
-        indentedValue += lines[i];
-      } else if (lines[i] == '$') {
-        indentedValue += '\n$';
-      } else {
-        indentedValue += ('\n' + indentationContext.spacer + lines[i]);
+  Writer.prototype.indentPartial = function indentPartial (value, indentation) {
+    if (!indentation || indentation.length == 0) {
+      return value;
+    }
+    var filteredIndentation = indentation.replace(/[^ \t]/g, '');
+    var partialByNl = value.split('\n');
+    for (var i = 0; i < partialByNl.length; i++) {
+      if (partialByNl[i].length) {
+        partialByNl[i] = filteredIndentation + partialByNl[i];
       }
     }
-    return indentedValue.substring(0, indentedValue.length-1); // remove the $
+    return partialByNl.join('\n');
   };
 
   Writer.prototype.unescapedValue = function unescapedValue (token, context) {
