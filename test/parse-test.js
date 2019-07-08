@@ -107,27 +107,27 @@ describe('Mustache.parse', function () {
     });
   });
 
-  describe('when parsing a template without tags specified followed by the same template with tags specified', function() {
-    it('returns different tokens for the latter parse', function() {
-      var template = "{{foo}}[bar]";
+  describe('when parsing a template without tags specified followed by the same template with tags specified', function () {
+    it('returns different tokens for the latter parse', function () {
+      var template = '{{foo}}[bar]';
       var parsedWithBraces = Mustache.parse(template);
       var parsedWithBrackets = Mustache.parse(template, ['[', ']']);
       assert.notDeepEqual(parsedWithBrackets, parsedWithBraces);
     });
   });
 
-  describe('when parsing a template with tags specified followed by the same template with different tags specified', function() {
-    it('returns different tokens for the latter parse', function() {
-      var template = "(foo)[bar]";
+  describe('when parsing a template with tags specified followed by the same template with different tags specified', function () {
+    it('returns different tokens for the latter parse', function () {
+      var template = '(foo)[bar]';
       var parsedWithParens = Mustache.parse(template, ['(', ')']);
       var parsedWithBrackets = Mustache.parse(template, ['[', ']']);
       assert.notDeepEqual(parsedWithBrackets, parsedWithParens);
     });
   });
 
-  describe('when parsing a template after already having parsed that template with a different Mustache.tags', function() {
-    it('returns different tokens for the latter parse', function() {
-      var template = "{{foo}}[bar]";
+  describe('when parsing a template after already having parsed that template with a different Mustache.tags', function () {
+    it('returns different tokens for the latter parse', function () {
+      var template = '{{foo}}[bar]';
       var parsedWithBraces = Mustache.parse(template);
 
       var oldTags = Mustache.tags;

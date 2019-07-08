@@ -1,5 +1,5 @@
 ({
   title: function () {
-    return "A Comedy of Errors";
+    return 'A Comedy of Errors';
   }
-})
+});

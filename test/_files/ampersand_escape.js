@@ -1,3 +1,3 @@
 ({
-  message: "Some <code>"
-})
+  message: 'Some <code>'
+});

@@ -42,7 +42,7 @@ var noSkip = process.env.NOSKIP;
 var fileToRun = process.env.TEST;
 
 // Mustache should work on node 0.6 that doesn't have fs.existsSync
-function existsDir(path) {
+function existsDir (path) {
   try {
     return fs.statSync(path).isDirectory();
   } catch (x) {
@@ -63,21 +63,21 @@ if (fileToRun) {
   specFiles = [];
 }
 
-function getSpecs(specArea) {
+function getSpecs (specArea) {
   return JSON.parse(fs.readFileSync(path.join(specsDir, specArea + '.' + 'json'), 'utf8'));
 }
 
-describe('Mustache spec compliance', function() {
+describe('Mustache spec compliance', function () {
   beforeEach(function () {
     Mustache.clearCache();
   });
 
-  specFiles.forEach(function(specArea) {
-    describe('- ' + specArea + ':', function() {
+  specFiles.forEach(function (specArea) {
+    describe('- ' + specArea + ':', function () {
       var specs = getSpecs(specArea);
-      specs.tests.forEach(function(test) {
+      specs.tests.forEach(function (test) {
         var it_ = (!noSkip && skipTests[specArea] && skipTests[specArea].indexOf(test.name) >= 0) ? it.skip : it;
-        it_(test.name + ' - ' + test.desc, function() {
+        it_(test.name + ' - ' + test.desc, function () {
           if (test.data.lambda && test.data.lambda.__tag__ === 'code')
             test.data.lambda = eval('(function() { return ' + test.data.lambda.js + '; })');
           var output = Mustache.render(test.template, test.data, test.partials);

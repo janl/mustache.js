@@ -1,6 +1,6 @@
 ({
   title: function () {
-    return "Welcome";
+    return 'Welcome';
   },
-  again: "Goodbye"
-})
+  again: 'Goodbye'
+});

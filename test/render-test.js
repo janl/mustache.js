@@ -40,7 +40,7 @@ describe('Mustache.render', function () {
       assert.equal(Mustache.render(template, { placeholder: 'foo' }, {}, ['[[', ']]']), 'foobar<<placeholder>>');
     });
 
-    it('does not mutate Mustache.tags when given tags argument', function() {
+    it('does not mutate Mustache.tags when given tags argument', function () {
       var correctMustacheTags = ['{{', '}}'];
       Mustache.tags = correctMustacheTags;
 
@@ -56,8 +56,8 @@ describe('Mustache.render', function () {
       }, ['<%', '%>']);
 
       assert.equal(output, 'Santa Claus');
-    })
-  })
+    });
+  });
 
   tests.forEach(function (test) {
     var view = eval(test.view);

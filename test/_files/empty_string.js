@@ -1,6 +1,6 @@
 ({
-  description: "That is all!",
+  description: 'That is all!',
   child: {
-    description: ""
+    description: ''
   }
-})
+});

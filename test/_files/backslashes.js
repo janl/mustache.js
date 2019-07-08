@@ -1,3 +1,3 @@
 ({
-  value: "\\abc"
-})
+  value: '\\abc'
+});

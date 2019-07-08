@@ -1,0 +1,6 @@
+{
+  "extends": "../.eslintrc",
+  "rules": {
+    "func-names": 0
+  }
+}

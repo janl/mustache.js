@@ -1,8 +1,8 @@
 ({
-  "outer": {
-    "id": 1,
-    "second": {
-      "nothing": 2
+  'outer': {
+    'id': 1,
+    'second': {
+      'nothing': 2
     }
   }
-})
+});

@@ -1,5 +1,5 @@
 ({
-  "person?": {
-    name: "Jon"
+  'person?': {
+    name: 'Jon'
   }
-})
+});

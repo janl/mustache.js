@@ -1,6 +1,6 @@
 ({
-  name: "A Book",
-  authors: ["John Power", "Jamie Walsh"],
+  name: 'A Book',
+  authors: ['John Power', 'Jamie Walsh'],
   price: {
     value: 200,
     vat: function () {
@@ -13,12 +13,12 @@
   },
   availability: {
     status: true,
-    text: "In Stock"
+    text: 'In Stock'
   },
   // And now, some truthy false values
   truthy: {
     zero: 0,
     notTrue: false
   },
-  singletonList: [{singletonItem: "singleton item"}]
-})
+  singletonList: [{singletonItem: 'singleton item'}]
+});

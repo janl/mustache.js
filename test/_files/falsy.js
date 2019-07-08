@@ -1,8 +1,8 @@
 ({
-  "emptyString": "",
-  "emptyArray": [],
-  "zero": 0,
-  "null": null,
-  "undefined": undefined,
-  "NaN": 0/0
-})
+  'emptyString': '',
+  'emptyArray': [],
+  'zero': 0,
+  'null': null,
+  'undefined': undefined,
+  'NaN': 0/0
+});
