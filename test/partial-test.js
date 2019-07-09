@@ -1,0 +1,112 @@
+/* eslint-disable func-names */
+require('./helper');
+
+describe('Partials spec', function () {
+  beforeEach(function () {
+    Mustache.clearCache();
+  });
+
+  
+    it('The greater-than operator should expand to the named partial.', function () {
+      var template = '"{{>text}}"';
+      var data = {};
+      var partials = {'text':'from partial'};
+      var expected = '"from partial"';
+      var renderResult = Mustache.render(template, data, partials);
+      assert.equal(renderResult, expected);
+    });
+    it('The empty string should be used when the named partial is not found.', function () {
+      var template = '"{{>text}}"';
+      var data = {};
+      var partials = {};
+      var expected = '""';
+      var renderResult = Mustache.render(template, data, partials);
+      assert.equal(renderResult, expected);
+    });
+    it('The greater-than operator should operate within the current context.', function () {
+      var template = '"{{>partial}}"';
+      var data = {'text':'content'};
+      var partials = {'partial':'*{{text}}*'};
+      var expected = '"*content*"';
+      var renderResult = Mustache.render(template, data, partials);
+      assert.equal(renderResult, expected);
+    });
+    it('The greater-than operator should properly recurse.', function () {
+      var template = '{{>node}}';
+      var data = {'content':'X','nodes':[{'content':'Y','nodes':[]}]};
+      var partials = {'node':'{{content}}<{{#nodes}}{{>node}}{{/nodes}}>'};
+      var expected = 'X<Y<>>';
+      var renderResult = Mustache.render(template, data, partials);
+      assert.equal(renderResult, expected);
+    });
+    it('The greater-than operator should not alter surrounding whitespace.', function () {
+      var template = '| {{>partial}} |';
+      var data = {};
+      var partials = {'partial':'\t|\t'};
+      var expected = '| \t|\t |';
+      var renderResult = Mustache.render(template, data, partials);
+      assert.equal(renderResult, expected);
+    });
+    it('"\r\n" should be considered a newline for standalone tags.', function () {
+      var template = '|\r\n{{>partial}}\r\n|';
+      var data = {};
+      var partials = {'partial':'>'};
+      var expected = '|\r\n>|';
+      var renderResult = Mustache.render(template, data, partials);
+      assert.equal(renderResult, expected);
+    });
+    it('Standalone tags should not require a newline to precede them.', function () {
+      var template = '  {{>partial}}\n>';
+      var data = {};
+      var partials = {'partial':'>\n>'};
+      var expected = '  >\n  >>';
+      var renderResult = Mustache.render(template, data, partials);
+      assert.equal(renderResult, expected);
+    });   
+    it('Superfluous in-tag whitespace should be ignored.', function () {
+      var template = '|{{> partial }}|';
+      var data = {'boolean':true};
+      var partials = {'partial':'[]'};
+      var expected = '|[]|';
+      var renderResult = Mustache.render(template, data, partials);
+      assert.equal(renderResult, expected);
+    });
+    it('Each line of the partial should be indented before rendering.', function () {
+      var template = '\\\n {{>partial}}\n/\n';
+      var data = {
+				'content': '<\n->'
+			};
+      var partials =  {
+				'partial': '|\n{{{content}}}\n|\n'
+			};
+      var expected = '\\\n |\n <\n->\n |\n/\n';
+      var renderResult = Mustache.render(template, data, partials);
+      assert.equal(renderResult, expected);
+    });
+
+    it('Standalone tags should not require a newline to follow them.', function () {
+      var template = '>\n  {{>partial}}';
+      var data = {
+			
+			};
+      var partials =  {
+				'partial': '>\n>'
+			};
+      var expected = '>\n  >\n  >';
+      var renderResult = Mustache.render(template, data, partials);
+      assert.equal(renderResult, expected);
+    });
+
+    it('Whitespace should be left untouched.', function () {
+      var template = '  {{data}}  {{> partial}}\n';
+      var data = {
+        'data': '|'
+			};
+      var partials =  {
+				'partial': '>\n>'
+			};
+      var expected = '  |  >\n>\n';
+      var renderResult = Mustache.render(template, data, partials);
+      assert.equal(renderResult, expected);
+    });
+});
