@@ -248,6 +248,8 @@
       }
     }
 
+    stripSpace();
+
     // Make sure there are no open sections when we're done.
     openSection = sections.pop();
 
