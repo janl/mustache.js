@@ -597,7 +597,8 @@
 
     var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
     if (value != null)
-      return this.renderTokens(this.parse(value, tags), context, partials, value);
+      return this.renderTokens(this.parse(value, tags), context.view[token[1]] ?
+        context.push(context.view[token[1]]) : context, partials, value);
   };
 
   Writer.prototype.unescapedValue = function unescapedValue (token, context) {
