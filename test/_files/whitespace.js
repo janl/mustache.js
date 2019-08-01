@@ -1,4 +1,4 @@
 ({
-  tag1: "Hello",
-  tag2: "World"
-})
+  tag1: 'Hello',
+  tag2: 'World'
+});

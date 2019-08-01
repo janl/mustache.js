@@ -1,4 +1,4 @@
 ({
-  name: "Joe",
-  greeting: "Welcome"
-})
+  name: 'Joe',
+  greeting: 'Welcome'
+});

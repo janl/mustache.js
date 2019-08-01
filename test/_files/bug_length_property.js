@@ -1,3 +1,3 @@
 ({
     length: 'hello'
-})
+});

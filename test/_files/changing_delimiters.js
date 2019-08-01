@@ -1,4 +1,4 @@
 ({
-  "foo": "foooooooooooooo",
-  "bar": "<b>bar!</b>"
-})
+  'foo': 'foooooooooooooo',
+  'bar': '<b>bar!</b>'
+});

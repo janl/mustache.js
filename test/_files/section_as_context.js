@@ -7,4 +7,4 @@
       {label: 'listitem2'}
     ]
   }
-})
+});

@@ -1,3 +1,3 @@
 ({
-  html: "I like {{mustache}}"
-})
+  html: 'I like {{mustache}}'
+});

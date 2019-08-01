@@ -3,7 +3,7 @@ var path = require('path');
 
 var _files = path.join(__dirname, '_files');
 
-function getContents(testName, ext) {
+function getContents (testName, ext) {
   try {
     return fs.readFileSync(path.join(_files, testName + '.' + ext), 'utf8');
   } catch (ex) {
@@ -11,13 +11,13 @@ function getContents(testName, ext) {
   }
 }
 
-function getView(testName) {
+function getView (testName) {
   var view = getContents(testName, 'js');
   if (!view) throw new Error('Cannot find view for test "' + testName + '"');
   return view;
 }
 
-function getPartial(testName) {
+function getPartial (testName) {
   try {
     return getContents(testName, 'partial');
   } catch (error) {
@@ -40,7 +40,7 @@ if (testToRun) {
   });
 }
 
-function getTest(testName) {
+function getTest (testName) {
   return {
     name: testName,
     view: getView(testName),
@@ -50,6 +50,6 @@ function getTest(testName) {
   };
 }
 
-exports.getTests = function getTests() {
+exports.getTests = function getTests () {
   return testNames.map(getTest);
 };

@@ -1,6 +1,6 @@
 ({
   title: function () {
-    return "Bear > Shark";
+    return 'Bear > Shark';
   },
   symbol: null
-})
+});

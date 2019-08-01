@@ -1,1 +1,1 @@
-({ name: 'Bruno' })
+({ name: 'Bruno' });

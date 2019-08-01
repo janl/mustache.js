@@ -1,7 +1,7 @@
 ({
-  bold: function(){
-    return function(text, render) {
-      return "<b>" + render(text) + "</b>";
-    }
+  bold: function (){
+    return function (text, render) {
+      return '<b>' + render(text) + '</b>';
+    };
   }
-})
+});

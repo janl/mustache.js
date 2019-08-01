@@ -1,5 +1,5 @@
 ({
   foo: true,
-  bar: "{{win}}",
-  win: "FAIL"
-})
+  bar: '{{win}}',
+  win: 'FAIL'
+});
