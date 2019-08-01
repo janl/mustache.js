@@ -1,0 +1,4 @@
+({
+  id: 'main',
+  value: 'foo'
+})
