@@ -92,6 +92,8 @@
   var equalsRe = /\s*=/;
   var curlyRe = /\s*\}/;
   var tagRe = /#|\^|\/|>|\{|&|=|!/;
+  var openingTagRe, closingTagRe, closingCurlyRe;
+  var sections, tokens, spaces, hasTag, noneSpace;
 
   /**
    * Breaks up the given `template` string into a tree of tokens. If the `tags`
@@ -119,38 +121,11 @@
     if (!template)
       return [];
 
-    var sections = [];     // Stack to hold section tokens
-    var tokens = [];       // Buffer to hold the tokens
-    var spaces = [];       // Indices of whitespace tokens on the current line
-    var hasTag = false;    // Is there a {{tag}} on the current line?
-    var nonSpace = false;  // Is there a non-space char on the current line?
-
-    // Strips all whitespace tokens array for the current line
-    // if there was a {{#tag}} on it and otherwise only space.
-    function stripSpace () {
-      if (hasTag && !nonSpace) {
-        while (spaces.length)
-          delete tokens[spaces.pop()];
-      } else {
-        spaces = [];
-      }
-
-      hasTag = false;
-      nonSpace = false;
-    }
-
-    var openingTagRe, closingTagRe, closingCurlyRe;
-    function compileTags (tagsToCompile) {
-      if (typeof tagsToCompile === 'string')
-        tagsToCompile = tagsToCompile.split(spaceRe, 2);
-
-      if (!isArray(tagsToCompile) || tagsToCompile.length !== 2)
-        throw new Error('Invalid tags: ' + tagsToCompile);
-
-      openingTagRe = new RegExp(escapeRegExp(tagsToCompile[0]) + '\\s*');
-      closingTagRe = new RegExp('\\s*' + escapeRegExp(tagsToCompile[1]));
-      closingCurlyRe = new RegExp('\\s*' + escapeRegExp('}' + tagsToCompile[1]));
-    }
+    sections = [];     // Stack to hold section tokens
+    tokens = [];       // Buffer to hold the tokens
+    spaces = [];       // Indices of whitespace tokens on the current line
+    hasTag = false;    // Is there a {{tag}} on the current line?
+    nonSpace = false;  // Is there a non-space char on the current line?
 
     compileTags(tags || mustache.tags);
 
@@ -164,22 +139,8 @@
       value = scanner.scanUntil(openingTagRe);
 
       if (value) {
-        for (var i = 0, valueLength = value.length; i < valueLength; ++i) {
-          chr = value.charAt(i);
-
-          if (isWhitespace(chr)) {
-            spaces.push(tokens.length);
-          } else {
-            nonSpace = true;
-          }
-
-          tokens.push([ 'text', chr, start, start + 1 ]);
-          start += 1;
-
-          // Check for whitespace on the current line.
-          if (chr === '\n')
-            stripSpace();
-        }
+        parseTemplateBetweenTags(value, start);
+        start = start + value.length;
       }
 
       // Match the opening tag.
@@ -193,18 +154,8 @@
       scanner.scan(whiteRe);
 
       // Get the tag value.
-      if (type === '=') {
-        value = scanner.scanUntil(equalsRe);
-        scanner.scan(equalsRe);
-        scanner.scanUntil(closingTagRe);
-      } else if (type === '{') {
-        value = scanner.scanUntil(closingCurlyRe);
-        scanner.scan(curlyRe);
-        scanner.scanUntil(closingTagRe);
-        type = '&';
-      } else {
-        value = scanner.scanUntil(closingTagRe);
-      }
+      value = getTagValue(scanner, type);
+      type = type == '{' ? '&' : type;
 
       // Match the closing tag.
       if (!scanner.scan(closingTagRe))
@@ -239,6 +190,75 @@
       throw new Error('Unclosed section "' + openSection[1] + '" at ' + scanner.pos);
 
     return nestTokens(squashTokens(tokens));
+  }
+
+  /**
+   * Parses text between tags
+   */
+  function parseTemplateBetweenTags (template, start) {
+    var chr;
+    for (var i = 0, valueLength = template.length; i < valueLength; ++i) {
+      chr = template.charAt(i);
+
+      if (isWhitespace(chr)) {
+        spaces.push(tokens.length);
+      } else {
+        nonSpace = true;
+      }
+
+      tokens.push([ 'text', chr, start, start + 1 ]);
+      start += 1;
+
+      // Check for whitespace on the current line.
+      if (chr === '\n') {
+        // Strips all whitespace tokens array for the current line
+        // if there was a {{#tag}} on it and otherwise only space.
+        if (hasTag && !nonSpace) {
+          while (spaces.length)
+            delete tokens[spaces.pop()];
+        } else {
+          spaces = [];
+        }
+
+        hasTag = false;
+        nonSpace = false;
+      }
+    }
+  }
+
+  /**
+   * Gets value of the tag give it's type
+   */
+  function getTagValue (scanner, type) {
+    var value = null;
+    if (type === '=') {
+      value = scanner.scanUntil(equalsRe);
+      scanner.scan(equalsRe);
+      scanner.scanUntil(closingTagRe);
+    } else if (type === '{') {
+      value = scanner.scanUntil(closingCurlyRe);
+      scanner.scan(curlyRe);
+      scanner.scanUntil(closingTagRe);
+    } else {
+      value = scanner.scanUntil(closingTagRe);
+    }
+    return value;
+  }
+
+  /**
+   * Extracts regular expressions for opening tag, closing tag
+   * and closing curly tag from tags
+   */
+  function compileTags (tagsToCompile) {
+    if (typeof tagsToCompile === 'string')
+      tagsToCompile = tagsToCompile.split(spaceRe, 2);
+
+    if (!isArray(tagsToCompile) || tagsToCompile.length !== 2)
+      throw new Error('Invalid tags: ' + tagsToCompile);
+
+    openingTagRe = new RegExp(escapeRegExp(tagsToCompile[0]) + '\\s*');
+    closingTagRe = new RegExp('\\s*' + escapeRegExp(tagsToCompile[1]));
+    closingCurlyRe = new RegExp('\\s*' + escapeRegExp('}' + tagsToCompile[1]));
   }
 
   /**
