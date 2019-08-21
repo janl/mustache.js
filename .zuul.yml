@@ -5,7 +5,7 @@ browsers:
   - name: firefox
     version: latest
   - name: ie
-    version: 9..latest
+    version: 11..latest
 concurrency: 1
 tunnel:
   type: ngrok
