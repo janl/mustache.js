@@ -1,6 +1,6 @@
 {
-  "name": "mustache",
-  "version": "3.0.1",
+  "name": "terun-mustache",
+  "version": "3.0.3",
   "description": "Logic-less {{mustache}} templates with JavaScript",
   "author": "mustache.js Authors <http://github.com/janl/mustache.js>",
   "homepage": "https://github.com/janl/mustache.js",
@@ -44,7 +44,7 @@
     "eslint": "2.5.1",
     "jshint": "^2.9.5",
     "mocha": "^3.0.2",
-    "uglify-js": "^3.4.6",
+    "uglify-js": "^3.4.6"
     "zuul": "^3.11.0",
     "zuul-ngrok": "nolanlawson/zuul-ngrok#patch-1"
   },

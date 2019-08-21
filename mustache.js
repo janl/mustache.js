@@ -92,6 +92,7 @@
   var equalsRe = /\s*=/;
   var curlyRe = /\s*\}/;
   var tagRe = /#|\^|\/|>|\{|&|=|!/;
+  var pipelineRe = /\|\>?/;
 
   /**
    * Breaks up the given `template` string into a tree of tokens. If the `tags`
@@ -397,13 +398,39 @@
     return new Context(view, this);
   };
 
+  Context.prototype.resolvePipelineOperator = function resolvePipelineOperator (value, pipelines){
+    var self = this;
+    var pipelineResolver = function pipelineResolver (val, func){
+      var findFunction = function(instance, functionToFind, valueToPutInFindedFunction, depth){
+        if(depth <= 0 || !instance) return null;
+        if(instance.view.hasOwnProperty(functionToFind)) return instance.view[func](valueToPutInFindedFunction);
+
+        return findFunction(instance.parent, functionToFind, val, depth)
+      }
+
+      var findedFunction = findFunction(self, func, val, 20)
+
+      return findedFunction ? findedFunction : val
+    };
+    return pipelines.reduce(pipelineResolver,value);
+  };
+
   /**
    * Returns the value of the given name in this context, traversing
    * up the context hierarchy if the value is absent in this context's view.
    */
   Context.prototype.lookup = function lookup (name) {
-    var cache = this.cache;
+    // {{variable | pipelineOne |> pipelineTwo}}
+    // output: [variable,pipelineOne, pipelineTwo ]
+    // Can use | or |>.
+    var replacedName = name
+      .replace(new RegExp(spaceRe, 'g'),'')
+      .split(pipelineRe);
 
+    name = replacedName.shift();
+    pipelines = replacedName;
+
+    var cache = this.cache;
     var value;
     if (cache.hasOwnProperty(name)) {
       value = cache[name];
@@ -478,8 +505,13 @@
       cache[name] = value;
     }
 
+
     if (isFunction(value))
       value = value.call(this.view);
+
+    if (pipelines){
+      value = this.resolvePipelineOperator(value, pipelines);
+    }
 
     return value;
   };
