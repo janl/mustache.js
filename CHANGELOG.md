@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.0.2] / 21 August 2019
+
+### Fixed
+
+ * [#705]: Fix indentation of partials, by [@kevindew] and [@yotammadem].
+
+### Dev
+
+ * [#701]: Fix test failure for Node 10 and above, by [@andersk].
+ * [#704]: Lint all test files just like the source files, by [@phillipj].
+ * Start experimenting & comparing GitHub Actions vs Travis CI, by [@phillipj].
+
 ## [3.0.1] / 11 November 2018
 
  * [#679]: Fix partials not rendering tokens when using custom tags, by [@stackchain].
@@ -325,6 +337,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[3.0.2]: https://github.com/janl/mustache.js/compare/v3.0.1...v3.0.2
 [3.0.1]: https://github.com/janl/mustache.js/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/janl/mustache.js/compare/v2.3.2...v3.0.0
 [2.3.2]: https://github.com/janl/mustache.js/compare/v2.3.1...v2.3.2
@@ -382,8 +395,12 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [#618]: https://github.com/janl/mustache.js/issues/618
 [#673]: https://github.com/janl/mustache.js/issues/673
 [#679]: https://github.com/janl/mustache.js/issues/679
+[#701]: https://github.com/janl/mustache.js/issues/701
+[#704]: https://github.com/janl/mustache.js/issues/704
+[#705]: https://github.com/janl/mustache.js/issues/705
 
 [@afc163]: https://github.com/afc163
+[@andersk]: https://github.com/andersk
 [@Andersos]: https://github.com/Andersos
 [@bbrooks]: https://github.com/bbrooks
 [@calvinf]: https://github.com/calvinf
@@ -403,6 +420,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [@kkirsche]: https://github.com/kkirsche
 [@kookookchoozeus]: https://github.com/kookookchoozeus
 [@kristijanmatic]: https://github.com/kristijanmatic
+[@kevindew]: https://github.com/kevindew
 [@mateusortiz]: https://github.com/mateusortiz
 [@mightyplow]: https://github.com/mightyplow
 [@mikesherov]: https://github.com/mikesherov
@@ -424,4 +442,5 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [@tomekwi]: https://github.com/tomekwi
 [@wizawu]: https://github.com/wizawu
 [@Xcrucifier]: https://github.com/Xcrucifier
+[@yotammadem]: https://github.com/yotammadem
 [@yousefcisco]: https://github.com/yousefcisco
