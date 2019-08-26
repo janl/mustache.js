@@ -110,18 +110,30 @@ describe('Partials spec', function () {
       assert.equal(renderResult, expected);
     });
 
-    it('Partial should inherit functions without indentation.', function () {
+    it('Partial without indentation should inherit functions.', function () {
       var template = '{{> partial }}';
-      var data = {t: () => (label) => label.toUpperCase()};
+      var data = {
+        t: function () {
+              return function (label) {
+                      return label.toUpperCase();
+              };
+        }
+      };
       var partials = {partial: '{{ #t }}Input{{ /t }}:'};
       var expected = 'INPUT:';
       var renderResult = Mustache.render(template, data, partials);
       assert.equal(renderResult, expected);
     });
 
-    it('Partial should inherit functions with indentation.', function () {
+    it('Partial with indentation should inherit functions.', function () {
       var template = '  {{> partial }}';
-      var data = {t: () => (label) => label.toUpperCase()};
+      var data = {
+        t: function () {
+              return function (label) {
+                      return label.toUpperCase();
+              };
+        }
+      };
       var partials = {partial: '{{ #t }}Input{{ /t }}:'};
       var expected = '  INPUT:';
       var renderResult = Mustache.render(template, data, partials);
