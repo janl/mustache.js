@@ -109,4 +109,34 @@ describe('Partials spec', function () {
       var renderResult = Mustache.render(template, data, partials);
       assert.equal(renderResult, expected);
     });
+
+    it('Partial without indentation should inherit functions.', function () {
+      var template = '{{> partial }}';
+      var data = {
+        toUpperCase: function () {
+              return function (label) {
+                      return label.toUpperCase();
+              };
+        }
+      };
+      var partials = {partial: 'aA-{{ #toUpperCase }}Input{{ /toUpperCase }}-Aa'};
+      var expected = 'aA-INPUT-Aa';
+      var renderResult = Mustache.render(template, data, partials);
+      assert.equal(renderResult, expected);
+    });
+
+    it('Partial with indentation should inherit functions.', function () {
+      var template = '  {{> partial }}';
+      var data = {
+        toUpperCase: function () {
+              return function (label) {
+                      return label.toUpperCase();
+              };
+        }
+      };
+      var partials = {partial: 'aA-{{ #toUpperCase }}Input{{ /toUpperCase }}-Aa'};
+      var expected = '  aA-INPUT-Aa';
+      var renderResult = Mustache.render(template, data, partials);
+      assert.equal(renderResult, expected);
+    });
 });
