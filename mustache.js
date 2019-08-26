@@ -632,7 +632,7 @@
       if (tagIndex == 0 && indentation) {
         indentedValue = this.indentPartial(value, indentation);
       }
-      return this.renderTokens(this.parse(indentedValue, tags), context, partials, value);
+      return this.renderTokens(this.parse(indentedValue, tags), context, partials, indentedValue);
     }
   };
 
