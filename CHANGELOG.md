@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.0.3] / 27 August 2019
+
+### Added
+
+ * [#713]: Add test cases for custom functions in partials, by [@wol-soft].
+
+### Fixed
+
+ * [#714]: Bugfix for wrong function output in partials with indentation, by [@phillipj].
+
 ## [3.0.2] / 21 August 2019
 
 ### Fixed
@@ -337,6 +347,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[3.0.3]: https://github.com/janl/mustache.js/compare/v3.0.2...v3.0.3
 [3.0.2]: https://github.com/janl/mustache.js/compare/v3.0.1...v3.0.2
 [3.0.1]: https://github.com/janl/mustache.js/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/janl/mustache.js/compare/v2.3.2...v3.0.0
@@ -398,6 +409,8 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [#701]: https://github.com/janl/mustache.js/issues/701
 [#704]: https://github.com/janl/mustache.js/issues/704
 [#705]: https://github.com/janl/mustache.js/issues/705
+[#713]: https://github.com/janl/mustache.js/issues/713
+[#714]: https://github.com/janl/mustache.js/issues/714
 
 [@afc163]: https://github.com/afc163
 [@andersk]: https://github.com/andersk
@@ -444,3 +457,4 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [@Xcrucifier]: https://github.com/Xcrucifier
 [@yotammadem]: https://github.com/yotammadem
 [@yousefcisco]: https://github.com/yousefcisco
+[@wol-soft]: https://github.com/wol-soft
