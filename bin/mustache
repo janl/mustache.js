@@ -131,7 +131,7 @@ function isStdin (view) {
 }
 
 function isJson (view) {
-  return path.parse(view).ext === '.js';
+  return path.extname(view) === '.js';
 }
 
 function wasNotFound (err) {
