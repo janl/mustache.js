@@ -53,7 +53,7 @@ function run (/*args*/) {
 }
 
 function readView (cb) {
-  let view;
+  var view;
   if (isJson(viewArg)) {
     view = require(path.join(process.cwd(),viewArg));
     cb(view);
