@@ -130,7 +130,7 @@ function isStdin (view) {
   return view === '-';
 }
 
-function isJson (view) {
+function isJsFile (view) {
   return path.extname(view) === '.js';
 }
 
