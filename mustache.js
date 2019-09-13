@@ -122,7 +122,7 @@
   function parseTemplate (template, tags) {
     if (!template)
       return [];
-
+    var lineHasNonSpace = false;
     var sections = [];     // Stack to hold section tokens
     var tokens = [];       // Buffer to hold the tokens
     var spaces = [];       // Indices of whitespace tokens on the current line
@@ -175,10 +175,11 @@
 
           if (isWhitespace(chr)) {
             spaces.push(tokens.length);
-            if (!nonSpace)
-              indentation += chr;
+            indentation += chr;
           } else {
             nonSpace = true;
+            lineHasNonSpace = true;
+            indentation += ' ';
           }
 
           tokens.push([ 'text', chr, start, start + 1 ]);
@@ -189,6 +190,7 @@
             stripSpace();
             indentation = '';
             tagIndex = 0;
+            lineHasNonSpace = false;
           }
         }
       }
@@ -222,7 +224,7 @@
         throw new Error('Unclosed tag at ' + scanner.pos);
 
       if (type == '>') {
-        token = [ type, value, start, scanner.pos, indentation, tagIndex ];
+        token = [ type, value, start, scanner.pos, indentation, tagIndex, lineHasNonSpace ];
       } else {
         token = [ type, value, start, scanner.pos ];
       }
@@ -610,11 +612,11 @@
       return this.renderTokens(token[4], context, partials, originalTemplate);
   };
 
-  Writer.prototype.indentPartial = function indentPartial (partial, indentation) {
+  Writer.prototype.indentPartial = function indentPartial (partial, indentation, lineHasNonSpace) {
     var filteredIndentation = indentation.replace(/[^ \t]/g, '');
     var partialByNl = partial.split('\n');
     for (var i = 0; i < partialByNl.length; i++) {
-      if (partialByNl[i].length) {
+      if (partialByNl[i].length && (i > 0 || !lineHasNonSpace)) {
         partialByNl[i] = filteredIndentation + partialByNl[i];
       }
     }
@@ -626,11 +628,12 @@
 
     var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
     if (value != null) {
+      var lineHasNonSpace = token[6];
       var tagIndex = token[5];
       var indentation = token[4];
       var indentedValue = value;
       if (tagIndex == 0 && indentation) {
-        indentedValue = this.indentPartial(value, indentation);
+        indentedValue = this.indentPartial(value, indentation, lineHasNonSpace);
       }
       return this.renderTokens(this.parse(indentedValue, tags), context, partials, indentedValue);
     }

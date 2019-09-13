@@ -31,6 +31,24 @@ describe('Partials spec', function () {
       var renderResult = Mustache.render(template, data, partials);
       assert.equal(renderResult, expected);
     });
+    it('Inline partials should not be indented', function () {
+      var template = '    <div>{{> partial}}</div>';
+      var data = {};
+      var partials = {'partial':'This is a partial.'};
+      var expected = '    <div>This is a partial.</div>';
+      var renderResult = Mustache.render(template, data, partials);
+      assert.equal(renderResult, expected);
+    });
+
+    it('Inline partials should not be indented (multiline)', function () {
+      var template = '    <div>{{> partial}}</div>';
+      var data = {};
+      var partials = {'partial':'This is a\npartial.'};
+      var expected = '    <div>This is a\n         partial.</div>';
+      var renderResult = Mustache.render(template, data, partials);
+      assert.equal(renderResult, expected);
+    });
+
     it('The greater-than operator should properly recurse.', function () {
       var template = '{{>node}}';
       var data = {'content':'X','nodes':[{'content':'Y','nodes':[]}]};
