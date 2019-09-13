@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.1.0] / 13 September 2019
+
+### Added
+
+ * [#717]: Added support .js files as views in command line tool, by [@JEStaubach].
+
+### Fixed
+
+ * [#716]: Bugfix for indentation of inline partials, by [@yotammadem].
+
 ## [3.0.3] / 27 August 2019
 
 ### Added
@@ -347,6 +357,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[3.1.0]: https://github.com/janl/mustache.js/compare/v3.0.3...v3.1.0
 [3.0.3]: https://github.com/janl/mustache.js/compare/v3.0.2...v3.0.3
 [3.0.2]: https://github.com/janl/mustache.js/compare/v3.0.1...v3.0.2
 [3.0.1]: https://github.com/janl/mustache.js/compare/v3.0.0...v3.0.1
@@ -411,6 +422,8 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [#705]: https://github.com/janl/mustache.js/issues/705
 [#713]: https://github.com/janl/mustache.js/issues/713
 [#714]: https://github.com/janl/mustache.js/issues/714
+[#716]: https://github.com/janl/mustache.js/issues/716
+[#717]: https://github.com/janl/mustache.js/issues/717
 
 [@afc163]: https://github.com/afc163
 [@andersk]: https://github.com/andersk
@@ -426,6 +439,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [@Flaque]: https://github.com/Flaque
 [@guybedford]: https://github.com/guybedford
 [@imagentleman]: https://github.com/imagentleman
+[@JEStaubach]: https://github.com/JEStaubach
 [@jfmercer]: https://github.com/jfmercer
 [@jrburke]: https://github.com/jrburke
 [@kannix]: https://github.com/kannix
