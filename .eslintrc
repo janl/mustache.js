@@ -16,5 +16,14 @@
     "no-use-before-define": 0,
     "no-process-exit": 0,
     "strict": 0
-  }
+  },
+  "overrides": [
+    {
+      "files": ["mustache.mjs"],
+      "parserOptions": {
+        "sourceType": "module",
+        "ecmaVersion": 2015
+      }
+    }
+  ]
 }
