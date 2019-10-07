@@ -47,7 +47,7 @@ class Bumper
 			# notify codemonkey
 			puts "staged bumped files and created commit"
 			puts_c 32, "successfully bumped version to #{@target_v}!"
-			puts_c 33, "don't forget to `npm publish` and `spm publish`!"
+			puts_c 33, "don't forget to `npm publish`!"
 		end
 
 		exit 0

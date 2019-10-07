@@ -48,13 +48,6 @@
     "zuul": "^3.11.0",
     "zuul-ngrok": "nolanlawson/zuul-ngrok#patch-1"
   },
-  "spm": {
-    "main": "mustache.js",
-    "ignore": [
-      "test",
-      "wrappers"
-    ]
-  },
   "greenkeeper": {
     "ignore": [
       "eslint"
