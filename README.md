@@ -14,9 +14,9 @@ For a language-agnostic overview of mustache's template syntax, see the `mustach
 
 ## Where to use mustache.js?
 
-You can use mustache.js to render mustache templates anywhere you can use JavaScript. This includes web browsers, server-side environments such as [node](http://nodejs.org/), and [CouchDB](http://couchdb.apache.org/) views.
+You can use mustache.js to render mustache templates anywhere you can use JavaScript. This includes web browsers, server-side environments such as [Node.js](http://nodejs.org/), and [CouchDB](http://couchdb.apache.org/) views.
 
-mustache.js ships with support for both the [CommonJS](http://www.commonjs.org/) module API and the [Asynchronous Module Definition](https://github.com/amdjs/amdjs-api/wiki/AMD) API, or AMD.
+mustache.js ships with support for both the [CommonJS](http://www.commonjs.org/) module API and the [Asynchronous Module Definition](https://github.com/amdjs/amdjs-api/wiki/AMD) API (AMD).
 
 And this will be your templates after you use Mustache:
 
@@ -24,7 +24,7 @@ And this will be your templates after you use Mustache:
 
 ## Install
 
-You can get Mustache via npm.
+You can get Mustache via [npm](http://npmjs.com).
 
 ```bash
 $ npm install mustache --save
@@ -37,7 +37,7 @@ $ bower install --save mustache
 
 ## Command line tool
 
-mustache.js is shipped with a node based command line tool. It might be installed as a global tool on your computer to render a mustache template of some kind
+mustache.js is shipped with a Node.js based command line tool. It might be installed as a global tool on your computer to render a mustache template of some kind
 
 ```bash
 $ npm install -g mustache
@@ -573,7 +573,7 @@ $ rake qooxdoo
 ```
 ## Testing
 
-In order to run the tests you'll need to install [node](http://nodejs.org/).
+In order to run the tests you'll need to install [Node.js](http://nodejs.org/).
 
 You also need to install the sub module containing [Mustache specifications](http://github.com/mustache/spec) in the project root.
 ```bash
