@@ -1,0 +1,6 @@
+{
+  "extends": "../.eslintrc",
+  "parserOptions": {
+    "ecmaVersion": 2017
+  }
+}
