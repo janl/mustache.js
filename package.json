@@ -32,8 +32,9 @@
     "npm": ">=1.4.0"
   },
   "scripts": {
-    "pretest": "eslint mustache.js bin/mustache test/**/*.js",
-    "test": "mocha --reporter spec test/*-test.js",
+    "test": "npm run test-lint && npm run test-unit",
+    "test-lint": "eslint mustache.js bin/mustache test/**/*.js",
+    "test-unit": "mocha --reporter spec test/*-test.js",
     "test-render": "mocha  --reporter spec test/render-test",
     "pre-test-browser": "node test/create-browser-suite.js",
     "test-browser": "npm run pre-test-browser && zuul -- test/context-test.js test/parse-test.js test/scanner-test.js test/render-test-browser.js",
