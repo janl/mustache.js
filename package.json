@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "chai": "^3.4.0",
-    "eslint": "2.5.1",
+    "eslint": "^6.5.1",
     "jshint": "^2.9.5",
     "mocha": "^3.0.2",
     "uglify-js": "^3.4.6",
