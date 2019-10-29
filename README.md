@@ -29,11 +29,6 @@ You can get Mustache via [npm](http://npmjs.com).
 ```bash
 $ npm install mustache --save
 ```
-or install with bower:
-
-```bash
-$ bower install --save mustache
-```
 
 ## Command line tool
 
