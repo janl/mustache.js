@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src='https://unpkg.com/requirejs@2.3.6/require.js'></script>
+  <script>
+    require.config({
+      paths: {
+        mustache: '../../../mustache'
+      }
+    });
+
+    // Placed here rather in the -test.js file because it makes debugging in
+    // a local browser simpler because this .html file can be opened by double
+    // clicking the file and inspecting any errors/unexpected results
+    requirejs(['mustache'], Mustache => {
+        document.body.textContent = Mustache.render(
+          '{{title}} spends {{calc}}',
+          {
+            title: 'Joe',
+            calc: () => 2 + 4
+          });
+      });
+  </script>
+</head>
+<body>Text content to be overwritten<body>
+</html>

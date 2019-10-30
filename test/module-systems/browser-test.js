@@ -34,4 +34,16 @@ describe('Browser usage', () => {
 
     chai.assert.equal(value.trim(), 'Joe spends 6');
   });
+
+  it('is exposed as AMD and consumable via RequireJS', async function () {
+    this.timeout(10 * 1000);
+
+    await page.goto(`file://${path.join(__dirname, '_fixtures/amd.html')}`, { waitUntil: 'networkidle0' });
+
+    const bodyElement = await page.$('body');
+    const textContentProperty = await bodyElement.getProperty('textContent');
+    const value = await textContentProperty.jsonValue();
+
+    chai.assert.equal(value, 'Joe spends 6');
+  });
 });
