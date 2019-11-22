@@ -82,3 +82,18 @@ jobs:
           deno-version: 'v0.23.0'
       - run: deno --version
       - run: deno test --allow-net=deno.land test/module-systems/deno-test.ts
+
+  build-output-sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: Install, build and check git diff
+        run: |
+          npm ci
+          npm run build
+          git diff --quiet HEAD --
