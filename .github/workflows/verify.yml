@@ -58,6 +58,25 @@ jobs:
           npm install $ARCHIVE_FILENAME
           node commonjs-test.js
 
+  esm-usage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '>=13.2.0'
+      - name: Package, install and test
+        run: |
+          export ARCHIVE_FILENAME=$(npm pack | tail -n 1)
+          export UNPACK_DESTINATION=$(mktemp -d)
+          mv $ARCHIVE_FILENAME $UNPACK_DESTINATION
+          cp test/module-systems/esm-test.mjs $UNPACK_DESTINATION
+          cd $UNPACK_DESTINATION
+          npm install $ARCHIVE_FILENAME
+          node esm-test.mjs
+
   browser-usage:
     runs-on: ubuntu-latest
 
