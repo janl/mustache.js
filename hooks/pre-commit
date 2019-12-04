@@ -34,9 +34,9 @@ class Bumper
 		# if bumped, do extra stuff and notify the user
 		if @bumped
 
-			# minify `mustache.js` using the Rakefile task
-			puts "> minifying `mustache.js`..."
-			`rake minify`
+			# keep .mjs & .js|.min.js in sync
+			puts "> building and minifying `mustache.mjs`..."
+			`npm run build`
 
 			# stage files for commit
 			`git add package.json`
@@ -78,7 +78,7 @@ class Bumper
 end
 
 bumper = Bumper.new([
-	Source.new('mustache.js', /mustache.version = '([\d\.]*)'/),
+	Source.new('mustache.mjs', /version: '([\d\.]*)'/),
 	Source.new('mustache.js.nuspec', /<version>([\d\.]*)<\/version>/),
 ])
 bumper.start
