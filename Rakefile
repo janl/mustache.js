@@ -12,11 +12,6 @@ task :test do
   sh "./node_modules/.bin/mocha test"
 end
 
-desc "Make a compressed build in #{minified_file}"
-task :minify do
-  sh "./node_modules/.bin/uglifyjs mustache.js > #{minified_file}"
-end
-
 desc "Run JSHint"
 task :hint do
   sh "./node_modules/.bin/jshint mustache.js"
