@@ -170,16 +170,16 @@ describe('Mustache.parse', function () {
     it('returns the same tokens for the latter parse', function () {
       Mustache.toggleCache(false);
       var parse = Mustache.Writer.prototype.parse;
-      var cache = new Map();
+      var cache = {};
 
       Mustache.Writer.prototype.parse = function (template, tags) {
         var cacheKey = template + ':' + (tags || Mustache.tags).join(':');
-        var fromCache = cache.get(cacheKey);
+        var fromCache = cache[cacheKey];
         if (fromCache) {
           return fromCache;
         } else {
           var tokens = parse.call(this, template, tags);
-          cache.set(cacheKey, tokens);
+          cache[cacheKey] = tokens;
           return tokens;
         }
       };
