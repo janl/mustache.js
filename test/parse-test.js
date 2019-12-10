@@ -58,6 +58,7 @@ var expectations = {
 
 beforeEach(function (){
   Mustache.clearCache();
+  Mustache.toggleCache(true);
 });
 
 describe('Mustache.parse', function () {
@@ -144,6 +145,45 @@ describe('Mustache.parse', function () {
 
   describe('when parsing a template with the same tags second time, return the cached tokens', function () {
     it('returns the same tokens for the latter parse', function () {
+      var template = '{{foo}}[bar]';
+      var parsedResult1 = Mustache.parse(template);
+      var parsedResult2 = Mustache.parse(template);
+
+      assert.deepEqual(parsedResult1, parsedResult2);
+      assert.ok(parsedResult1 === parsedResult2);
+    });
+  });
+
+  describe('when parsing a template with caching disabled and the same tags second time, do not return the cached tokens', function () {
+    it('returns different tokens for the latter parse', function () {
+      Mustache.toggleCache(false);
+      var template = '{{foo}}[bar]';
+      var parsedResult1 = Mustache.parse(template);
+      var parsedResult2 = Mustache.parse(template);
+
+      assert.deepEqual(parsedResult1, parsedResult2);
+      assert.ok(parsedResult1 !== parsedResult2);
+    });
+  });
+
+  describe('when parsing a template with custom caching and the same tags second time, do not return the cached tokens', function () {
+    it('returns the same tokens for the latter parse', function () {
+      Mustache.toggleCache(false);
+      var parse = Mustache.Writer.prototype.parse;
+      var cache = new Map();
+
+      Mustache.Writer.prototype.parse = function (template, tags) {
+        var cacheKey = template + ':' + (tags || Mustache.tags).join(':');
+        var fromCache = cache.get(cacheKey);
+        if (fromCache) {
+          return fromCache;
+        } else {
+          var tokens = parse.call(this, template, tags);
+          cache.set(cacheKey, tokens);
+          return tokens;
+        }
+      };
+
       var template = '{{foo}}[bar]';
       var parsedResult1 = Mustache.parse(template);
       var parsedResult2 = Mustache.parse(template);

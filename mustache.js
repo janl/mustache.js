@@ -493,6 +493,7 @@
    */
   function Writer () {
     this.cache = {};
+    this.cacheEnabled = true;
   }
 
   /**
@@ -503,18 +504,33 @@
   };
 
   /**
+   * Disables or enables template caching for this writer.
+   */
+  Writer.prototype.toggleCache = function toggleCache (enable) {
+    // If we are disabling the cache, clear it.
+    if (!enable) {
+      this.clearCache();
+    }
+    this.cacheEnabled = !!enable;
+  };
+
+  /**
    * Parses and caches the given `template` according to the given `tags` or
    * `mustache.tags` if `tags` is omitted,  and returns the array of tokens
    * that is generated from the parse.
    */
   Writer.prototype.parse = function parse (template, tags) {
+    var tokens = null;
     var cache = this.cache;
     var cacheKey = template + ':' + (tags || mustache.tags).join(':');
-    var tokens = cache[cacheKey];
-
-    if (tokens == null)
-      tokens = cache[cacheKey] = parseTemplate(template, tags);
-
+    tokens = this.cacheEnabled ? cache[cacheKey] : null;
+  
+    if (tokens == null) {
+      tokens = parseTemplate(template, tags);
+      if (this.cacheEnabled) {
+        cache[cacheKey] = tokens;
+      }
+    }
     return tokens;
   };
 
@@ -667,6 +683,13 @@
    */
   mustache.clearCache = function clearCache () {
     return defaultWriter.clearCache();
+  };
+
+  /**
+   * Disables or enables template caching for this writer.
+   */
+  mustache.toggleCache = function toggleCache (value) {
+    return defaultWriter.toggleCache(value);
   };
 
   /**
