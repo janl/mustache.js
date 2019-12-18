@@ -3,6 +3,60 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.0] / 18 December 2019
+
+### Added
+
+* [#728]: Expose ECMAScript Module in addition to UMD (CommonJS, AMD & global scope), by [@phillipj] and [@zekth].
+
+### Using mustache.js as an ES module
+
+To stay backwards compatible with already using projects, the default exposed module format is still UMD.
+That means projects using mustache.js as an CommonJS, AMD or global scope module, from npm or directly from github.com
+can keep on doing that for now.
+
+For those projects who would rather want to use mustache.js as an ES module, the `mustache/mustache.mjs` file has to
+be `import`ed directly.
+
+Below are some usage scenarios for different runtimes.
+
+#### Modern browser with ES module support
+
+```html
+<!-- index.html -->
+<script type="module">
+  import mustache from "https://unpkg.com/mustache@3.2.0/mustache.mjs"
+
+  console.log(mustache.render('Hello {{name}}!', { name: 'Santa' }))
+  // Hello Santa!
+</script>
+```
+
+#### [Node.js](https://nodejs.org) (>= v13.2.0 or using --experimental-modules flag)
+
+```js
+// index.mjs
+import mustache from 'mustache/mustache.mjs'
+
+console.log(mustache.render('Hello {{name}}!', { name: 'Santa' }))
+// Hello Santa!
+```
+
+ES Module support for Node.js will be improved in the future when [Conditional Exports](https://nodejs.org/api/esm.html#esm_conditional_exports)
+is enabled by default rather than being behind an experimental flag.
+
+More info in [Node.js ECMAScript Modules docs](https://nodejs.org/api/esm.html).
+
+#### [Deno](https://deno.land/)
+
+```js
+// index.ts
+import mustache from 'https://unpkg.com/mustache@3.2.0/mustache.mjs'
+
+console.log(mustache.render('Hello {{name}}!', { name: 'Santa' }))
+// Hello Santa!
+```
+
 ## [3.1.0] / 13 September 2019
 
 ### Added
@@ -357,6 +411,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[3.2.0]: https://github.com/janl/mustache.js/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/janl/mustache.js/compare/v3.0.3...v3.1.0
 [3.0.3]: https://github.com/janl/mustache.js/compare/v3.0.2...v3.0.3
 [3.0.2]: https://github.com/janl/mustache.js/compare/v3.0.1...v3.0.2
@@ -424,6 +479,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [#714]: https://github.com/janl/mustache.js/issues/714
 [#716]: https://github.com/janl/mustache.js/issues/716
 [#717]: https://github.com/janl/mustache.js/issues/717
+[#728]: https://github.com/janl/mustache.js/issues/728
 
 [@afc163]: https://github.com/afc163
 [@andersk]: https://github.com/andersk
@@ -468,7 +524,8 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [@TiddoLangerak]: https://github.com/TiddoLangerak
 [@tomekwi]: https://github.com/tomekwi
 [@wizawu]: https://github.com/wizawu
+[@wol-soft]: https://github.com/wol-soft
 [@Xcrucifier]: https://github.com/Xcrucifier
 [@yotammadem]: https://github.com/yotammadem
 [@yousefcisco]: https://github.com/yousefcisco
-[@wol-soft]: https://github.com/wol-soft
+[@zekth]: https://github.com/zekth
