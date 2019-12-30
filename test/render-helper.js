@@ -13,6 +13,7 @@ function getContents (testName, ext) {
 
 function getView (testName) {
   var view = getContents(testName, 'js');
+  if (!view) view = getContents(testName, 'cjs');
   if (!view) throw new Error('Cannot find view for test "' + testName + '"');
   return view;
 }
@@ -34,9 +35,9 @@ if (testToRun) {
   testNames = testToRun.split(',');
 } else {
   testNames = fs.readdirSync(_files).filter(function (file) {
-    return (/\.js$/).test(file);
+    return (/\.c?js$/).test(file);
   }).map(function (file) {
-    return path.basename(file).replace(/\.js$/, '');
+    return path.basename(file).replace(/\.c?js$/, '');
   });
 }
 
