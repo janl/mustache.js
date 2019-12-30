@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [3.2.1] / 30 December 2019
+
+### Fixed
+
+ * [#733]: Allow the CLI to use JavaScript views when the project has ES6 modules enabled, by [@eobrain].
+
 ## [3.2.0] / 18 December 2019
 
 ### Added
@@ -411,6 +417,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[3.2.1]: https://github.com/janl/mustache.js/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/janl/mustache.js/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/janl/mustache.js/compare/v3.0.3...v3.1.0
 [3.0.3]: https://github.com/janl/mustache.js/compare/v3.0.2...v3.0.3
@@ -480,6 +487,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [#716]: https://github.com/janl/mustache.js/issues/716
 [#717]: https://github.com/janl/mustache.js/issues/717
 [#728]: https://github.com/janl/mustache.js/issues/728
+[#733]: https://github.com/janl/mustache.js/issues/733
 
 [@afc163]: https://github.com/afc163
 [@andersk]: https://github.com/andersk
@@ -490,6 +498,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [@cweider]: https://github.com/cweider
 [@dasilvacontin]: https://github.com/dasilvacontin
 [@djchie]: https://github.com/djchie
+[@eobrain]: https://github.com/eobrain
 [@EvanLovely]: https://github.com/EvanLovely
 [@fallenice]: https://github.com/fallenice
 [@Flaque]: https://github.com/Flaque
