@@ -179,7 +179,21 @@ describe('Mustache.parse', function () {
 
   describe('when parsing a template with custom caching and the same tags second time, do not return the cached tokens', function () {
     it('returns the same tokens for the latter parse', function () {
-      Mustache.templateCache = new Map();
+      Mustache.templateCache = {
+        _cache: [],
+        set: function set (key, value) {
+          this._cache.push([key, value]);
+        },
+        get: function get (key) {
+          var entry = this._cache.find(function (item) {
+            return item[0] === key;
+          });
+          return entry && entry[1];
+        },
+        clear: function clear () {
+          this._cache = [];
+        }
+      };
 
       var template = '{{foo}}[bar]';
       var parsedResult1 = Mustache.parse(template);
