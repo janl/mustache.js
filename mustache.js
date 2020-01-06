@@ -517,7 +517,7 @@
     var cacheKey = template + ':' + (tags || mustache.tags).join(':');
     var isCacheEnabled = typeof cache !== 'undefined';
     var tokens = isCacheEnabled ? cache.get(cacheKey) : undefined;
-  
+
     if (tokens == undefined) {
       tokens = parseTemplate(template, tags);
       isCacheEnabled && cache.set(cacheKey, tokens);
@@ -673,7 +673,10 @@
     to_html: undefined,
     Scanner: undefined,
     Context: undefined,
-    Writer: undefined
+    Writer: undefined,
+    set templateCache (cache) {
+      defaultWriter.templateCache = cache;
+    }
   };
 
   // All high-level mustache.* functions use this writer.
@@ -685,15 +688,6 @@
   mustache.clearCache = function clearCache () {
     return defaultWriter.clearCache();
   };
-
-  /**
-   * Replaces the template cache in the default writer.
-   */
-  Object.defineProperty(mustache, 'templateCache', {
-    set: function setTemplateCache (cache) {
-      defaultWriter.templateCache = cache;
-    }
-  });
 
   /**
    * Parses and caches the given template in the default writer and returns the

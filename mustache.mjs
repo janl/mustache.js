@@ -479,14 +479,25 @@ Context.prototype.lookup = function lookup (name) {
  * avoid the need to parse the same template twice.
  */
 function Writer () {
-  this.cache = {};
+  this.templateCache = {
+    _cache: {},
+    set: function set (key, value) {
+      this._cache[key] = value;
+    },
+    get: function get (key) {
+      return this._cache[key];
+    },
+    clear: function clear () {
+      this._cache = {};
+    }
+  };
 }
 
 /**
  * Clears all cached templates in this writer.
  */
 Writer.prototype.clearCache = function clearCache () {
-  this.cache = {};
+  this.templateCache !== undefined && this.templateCache.clear();
 };
 
 /**
@@ -495,13 +506,15 @@ Writer.prototype.clearCache = function clearCache () {
  * that is generated from the parse.
  */
 Writer.prototype.parse = function parse (template, tags) {
-  var cache = this.cache;
+  var cache = this.templateCache;
   var cacheKey = template + ':' + (tags || mustache.tags).join(':');
-  var tokens = cache[cacheKey];
+  var isCacheEnabled = typeof cache !== 'undefined';
+  var tokens = isCacheEnabled ? cache.get(cacheKey) : undefined;
 
-  if (tokens == null)
-    tokens = cache[cacheKey] = parseTemplate(template, tags);
-
+  if (tokens == undefined) {
+    tokens = parseTemplate(template, tags);
+    isCacheEnabled && cache.set(cacheKey, tokens);
+  }
   return tokens;
 };
 
@@ -653,7 +666,10 @@ var mustache = {
   to_html: undefined,
   Scanner: undefined,
   Context: undefined,
-  Writer: undefined
+  Writer: undefined,
+  set templateCache (cache) {
+    defaultWriter.templateCache = cache;
+  }
 };
 
 // All high-level mustache.* functions use this writer.
