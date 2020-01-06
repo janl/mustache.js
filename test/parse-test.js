@@ -58,7 +58,18 @@ var expectations = {
 
 beforeEach(function (){
   Mustache.clearCache();
-  Mustache.toggleCache(true);
+  Mustache.templateCache = {
+    _cache: {},
+    set: function set (key, value) {
+      this._cache[key] = value;
+    },
+    get: function get (key) {
+      return this._cache[key];
+    },
+    clear: function clear () {
+      this._cache = {};
+    }
+  };
 });
 
 describe('Mustache.parse', function () {
@@ -156,7 +167,7 @@ describe('Mustache.parse', function () {
 
   describe('when parsing a template with caching disabled and the same tags second time, do not return the cached tokens', function () {
     it('returns different tokens for the latter parse', function () {
-      Mustache.toggleCache(false);
+      Mustache.templateCache = undefined;
       var template = '{{foo}}[bar]';
       var parsedResult1 = Mustache.parse(template);
       var parsedResult2 = Mustache.parse(template);
@@ -168,21 +179,7 @@ describe('Mustache.parse', function () {
 
   describe('when parsing a template with custom caching and the same tags second time, do not return the cached tokens', function () {
     it('returns the same tokens for the latter parse', function () {
-      Mustache.toggleCache(false);
-      var parse = Mustache.Writer.prototype.parse;
-      var cache = {};
-
-      Mustache.Writer.prototype.parse = function (template, tags) {
-        var cacheKey = template + ':' + (tags || Mustache.tags).join(':');
-        var fromCache = cache[cacheKey];
-        if (fromCache) {
-          return fromCache;
-        } else {
-          var tokens = parse.call(this, template, tags);
-          cache[cacheKey] = tokens;
-          return tokens;
-        }
-      };
+      Mustache.templateCache = new Map();
 
       var template = '{{foo}}[bar]';
       var parsedResult1 = Mustache.parse(template);

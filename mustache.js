@@ -492,26 +492,25 @@
    * avoid the need to parse the same template twice.
    */
   function Writer () {
-    this.cache = {};
-    this.cacheEnabled = true;
+    this.templateCache = {
+      _cache: {},
+      set: function set (key, value) {
+        this._cache[key] = value;
+      },
+      get: function get (key) {
+        return this._cache[key];
+      },
+      clear: function clear () {
+        this._cache = {};
+      }
+    };
   }
 
   /**
    * Clears all cached templates in this writer.
    */
   Writer.prototype.clearCache = function clearCache () {
-    this.cache = {};
-  };
-
-  /**
-   * Disables or enables template caching for this writer.
-   */
-  Writer.prototype.toggleCache = function toggleCache (enable) {
-    // If we are disabling the cache, clear it.
-    if (!enable) {
-      this.clearCache();
-    }
-    this.cacheEnabled = !!enable;
+    this.templateCache !== undefined && this.templateCache.clear();
   };
 
   /**
@@ -520,16 +519,14 @@
    * that is generated from the parse.
    */
   Writer.prototype.parse = function parse (template, tags) {
-    var tokens = null;
-    var cache = this.cache;
+    var cache = this.templateCache;
     var cacheKey = template + ':' + (tags || mustache.tags).join(':');
-    tokens = this.cacheEnabled ? cache[cacheKey] : null;
+    var isCacheEnabled = typeof cache !== 'undefined';
+    var tokens = isCacheEnabled ? cache.get(cacheKey) : undefined;
   
-    if (tokens == null) {
+    if (tokens == undefined) {
       tokens = parseTemplate(template, tags);
-      if (this.cacheEnabled) {
-        cache[cacheKey] = tokens;
-      }
+      isCacheEnabled && cache.set(cacheKey, tokens);
     }
     return tokens;
   };
@@ -686,11 +683,13 @@
   };
 
   /**
-   * Disables or enables template caching for this writer.
+   * Replaces the template cache in the default writer.
    */
-  mustache.toggleCache = function toggleCache (value) {
-    return defaultWriter.toggleCache(value);
-  };
+  Object.defineProperty(mustache, 'templateCache', {
+    set: function setTemplateCache (cache) {
+      defaultWriter.templateCache = cache;
+    }
+  });
 
   /**
    * Parses and caches the given template in the default writer and returns the
