@@ -185,10 +185,14 @@ describe('Mustache.parse', function () {
           this._cache.push([key, value]);
         },
         get: function get (key) {
-          var entry = this._cache.find(function (item) {
-            return item[0] === key;
-          });
-          return entry && entry[1];
+          var cacheLength = this._cache.length;
+          for (var i = 0; i < cacheLength; i++) {
+            var entry = this._cache[i];
+            if (entry[0] === key) {
+              return entry[1];
+            }
+          }
+          return undefined;
         },
         clear: function clear () {
           this._cache = [];
