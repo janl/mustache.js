@@ -131,7 +131,8 @@ function isStdin (view) {
 }
 
 function isJsFile (view) {
-  return path.extname(view) === '.js';
+  var extension = path.extname(view);
+  return extension === '.js' || extension === '.cjs';
 }
 
 function wasNotFound (err) {

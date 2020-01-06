@@ -1,20 +1,14 @@
-/*!
- * mustache.js - Logic-less {{mustache}} templates with JavaScript
- * http://github.com/janl/mustache.js
- */
+// This file has been generated from mustache.mjs
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
+  (global = global || self, global.Mustache = factory());
+}(this, (function () { 'use strict';
 
-/*global define: false Mustache: true*/
-
-(function defineMustache (global, factory) {
-  if (typeof exports === 'object' && exports && typeof exports.nodeName !== 'string') {
-    factory(exports); // CommonJS
-  } else if (typeof define === 'function' && define.amd) {
-    define(['exports'], factory); // AMD
-  } else {
-    global.Mustache = {};
-    factory(global.Mustache); // script, wsh, asp
-  }
-}(this, function mustacheFactory (mustache) {
+  /*!
+   * mustache.js - Logic-less {{mustache}} templates with JavaScript
+   * http://github.com/janl/mustache.js
+   */
 
   var objectToString = Object.prototype.toString;
   var isArray = Array.isArray || function isArrayPolyfill (object) {
@@ -546,7 +540,7 @@
    */
   Writer.prototype.render = function render (template, view, partials, tags) {
     var tokens = this.parse(template, tags);
-    var context = (view instanceof Context) ? view : new Context(view);
+    var context = (view instanceof Context) ? view : new Context(view, undefined);
     return this.renderTokens(tokens, context, partials, template, tags);
   };
 
@@ -668,9 +662,19 @@
     return token[1];
   };
 
-  mustache.name = 'mustache.js';
-  mustache.version = '3.1.0';
-  mustache.tags = [ '{{', '}}' ];
+  var mustache = {
+    name: 'mustache.js',
+    version: '3.2.1',
+    tags: [ '{{', '}}' ],
+    clearCache: undefined,
+    escape: undefined,
+    parse: undefined,
+    render: undefined,
+    to_html: undefined,
+    Scanner: undefined,
+    Context: undefined,
+    Writer: undefined
+  };
 
   // All high-level mustache.* functions use this writer.
   var defaultWriter = new Writer();
@@ -740,4 +744,5 @@
   mustache.Writer = Writer;
 
   return mustache;
-}));
+
+})));

@@ -1,6 +1,6 @@
 {
   "name": "mustache",
-  "version": "3.1.0",
+  "version": "3.2.1",
   "description": "Logic-less {{mustache}} templates with JavaScript",
   "author": "mustache.js Authors <http://github.com/janl/mustache.js>",
   "homepage": "https://github.com/janl/mustache.js",
@@ -20,6 +20,7 @@
   },
   "files": [
     "mustache.js",
+    "mustache.mjs",
     "mustache.min.js",
     "bin",
     "wrappers",
@@ -32,8 +33,9 @@
     "npm": ">=1.4.0"
   },
   "scripts": {
+    "build": "rollup mustache.mjs --file mustache.js --format umd --name Mustache --banner '// This file has been generated from mustache.mjs' && uglifyjs mustache.js > mustache.min.js",
     "test": "npm run test-lint && npm run test-unit",
-    "test-lint": "eslint mustache.js bin/mustache test/**/*.js",
+    "test-lint": "eslint mustache.mjs bin/mustache test/**/*.js",
     "test-unit": "mocha --reporter spec test/*-test.js",
     "test-render": "mocha  --reporter spec test/render-test",
     "pre-test-browser": "node test/create-browser-suite.js",
@@ -46,6 +48,7 @@
     "jshint": "^2.9.5",
     "mocha": "^3.0.2",
     "puppeteer": "^2.0.0",
+    "rollup": "^1.26.3",
     "uglify-js": "^3.4.6",
     "zuul": "^3.11.0",
     "zuul-ngrok": "nolanlawson/zuul-ngrok#patch-1"
