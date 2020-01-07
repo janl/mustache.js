@@ -56,20 +56,14 @@ var expectations = {
                                             : [ [ '#', 'foo', 0, 8, [ [ '#', 'a', 11, 17, [ [ 'text', '    ', 18, 22 ], [ 'name', 'b', 22, 27 ], [ 'text', '\n', 27, 28 ] ], 30 ] ], 37 ] ]
 };
 
+var originalTemplateCache;
+before(function () {
+  originalTemplateCache = Mustache.templateCache;
+});
+
 beforeEach(function (){
   Mustache.clearCache();
-  Mustache.templateCache = {
-    _cache: {},
-    set: function set (key, value) {
-      this._cache[key] = value;
-    },
-    get: function get (key) {
-      return this._cache[key];
-    },
-    clear: function clear () {
-      this._cache = {};
-    }
-  };
+  Mustache.templateCache = originalTemplateCache;
 });
 
 describe('Mustache.parse', function () {

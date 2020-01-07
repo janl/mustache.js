@@ -504,7 +504,9 @@
    * Clears all cached templates in this writer.
    */
   Writer.prototype.clearCache = function clearCache () {
-    this.templateCache !== undefined && this.templateCache.clear();
+    if (typeof this.templateCache !== 'undefined') {
+      this.templateCache.clear();
+    }
   };
 
   /**
@@ -676,6 +678,9 @@
     Writer: undefined,
     set templateCache (cache) {
       defaultWriter.templateCache = cache;
+    },
+    get templateCache () {
+      return defaultWriter.templateCache;
     }
   };
 
