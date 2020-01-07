@@ -676,9 +676,17 @@
     Scanner: undefined,
     Context: undefined,
     Writer: undefined,
+    /**
+     * Allows a user to override the default caching strategy, by providing an
+     * object with set, get and clear methods. This can also be used to disable
+     * the cache by setting it to the literal `undefined`.
+     */
     set templateCache (cache) {
       defaultWriter.templateCache = cache;
     },
+    /**
+     * Gets the default or overridden caching object from the default writer.
+     */
     get templateCache () {
       return defaultWriter.templateCache;
     }
