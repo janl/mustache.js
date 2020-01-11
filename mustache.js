@@ -486,14 +486,27 @@
    * avoid the need to parse the same template twice.
    */
   function Writer () {
-    this.cache = {};
+    this.templateCache = {
+      _cache: {},
+      set: function set (key, value) {
+        this._cache[key] = value;
+      },
+      get: function get (key) {
+        return this._cache[key];
+      },
+      clear: function clear () {
+        this._cache = {};
+      }
+    };
   }
 
   /**
    * Clears all cached templates in this writer.
    */
   Writer.prototype.clearCache = function clearCache () {
-    this.cache = {};
+    if (typeof this.templateCache !== 'undefined') {
+      this.templateCache.clear();
+    }
   };
 
   /**
@@ -502,13 +515,15 @@
    * that is generated from the parse.
    */
   Writer.prototype.parse = function parse (template, tags) {
-    var cache = this.cache;
+    var cache = this.templateCache;
     var cacheKey = template + ':' + (tags || mustache.tags).join(':');
-    var tokens = cache[cacheKey];
+    var isCacheEnabled = typeof cache !== 'undefined';
+    var tokens = isCacheEnabled ? cache.get(cacheKey) : undefined;
 
-    if (tokens == null)
-      tokens = cache[cacheKey] = parseTemplate(template, tags);
-
+    if (tokens == undefined) {
+      tokens = parseTemplate(template, tags);
+      isCacheEnabled && cache.set(cacheKey, tokens);
+    }
     return tokens;
   };
 
@@ -660,7 +675,21 @@
     to_html: undefined,
     Scanner: undefined,
     Context: undefined,
-    Writer: undefined
+    Writer: undefined,
+    /**
+     * Allows a user to override the default caching strategy, by providing an
+     * object with set, get and clear methods. This can also be used to disable
+     * the cache by setting it to the literal `undefined`.
+     */
+    set templateCache (cache) {
+      defaultWriter.templateCache = cache;
+    },
+    /**
+     * Gets the default or overridden caching object from the default writer.
+     */
+    get templateCache () {
+      return defaultWriter.templateCache;
+    }
   };
 
   // All high-level mustache.* functions use this writer.
