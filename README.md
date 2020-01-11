@@ -16,7 +16,9 @@ For a language-agnostic overview of mustache's template syntax, see the `mustach
 
 You can use mustache.js to render mustache templates anywhere you can use JavaScript. This includes web browsers, server-side environments such as [Node.js](http://nodejs.org/), and [CouchDB](http://couchdb.apache.org/) views.
 
-mustache.js ships with support for both the [CommonJS](http://www.commonjs.org/) module API and the [Asynchronous Module Definition](https://github.com/amdjs/amdjs-api/wiki/AMD) API (AMD).
+mustache.js ships with support for the [CommonJS](http://www.commonjs.org/) module API, the [Asynchronous Module Definition](https://github.com/amdjs/amdjs-api/wiki/AMD) API (AMD) and [ECMAScript modules](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules).
+
+In addition to being a package to be used programmatically, you can use it as a [command line tool](#command-line-tool).
 
 And this will be your templates after you use Mustache:
 
@@ -29,65 +31,6 @@ You can get Mustache via [npm](http://npmjs.com).
 ```bash
 $ npm install mustache --save
 ```
-
-## Command line tool
-
-mustache.js is shipped with a Node.js based command line tool. It might be installed as a global tool on your computer to render a mustache template of some kind
-
-```bash
-$ npm install -g mustache
-
-$ mustache dataView.json myTemplate.mustache > output.html
-```
-
-also supports stdin.
-
-```bash
-$ cat dataView.json | mustache - myTemplate.mustache > output.html
-```
-
-or as a package.json `devDependency` in a build process maybe?
-
-```bash
-$ npm install mustache --save-dev
-```
-
-```json
-{
-  "scripts": {
-    "build": "mustache dataView.json myTemplate.mustache > public/output.html"
-  }
-}
-```
-```bash
-$ npm run build
-```
-
-The command line tool is basically a wrapper around `Mustache.render` so you get all the features.
-
-If your templates use partials you should pass paths to partials using `-p` flag:
-
-```bash
-$ mustache -p path/to/partial1.mustache -p path/to/partial2.mustache dataView.json myTemplate.mustache
-```
-
-## Who uses mustache.js?
-
-An updated list of mustache.js users is kept [on the Github wiki](https://github.com/janl/mustache.js/wiki/Beard-Competition). Add yourself or your company if you use mustache.js!
-
-## Contributing
-
-mustache.js is a mature project, but it continues to actively invite maintainers. You can help out a high-profile project that is used in a lot of places on the web. There is [plenty](https://github.com/janl/mustache.js/issues) of [work](https://github.com/janl/mustache.js/pulls) to do. No big commitment required, if all you do is review a single [Pull Request](https://github.com/janl/mustache.js/pulls), you are a maintainer. And a hero.
-
-### Your First Contribution
-
-- review a [Pull Request](https://github.com/janl/mustache.js/pulls)
-- fix an [Issue](https://github.com/janl/mustache.js/issues)
-- update the [documentation](https://github.com/janl/mustache.js#usage)
-- make a website
-- write a tutorial
-
-* * *
 
 ## Usage
 
@@ -531,6 +474,47 @@ Mustache.parse(template);
 Mustache.render(template, view);
 ```
 
+## Command line tool
+
+mustache.js is shipped with a Node.js based command line tool. It might be installed as a global tool on your computer to render a mustache template of some kind
+
+```bash
+$ npm install -g mustache
+
+$ mustache dataView.json myTemplate.mustache > output.html
+```
+
+also supports stdin.
+
+```bash
+$ cat dataView.json | mustache - myTemplate.mustache > output.html
+```
+
+or as a package.json `devDependency` in a build process maybe?
+
+```bash
+$ npm install mustache --save-dev
+```
+
+```json
+{
+  "scripts": {
+    "build": "mustache dataView.json myTemplate.mustache > public/output.html"
+  }
+}
+```
+```bash
+$ npm run build
+```
+
+The command line tool is basically a wrapper around `Mustache.render` so you get all the features.
+
+If your templates use partials you should pass paths to partials using `-p` flag:
+
+```bash
+$ mustache -p path/to/partial1.mustache -p path/to/partial2.mustache dataView.json myTemplate.mustache
+```
+
 ## Plugins for JavaScript Libraries
 
 mustache.js may be built specifically for several different client libraries, including the following:
@@ -549,6 +533,7 @@ $ rake dojo
 $ rake yui3
 $ rake qooxdoo
 ```
+
 ## Testing
 
 In order to run the tests you'll need to install [Node.js](http://nodejs.org/).
@@ -580,6 +565,7 @@ Then, you can run the test with:
 ```bash
 $ TEST=mytest npm run test-render
 ```
+
 ### Browser tests
 
 Browser tests are not included in `npm test` as they run for too long, although they are ran automatically on Travis when merged into master. Run browser tests locally in any browser:
@@ -588,14 +574,22 @@ $ npm run test-browser-local
 ```
 then point your browser to `http://localhost:8080/__zuul`
 
-### Troubleshooting
+## Who uses mustache.js?
 
-#### npm install fails
+An updated list of mustache.js users is kept [on the Github wiki](https://github.com/janl/mustache.js/wiki/Beard-Competition). Add yourself or your company if you use mustache.js!
 
-Ensure to have a recent version of npm installed. While developing this project requires npm with support for `^` version ranges.
-```bash
-$ npm install -g npm
-```
+## Contributing
+
+mustache.js is a mature project, but it continues to actively invite maintainers. You can help out a high-profile project that is used in a lot of places on the web. No big commitment required, if all you do is review a single [Pull Request](https://github.com/janl/mustache.js/pulls), you are a maintainer. And a hero.
+
+### Your First Contribution
+
+- review a [Pull Request](https://github.com/janl/mustache.js/pulls)
+- fix an [Issue](https://github.com/janl/mustache.js/issues)
+- update the [documentation](https://github.com/janl/mustache.js#usage)
+- make a website
+- write a tutorial
+
 ## Thanks
 
 mustache.js wouldn't kick ass if it weren't for these fine souls:
