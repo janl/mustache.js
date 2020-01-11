@@ -534,6 +534,11 @@ $ rake yui3
 $ rake qooxdoo
 ```
 
+## TypeScript
+
+Since the source code of this package is written in JavaScript, we follow the [TypeScript publishing docs](https://www.typescriptlang.org/docs/handbook/declaration-files/publishing.html) preferred approach
+by having type definitions available via [@types/mustache](https://www.npmjs.com/package/@types/mustache).
+
 ## Testing
 
 In order to run the tests you'll need to install [Node.js](http://nodejs.org/).
