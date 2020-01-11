@@ -137,38 +137,42 @@ There are several techniques that can be used to load templates and hand them to
 
 #### Include Templates
 
-If you need a template for a dynamic part in a static website, you can consider including the template in the static HTML file to avoid loading templates separately. Here's a small example using `jQuery`:
-
-```html
-<!DOCTYPE HTML>
-<html>
-<body onload="loadUser()">
-<div id="target">Loading...</div>
-<script id="template" type="x-tmpl-mustache">
-Hello {{ name }}!
-</script>
-</body>
-</html>
-```
+If you need a template for a dynamic part in a static website, you can consider including the template in the static HTML file to avoid loading templates separately. Here's a small example:
 
 ```js
-function loadUser() {
-  var template = $('#template').html();
-  Mustache.parse(template);   // optional, speeds up future uses
-  var rendered = Mustache.render(template, {name: "Luke"});
-  $('#target').html(rendered);
+// file: render.js
+
+function renderHello() {
+  var template = document.getElementById('template').innerHTML;
+  var rendered = Mustache.render(template, { name: 'Luke' });
+  document.getElementById('target').innerHTML = rendered;
 }
+```
+
+```html
+<html>
+  <body onload="renderHello()">
+    <div id="target">Loading...</div>
+    <script id="template" type="x-tmpl-mustache">
+      Hello {{ name }}!
+    </script>
+
+    <script src="https://unpkg.com/mustache@latest"></script>
+    <script src="render.js"></script>
+  </body>
+</html>
 ```
 
 #### Load External Templates
 
-If your templates reside in individual files, you can load them asynchronously and render them when they arrive. Another example using `jQuery`:
+If your templates reside in individual files, you can load them asynchronously and render them when they arrive. Another example using [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch):
 
 ```js
-function loadUser() {
-  $.get('template.mst', function(template) {
-    var rendered = Mustache.render(template, {name: "Luke"});
-    $('#target').html(rendered);
+function renderHello() {
+  fetch('template.mustache').then(function (template) {
+    var template = document.getElementById('template').innerHTML;
+    var rendered = Mustache.render(template, { name: 'Luke' });
+    document.getElementById('target').innerHTML = rendered;    
   });
 }
 ```
