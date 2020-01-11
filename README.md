@@ -169,11 +169,13 @@ If your templates reside in individual files, you can load them asynchronously a
 
 ```js
 function renderHello() {
-  fetch('template.mustache').then(function (template) {
-    var template = document.getElementById('template').innerHTML;
-    var rendered = Mustache.render(template, { name: 'Luke' });
-    document.getElementById('target').innerHTML = rendered;    
-  });
+  fetch('template.mustache')
+    .then((response) => response.text())
+    .then((template) => {
+      var template = document.getElementById('template').innerHTML;
+      var rendered = Mustache.render(template, { name: 'Luke' });
+      document.getElementById('target').innerHTML = rendered;    
+    });
 }
 ```
 
