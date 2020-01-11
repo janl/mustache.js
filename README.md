@@ -106,29 +106,6 @@ var output = Mustache.render("{{title}} spends {{calc}}", view);
 
 In this example, the `Mustache.render` function takes two parameters: 1) the [mustache](http://mustache.github.com/) template and 2) a `view` object that contains the data and code needed to render the template.
 
-## API
-
-Following is an [rtype](https://git.io/rtype) signature of the most commonly used functions.
-
-```js
-Mustache.render(
-  template            : String,
-  view                : Object,
-  partials?           : Object,
-  tags = ['{{', '}}'] : Tags,
-) => String
-
-Mustache.parse(
-  template              : String,
-  tags = ['{{', '}}']   : Tags,
-) => Token[]
-
-interface Token [String, String, Number, Number, Token[]?, Number?]
-
-interface Tags [String, String]
-
-```
-
 ## Templates
 
 A [mustache](http://mustache.github.com/) template is a string that contains any number of mustache tags. Tags are indicated by the double mustaches that surround them. `{{person}}` is a tag, as is `{{#person}}`. In both examples we refer to `person` as the tag's key. There are several types of tags available in mustache.js, described below.
