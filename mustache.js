@@ -672,7 +672,6 @@
     escape: undefined,
     parse: undefined,
     render: undefined,
-    to_html: undefined,
     Scanner: undefined,
     Context: undefined,
     Writer: undefined,
@@ -725,20 +724,6 @@
     }
 
     return defaultWriter.render(template, view, partials, tags);
-  };
-
-  // This is here for backwards compatibility with 0.4.x.,
-  /*eslint-disable */ // eslint wants camel cased function name
-  mustache.to_html = function to_html (template, view, partials, send) {
-    /*eslint-enable*/
-
-    var result = mustache.render(template, view, partials);
-
-    if (isFunction(send)) {
-      send(result);
-    } else {
-      return result;
-    }
   };
 
   // Export the escaping function so that the user may override it.
