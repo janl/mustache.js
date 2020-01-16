@@ -659,7 +659,7 @@ Writer.prototype.rawValue = function rawValue (token) {
 
 var mustache = {
   name: 'mustache.js',
-  version: '3.2.1',
+  version: '4.0.0',
   tags: [ '{{', '}}' ],
   clearCache: undefined,
   escape: undefined,

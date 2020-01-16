@@ -3,6 +3,50 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.0.0] / 16 January 2020
+
+Majority of using projects don't have to worry by this being a new major version.
+
+**TLDR;** if your project manipulates `Writer.prototype.parse | Writer.cache` directly or uses `.to_html()`, you probably have to change that code.
+
+This release allows the internal template cache to be customised, either by disabling it completely
+or provide a custom strategy deciding how the cache should behave when mustache.js parses templates.
+
+```js
+const mustache = require('mustache');
+
+// disable caching
+Mustache.templateCache = undefined;
+
+// or use a built-in Map in modern environments
+Mustache.templateCache = new Map();
+```
+
+Projects that wanted to customise the caching behaviour in earlier versions of mustache.js were forced to
+override internal method responsible for parsing templates; `Writer.prototype.parse`. In short, that was unfortunate
+because there is more than caching happening in that method.
+
+We've improved that now by introducing a first class API that only affects template caching.
+
+The default template cache behaves as before and is still compatible with older JavaScript environments.
+For those who wants to provide a custom more sopisiticated caching strategy, one can do that with an object that adheres to the following requirements:
+
+```ts
+{
+  set(cacheKey: string, value: string): void
+  get(cacheKey: string): string | undefined
+  clear(): void
+}
+```
+
+### Added
+
+* [#731]: Allow template caching to be customised, by [@AndrewLeedham].
+
+### Removed
+
+* [#735]: Remove `.to_html()`, by [@phillipj].
+
 ## [3.2.1] / 30 December 2019
 
 ### Fixed
@@ -417,6 +461,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[4.0.0]: https://github.com/janl/mustache.js/compare/v3.2.1...v4.0.0
 [3.2.1]: https://github.com/janl/mustache.js/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/janl/mustache.js/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/janl/mustache.js/compare/v3.0.3...v3.1.0
@@ -488,10 +533,13 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [#717]: https://github.com/janl/mustache.js/issues/717
 [#728]: https://github.com/janl/mustache.js/issues/728
 [#733]: https://github.com/janl/mustache.js/issues/733
+[#731]: https://github.com/janl/mustache.js/issues/731
+[#735]: https://github.com/janl/mustache.js/issues/735
 
 [@afc163]: https://github.com/afc163
 [@andersk]: https://github.com/andersk
 [@Andersos]: https://github.com/Andersos
+[@AndrewLeedham]: https://github.com/AndrewLeedham
 [@bbrooks]: https://github.com/bbrooks
 [@calvinf]: https://github.com/calvinf
 [@cmbuckley]: https://github.com/cmbuckley
