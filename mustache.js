@@ -644,7 +644,7 @@
       if (tagIndex == 0 && indentation) {
         indentedValue = this.indentPartial(value, indentation, lineHasNonSpace);
       }
-      return this.renderTokens(this.parse(indentedValue, tags), context, partials, indentedValue);
+      return this.renderTokens(this.parse(indentedValue, tags), context, partials, indentedValue, tags);
     }
   };
 

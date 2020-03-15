@@ -157,4 +157,19 @@ describe('Partials spec', function () {
       var renderResult = Mustache.render(template, data, partials);
       assert.equal(renderResult, expected);
     });
+
+    it('Nested partials should support custom delimiters.', function () {
+      var tags = ["[[", "]]"];
+      var template = '[[> level1 ]]';
+      var partials = {
+        level1: 'partial 1\n[[> level2]]',
+        level2: 'partial 2\n[[> level3]]',
+        level3: 'partial 3\n[[> level4]]',
+        level4: 'partial 4\n[[> level5]]',
+        level5: 'partial 5',
+      };
+      var expected = 'partial 1\npartial 2\npartial 3\npartial 4\npartial 5';
+      var renderResult = Mustache.render(template, {}, partials, tags);
+      assert.equal(renderResult, expected);
+    });
 });
