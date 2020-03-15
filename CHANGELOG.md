@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.0.1] / 15 March 2020
+
+### Fixed
+
+ * [#739]: Fix custom delimiters in nested partials, by [@aielo].
+
 ## [4.0.0] / 16 January 2020
 
 Majority of using projects don't have to worry by this being a new major version.
@@ -461,6 +467,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[4.0.1]: https://github.com/janl/mustache.js/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/janl/mustache.js/compare/v3.2.1...v4.0.0
 [3.2.1]: https://github.com/janl/mustache.js/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/janl/mustache.js/compare/v3.1.0...v3.2.0
@@ -535,8 +542,10 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [#733]: https://github.com/janl/mustache.js/issues/733
 [#731]: https://github.com/janl/mustache.js/issues/731
 [#735]: https://github.com/janl/mustache.js/issues/735
+[#739]: https://github.com/janl/mustache.js/issues/739
 
 [@afc163]: https://github.com/afc163
+[@aielo]: https://github.com/aielo
 [@andersk]: https://github.com/andersk
 [@Andersos]: https://github.com/Andersos
 [@AndrewLeedham]: https://github.com/AndrewLeedham

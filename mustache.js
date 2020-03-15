@@ -666,7 +666,7 @@
 
   var mustache = {
     name: 'mustache.js',
-    version: '4.0.0',
+    version: '4.0.1',
     tags: [ '{{', '}}' ],
     clearCache: undefined,
     escape: undefined,
