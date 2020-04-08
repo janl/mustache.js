@@ -32,7 +32,7 @@ var skipTests = {
   ]
 };
 
-// You can run the skiped tests by setting the NOSKIP environment variable to
+// You can run the skipped tests by setting the NOSKIP environment variable to
 // true (e.g. NOSKIP=true mocha test/mustache-spec-test.js)
 var noSkip = process.env.NOSKIP;
 
