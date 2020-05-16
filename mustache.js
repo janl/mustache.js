@@ -657,7 +657,7 @@
   Writer.prototype.escapedValue = function escapedValue (token, context) {
     var value = context.lookup(token[1]);
     if (value != null)
-      return mustache.escape(value);
+      return typeof value === 'number' ? String(value) : mustache.escape(value);
   };
 
   Writer.prototype.rawValue = function rawValue (token) {
