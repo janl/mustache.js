@@ -1,5 +1,4 @@
-import { test } from "https://deno.land/std@v0.21.0/testing/mod.ts";
-import { assertEquals } from "https://deno.land/std@v0.21.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@v0.51.0/testing/asserts.ts";
 import mustache from "../../mustache.mjs";
 
 const view = {
@@ -9,7 +8,7 @@ const view = {
   }
 };
 
-test(function canUseMustache() {
+Deno.test("can use mustache", () => {
   assertEquals(
     mustache.render("{{title}} spends {{calc}}", view),
     "Joe spends 6"

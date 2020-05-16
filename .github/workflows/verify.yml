@@ -96,9 +96,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - uses: denolib/setup-deno@v1
+      - uses: denolib/setup-deno@master
         with:
-          deno-version: 'v0.23.0'
+          deno-version: 'v1.0.0'
       - run: deno --version
       - run: deno test --allow-net=deno.land test/module-systems/deno-test.ts
 
