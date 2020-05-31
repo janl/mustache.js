@@ -7,5 +7,5 @@ qooxdoo.mustache.js
 test/render-test-browser.js
 npm-debug.log
 .DS_Store
-
 test/render-test-browser.js
+.idea/
