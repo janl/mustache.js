@@ -300,6 +300,27 @@ Output:
 * Ringo Starr
 ```
 
+#### Instream Parameters
+
+This is a proposal by Steve Pritchard implemented in the modified mustache.js in this fork. It is less than 2 dozen lines of code but made a significant simplification to the code generator that was implmented using Mustache.js. In brief the {{funcName(parm1,parm2)}} is scanned for an opening and closing parenthesis.  If found the parenthetical string parm is parsed by splitting on the ',' character and the array is passed to the function (*funcName* in this case). *funcName* processes the parameters and returns a string in the normal fashion. (To allow for alternate parsing, the modification uses an `*` right after the opening paren as an escape mechanism so the unsplit string is passed as a single parameter to the receiving function).
+
+I was thus able to write an *isState* function that would generate something only when the context state matched the parmameter state.
+
+```html
+{{#isState(ready)}}
+<p>only generated when internal context state matches 'ready'</p>
+{{/isState(ready)}}
+```
+
+The other major use was to generate HTML based on the template context and the supplied parameters. Thus
+
+```html
+{{&elem(text,fldName,label=Input Name,onChange=changeFunc)}}
+```
+could generate HTML connected into an internal model that was the context of the template.
+
+I also employ a convention of a leading `*` with each parameter as a trigger for the receiving function to do a contextual lookup and thus provide a dynamic replacement value;
+
 #### Functions
 
 If the value of a section key is a function, it is called with the section's literal block of text, un-rendered, as its first argument. The second argument is a special rendering function that uses the current view as its view argument. It is called in the context of the current view object.
