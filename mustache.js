@@ -746,10 +746,8 @@
   };
 
   /**
-   * Renders the `template` with the given `view` and `partials` using the
-   * default writer. If the optional `tags` argument is given here it must be an
-   * array with two string values: the opening and closing tags used in the
-   * template (e.g. [ "<%", "%>" ]). The default is to mustache.tags.
+   * Renders the `template` with the given `view`, `partials`, and `config`
+   * using the default writer.
    */
   mustache.render = function render (template, view, partials, config) {
     if (typeof template !== 'string') {
