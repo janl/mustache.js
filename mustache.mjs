@@ -529,14 +529,25 @@ Writer.prototype.parse = function parse (template, tags) {
  * also be a function that is used to load partial templates on the fly
  * that takes a single argument: the name of the partial.
  *
- * If the optional `tags` argument is given here it must be an array with two
+ * If the optional `config` argument is given here, then it should be an
+ * object with a `tags` attribute or an `escape` attribute or both.
+ * If an array is passed, then it will be interpreted the same way as
+ * a `tags` attribute on a `config` object.
+ *
+ * The `tags` attribute of a `config` object must be an array with two
  * string values: the opening and closing tags used in the template (e.g.
  * [ "<%", "%>" ]). The default is to mustache.tags.
+ *
+ * The `escape` attribute of a `config` object must be a function which
+ * accepts a string as input and outputs a safely escaped string.
+ * If an `escape` function is not provided, then an HTML-safe string
+ * escaping function is used as the default.
  */
-Writer.prototype.render = function render (template, view, partials, tags) {
+Writer.prototype.render = function render (template, view, partials, config) {
+  var tags = this.getConfigTags(config);
   var tokens = this.parse(template, tags);
   var context = (view instanceof Context) ? view : new Context(view, undefined);
-  return this.renderTokens(tokens, context, partials, template, tags);
+  return this.renderTokens(tokens, context, partials, template, config);
 };
 
 /**
@@ -548,7 +559,7 @@ Writer.prototype.render = function render (template, view, partials, tags) {
  * If the template doesn't use higher-order sections, this argument may
  * be omitted.
  */
-Writer.prototype.renderTokens = function renderTokens (tokens, context, partials, originalTemplate, tags) {
+Writer.prototype.renderTokens = function renderTokens (tokens, context, partials, originalTemplate, config) {
   var buffer = '';
 
   var token, symbol, value;
@@ -557,11 +568,11 @@ Writer.prototype.renderTokens = function renderTokens (tokens, context, partials
     token = tokens[i];
     symbol = token[0];
 
-    if (symbol === '#') value = this.renderSection(token, context, partials, originalTemplate);
-    else if (symbol === '^') value = this.renderInverted(token, context, partials, originalTemplate);
-    else if (symbol === '>') value = this.renderPartial(token, context, partials, tags);
+    if (symbol === '#') value = this.renderSection(token, context, partials, originalTemplate, config);
+    else if (symbol === '^') value = this.renderInverted(token, context, partials, originalTemplate, config);
+    else if (symbol === '>') value = this.renderPartial(token, context, partials, config);
     else if (symbol === '&') value = this.unescapedValue(token, context);
-    else if (symbol === 'name') value = this.escapedValue(token, context);
+    else if (symbol === 'name') value = this.escapedValue(token, context, config);
     else if (symbol === 'text') value = this.rawValue(token);
 
     if (value !== undefined)
@@ -571,7 +582,7 @@ Writer.prototype.renderTokens = function renderTokens (tokens, context, partials
   return buffer;
 };
 
-Writer.prototype.renderSection = function renderSection (token, context, partials, originalTemplate) {
+Writer.prototype.renderSection = function renderSection (token, context, partials, originalTemplate, config) {
   var self = this;
   var buffer = '';
   var value = context.lookup(token[1]);
@@ -586,10 +597,10 @@ Writer.prototype.renderSection = function renderSection (token, context, partial
 
   if (isArray(value)) {
     for (var j = 0, valueLength = value.length; j < valueLength; ++j) {
-      buffer += this.renderTokens(token[4], context.push(value[j]), partials, originalTemplate);
+      buffer += this.renderTokens(token[4], context.push(value[j]), partials, originalTemplate, config);
     }
   } else if (typeof value === 'object' || typeof value === 'string' || typeof value === 'number') {
-    buffer += this.renderTokens(token[4], context.push(value), partials, originalTemplate);
+    buffer += this.renderTokens(token[4], context.push(value), partials, originalTemplate, config);
   } else if (isFunction(value)) {
     if (typeof originalTemplate !== 'string')
       throw new Error('Cannot use higher-order sections without the original template');
@@ -600,18 +611,18 @@ Writer.prototype.renderSection = function renderSection (token, context, partial
     if (value != null)
       buffer += value;
   } else {
-    buffer += this.renderTokens(token[4], context, partials, originalTemplate);
+    buffer += this.renderTokens(token[4], context, partials, originalTemplate, config);
   }
   return buffer;
 };
 
-Writer.prototype.renderInverted = function renderInverted (token, context, partials, originalTemplate) {
+Writer.prototype.renderInverted = function renderInverted (token, context, partials, originalTemplate, config) {
   var value = context.lookup(token[1]);
 
   // Use JavaScript's definition of falsy. Include empty arrays.
   // See https://github.com/janl/mustache.js/issues/186
   if (!value || (isArray(value) && value.length === 0))
-    return this.renderTokens(token[4], context, partials, originalTemplate);
+    return this.renderTokens(token[4], context, partials, originalTemplate, config);
 };
 
 Writer.prototype.indentPartial = function indentPartial (partial, indentation, lineHasNonSpace) {
@@ -625,8 +636,9 @@ Writer.prototype.indentPartial = function indentPartial (partial, indentation, l
   return partialByNl.join('\n');
 };
 
-Writer.prototype.renderPartial = function renderPartial (token, context, partials, tags) {
+Writer.prototype.renderPartial = function renderPartial (token, context, partials, config) {
   if (!partials) return;
+  var tags = this.getConfigTags(config);
 
   var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
   if (value != null) {
@@ -637,7 +649,8 @@ Writer.prototype.renderPartial = function renderPartial (token, context, partial
     if (tagIndex == 0 && indentation) {
       indentedValue = this.indentPartial(value, indentation, lineHasNonSpace);
     }
-    return this.renderTokens(this.parse(indentedValue, tags), context, partials, indentedValue, tags);
+    var tokens = this.parse(indentedValue, tags);
+    return this.renderTokens(tokens, context, partials, indentedValue, config);
   }
 };
 
@@ -647,14 +660,36 @@ Writer.prototype.unescapedValue = function unescapedValue (token, context) {
     return value;
 };
 
-Writer.prototype.escapedValue = function escapedValue (token, context) {
+Writer.prototype.escapedValue = function escapedValue (token, context, config) {
+  var escape = this.getConfigEscape(config) || mustache.escape;
   var value = context.lookup(token[1]);
   if (value != null)
-    return typeof value === 'number' ? String(value) : mustache.escape(value);
+    return (typeof value === 'number' && escape === mustache.escape) ? String(value) : escape(value);
 };
 
 Writer.prototype.rawValue = function rawValue (token) {
   return token[1];
+};
+
+Writer.prototype.getConfigTags = function getConfigTags (config) {
+  if (Array.isArray(config)) {
+    return config;
+  }
+  else if (config && typeof config === 'object') {
+    return config.tags;
+  }
+  else {
+    return undefined;
+  }
+};
+
+Writer.prototype.getConfigEscape = function getConfigEscape (config) {
+  if (config && typeof config === 'object' && !Array.isArray(config)) {
+    return config.escape;
+  }
+  else {
+    return undefined;
+  }
 };
 
 var mustache = {
@@ -704,19 +739,17 @@ mustache.parse = function parse (template, tags) {
 };
 
 /**
- * Renders the `template` with the given `view` and `partials` using the
- * default writer. If the optional `tags` argument is given here it must be an
- * array with two string values: the opening and closing tags used in the
- * template (e.g. [ "<%", "%>" ]). The default is to mustache.tags.
+ * Renders the `template` with the given `view`, `partials`, and `config`
+ * using the default writer.
  */
-mustache.render = function render (template, view, partials, tags) {
+mustache.render = function render (template, view, partials, config) {
   if (typeof template !== 'string') {
     throw new TypeError('Invalid template! Template should be a "string" ' +
                         'but "' + typeStr(template) + '" was given as the first ' +
                         'argument for mustache#render(template, view, partials)');
   }
 
-  return defaultWriter.render(template, view, partials, tags);
+  return defaultWriter.render(template, view, partials, config);
 };
 
 // Export the escaping function so that the user may override it.
