@@ -182,7 +182,13 @@ describe('Mustache.render', function () {
     });
     
     it('uses provided config.tags and config.escape when rendering sections', function () {
-      var template = '<[[&value-raw]] [[#test-1]][[value-1]][[/test-1]][[^test-2]][[value-2]][[/test-2]]>';
+      var template = (
+        '<[[&value-raw]]: ' +
+        '[[#test-1]][[value-1]][[/test-1]]' +
+        '[[^test-2]][[value-2]][[/test-2]], ' +
+        '[[#test-lambda]][[value-lambda]][[/test-lambda]]' +
+        '>'
+      );
       
       function escapeQuotes (text) {
         return '"' + text + '"';
@@ -196,20 +202,28 @@ describe('Mustache.render', function () {
         'test-1': true,
         'value-1': 'abc',
         'test-2': true,
-        'value-2': '123'
+        'value-2': '123',
+        'test-lambda': function () {
+          return function (text, render) { return 'lambda: ' + render(text); };
+        },
+        'value-lambda': 'bar'
       };
       var viewTestFalse = {
         'value-raw': 'foo',
         'test-1': false,
         'value-1': 'abc',
         'test-2': false,
-        'value-2': '123'
+        'value-2': '123',
+        'test-lambda': function () {
+          return function (text, render) { return 'lambda: ' + render(text); };
+        },
+        'value-lambda': 'bar'
       };
       var outputTrue = Mustache.render(template, viewTestTrue, {}, config); 
       var outputFalse = Mustache.render(template, viewTestFalse, {}, config); 
 
-      assert.equal(outputTrue, '<foo "abc">');
-      assert.equal(outputFalse, '<foo "123">');
+      assert.equal(outputTrue, '<foo: "abc", lambda: "bar">');
+      assert.equal(outputFalse, '<foo: "123", lambda: "bar">');
     });
   });
 
