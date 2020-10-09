@@ -28,7 +28,7 @@
     "url": "https://raw.github.com/janl/mustache.js/{version}/mustache.js"
   },
   "scripts": {
-    "build": "rollup mustache.mjs --file mustache.js --format umd --name Mustache --banner '// This file has been generated from mustache.mjs' && uglifyjs mustache.js > mustache.min.js",
+    "build": "rollup mustache.mjs --file mustache.js --format umd --name Mustache --banner \"// This file has been generated from mustache.mjs\" && uglifyjs mustache.js > mustache.min.js",
     "test": "npm run test-lint && npm run test-unit",
     "test-lint": "eslint mustache.mjs bin/mustache test/**/*.js",
     "test-unit": "mocha --reporter spec test/*-test.js",
