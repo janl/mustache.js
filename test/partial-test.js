@@ -159,7 +159,7 @@ describe('Partials spec', function () {
     });
 
     it('Nested partials should support custom delimiters.', function () {
-      var tags = ["[[", "]]"];
+      var tags = ['[[', ']]'];
       var template = '[[> level1 ]]';
       var partials = {
         level1: 'partial 1\n[[> level2]]',
