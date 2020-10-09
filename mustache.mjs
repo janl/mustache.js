@@ -590,7 +590,7 @@ Writer.prototype.renderSection = function renderSection (token, context, partial
   // This function is used to render an arbitrary template
   // in the current context by higher-order sections.
   function subRender (template) {
-    return self.render(template, context, partials);
+    return self.render(template, context, partials, config);
   }
 
   if (!value) return;
