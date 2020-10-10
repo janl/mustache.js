@@ -679,7 +679,7 @@
   };
 
   Writer.prototype.getConfigTags = function getConfigTags (config) {
-    if (Array.isArray(config)) {
+    if (isArray(config)) {
       return config;
     }
     else if (config && typeof config === 'object') {
@@ -691,7 +691,7 @@
   };
 
   Writer.prototype.getConfigEscape = function getConfigEscape (config) {
-    if (config && typeof config === 'object' && !Array.isArray(config)) {
+    if (config && typeof config === 'object' && !isArray(config)) {
       return config.escape;
     }
     else {
