@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@v0.51.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.51.0/testing/asserts.ts";
 import mustache from "../../mustache.mjs";
 
 const view = {
