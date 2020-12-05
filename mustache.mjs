@@ -694,7 +694,7 @@ Writer.prototype.getConfigEscape = function getConfigEscape (config) {
 
 var mustache = {
   name: 'mustache.js',
-  version: '4.0.1',
+  version: '4.1.0',
   tags: [ '{{', '}}' ],
   clearCache: undefined,
   escape: undefined,

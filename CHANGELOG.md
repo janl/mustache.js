@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.1.0] / 6 December 2020
+
+### Added
+
+* [#764]: `render()` now recognizes a config object argument, by [@pineapplemachine].
+
+### Fixed
+
+* [#764]: Ask custom `escape` functions to escape all types of values (including `number`s), by [@pineapplemachine].
+
 ## [4.0.1] / 15 March 2020
 
 ### Fixed
@@ -467,6 +477,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[4.1.0]: https://github.com/janl/mustache.js/compare/v4.0.1...v4.1.0
 [4.0.1]: https://github.com/janl/mustache.js/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/janl/mustache.js/compare/v3.2.1...v4.0.0
 [3.2.1]: https://github.com/janl/mustache.js/compare/v3.2.0...v3.2.1
@@ -543,6 +554,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [#731]: https://github.com/janl/mustache.js/issues/731
 [#735]: https://github.com/janl/mustache.js/issues/735
 [#739]: https://github.com/janl/mustache.js/issues/739
+[#764]: https://github.com/janl/mustache.js/issues/764
 
 [@afc163]: https://github.com/afc163
 [@aielo]: https://github.com/aielo
@@ -581,6 +593,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [@paultopia]: https://github.com/paultopia
 [@pgilad]: https://github.com/pgilad
 [@phillipj]: https://github.com/phillipj
+[@pineapplemachine]: https://github.com/pineapplemachine
 [@pra85]: https://github.com/pra85
 [@raymond-lam]: https://github.com/raymond-lam
 [@seminaoki]: https://github.com/seminaoki
