@@ -1,8 +1,6 @@
 language: node_js
 node_js:
   - 8
-  - 10
-  - 12
 script:
   - npm test
   - "test $TRAVIS_PULL_REQUEST != 'false' || test $TRAVIS_NODE_VERSION != '8' || npm run test-browser"
