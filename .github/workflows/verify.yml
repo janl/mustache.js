@@ -11,7 +11,8 @@ jobs:
         node-version: [8.x, 10.x, 12.x, 14.x, 15.x]
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        submodules: recursive
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
@@ -29,7 +30,8 @@ jobs:
         node-version: [0.10.x, 0.12.x, 4.x, 6.x]
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        submodules: recursive
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
