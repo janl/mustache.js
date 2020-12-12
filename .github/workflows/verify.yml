@@ -12,7 +12,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        submodules: recursive
+        with:
+          submodules: recursive
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
@@ -31,7 +32,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        submodules: recursive
+        with:
+          submodules: recursive
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
