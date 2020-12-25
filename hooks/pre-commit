@@ -78,6 +78,6 @@ class Bumper
 end
 
 bumper = Bumper.new([
-	Source.new('mustache.mjs', /version: '([^']+)'/),
+	Source.new('mustache.js', /version: '([^']+)'/),
 ])
 bumper.start
