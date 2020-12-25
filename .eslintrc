@@ -19,7 +19,7 @@
   },
   "overrides": [
     {
-      "files": ["mustache.mjs"],
+      "files": ["mustache.js"],
       "parserOptions": {
         "sourceType": "module",
         "ecmaVersion": 2015
