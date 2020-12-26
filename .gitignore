@@ -10,3 +10,4 @@ npm-debug.log
 test/render-test-browser.js
 .idea/
 mustache.mjs
+mustache.min.js
