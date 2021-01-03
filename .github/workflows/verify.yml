@@ -35,6 +35,27 @@ jobs:
           npm install
           npm run test-unit
 
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: npm install and build
+        run: |
+          npm install
+          npm run build
+      - name: Store build-output for later
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-output
+          path: |
+            mustache.js
+            mustache.mjs
+
   tests-on-legacy:
     runs-on: ubuntu-latest
 
@@ -42,6 +63,7 @@ jobs:
       matrix:
         node-version: [0.10.x, 0.12.x, 4.x, 6.x, 8.x]
 
+    needs: build
     steps:
       - uses: actions/checkout@v2
         with:
@@ -50,6 +72,10 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Get build-output from build step
+        uses: actions/download-artifact@v2
+        with:
+          name: build-output
       - name: npm install and test
         run: |
           npm install mocha@3 chai@3
