@@ -3,7 +3,7 @@ name: Package usage
 on: [push, pull_request]
 
 jobs:
-  package:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -12,6 +12,32 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14.x
+      - name: npm install and build
+        run: |
+          npm install
+          npm run build
+      - name: Store build-output for later
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-output
+          path: |
+            mustache.js
+            mustache.mjs
+
+  package:
+    runs-on: ubuntu-latest
+
+    needs: build
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: Get build-output from build step
+        uses: actions/download-artifact@v2
+        with:
+          name: build-output
       - name: Create package tarball
         run: |
           export ARCHIVE_FILENAME=$(npm pack | tail -n 1)
@@ -71,12 +97,17 @@ jobs:
   browser-usage:
     runs-on: ubuntu-latest
 
+    needs: build
     steps:
       - uses: actions/checkout@v1
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
+      - name: Get build-output from build step
+        uses: actions/download-artifact@v2
+        with:
+          name: build-output
       - name: Install and test
         run: |
           npm ci
@@ -85,10 +116,15 @@ jobs:
   deno-usage:
     runs-on: ubuntu-latest
 
+    needs: build
     steps:
       - uses: actions/checkout@v1
       - uses: denolib/setup-deno@master
         with:
           deno-version: 'v1.0.0'
+      - name: Get build-output from build step
+        uses: actions/download-artifact@v2
+        with:
+          name: build-output
       - run: deno --version
       - run: deno test --allow-net=deno.land test/module-systems/deno-test.ts
