@@ -3,6 +3,18 @@ name: Verify changes
 on: [push, pull_request]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - run: npm install
+      - run: npm run test-lint
+
   tests:
     runs-on: ubuntu-latest
 
@@ -21,7 +33,7 @@ jobs:
       - name: npm install and test
         run: |
           npm install
-          npm test
+          npm run test-unit
 
   tests-on-legacy:
     runs-on: ubuntu-latest
