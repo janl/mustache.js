@@ -1,0 +1,8 @@
+{
+  cjs: {
+    // Ensure ESM `export default` ends up as the root, e.g. `module.exports` when
+    // being `require()`d from CJS code. This is not spec compliant, but that does
+    // not matter because only use this `esm` package trickery locally while testing
+    dedefault: true
+  }
+}

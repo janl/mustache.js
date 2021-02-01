@@ -9,10 +9,10 @@ var cliPartialsTxt = path.resolve(_files, 'cli_with_partials.txt');
 var moduleVersion = require('../package').version;
 
 function changeForOS (command) {
+  command = command.replace('bin/mustache', 'node --require esm bin/mustache')
 
   if (process.platform === 'win32') {
     return command
-      .replace(/bin\/mustache/g, 'node bin\\mustache')
       .replace(/\bcat\b/g, 'type')
       .replace(/\//g, '\\');
   }
