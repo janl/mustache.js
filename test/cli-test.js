@@ -9,7 +9,8 @@ var cliPartialsTxt = path.resolve(_files, 'cli_with_partials.txt');
 var moduleVersion = require('../package').version;
 
 function changeForOS (command) {
-  command = command.replace('bin/mustache', 'node --require esm bin/mustache')
+  var requireFlag = !isLegacyNodeVersion ? '--require esm' : '';
+  command = command.replace('bin/mustache', 'node ' + requireFlag + ' bin/mustache')
 
   if (process.platform === 'win32') {
     return command
