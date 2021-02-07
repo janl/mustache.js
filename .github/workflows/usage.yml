@@ -1,0 +1,94 @@
+name: Package usage
+
+on: [push, pull_request]
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: Create package tarball
+        run: |
+          export ARCHIVE_FILENAME=$(npm pack | tail -n 1)
+          mv $ARCHIVE_FILENAME mustache.tgz
+      - name: Store package tarball for later
+        uses: actions/upload-artifact@v2
+        with:
+          name: package-output
+          path: mustache.tgz
+
+  common-js-usage:
+    runs-on: ubuntu-latest
+
+    needs: package
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: Get package tarball from package step
+        uses: actions/download-artifact@v2
+        with:
+          name: package-output
+      - name: Package, install and test
+        run: |
+          export UNPACK_DESTINATION=$(mktemp -d)
+          mv mustache.tgz $UNPACK_DESTINATION
+          cp test/module-systems/commonjs-test.js $UNPACK_DESTINATION
+          cd $UNPACK_DESTINATION
+          npm install mustache.tgz
+          node commonjs-test.js
+
+  esm-usage:
+    runs-on: ubuntu-latest
+
+    needs: package
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '>=13.2.0'
+      - name: Get package tarball from package step
+        uses: actions/download-artifact@v2
+        with:
+          name: package-output
+      - name: Package, install and test
+        run: |
+          export UNPACK_DESTINATION=$(mktemp -d)
+          mv mustache.tgz $UNPACK_DESTINATION
+          cp test/module-systems/esm-test.mjs $UNPACK_DESTINATION
+          cd $UNPACK_DESTINATION
+          npm install mustache.tgz
+          node esm-test.mjs
+
+  browser-usage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: Install and test
+        run: |
+          npm ci
+          npx mocha test/module-systems/browser-test.js
+
+  deno-usage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - uses: denolib/setup-deno@master
+        with:
+          deno-version: 'v1.0.0'
+      - run: deno --version
+      - run: deno test --allow-net=deno.land test/module-systems/deno-test.ts

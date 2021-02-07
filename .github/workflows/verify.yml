@@ -43,69 +43,6 @@ jobs:
           npm install mocha@3 chai@3
           npm run test-unit
 
-  common-js-usage:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 12.x
-      - name: Package, install and test
-        run: |
-          export ARCHIVE_FILENAME=$(npm pack | tail -n 1)
-          export UNPACK_DESTINATION=$(mktemp -d)
-          mv $ARCHIVE_FILENAME $UNPACK_DESTINATION
-          cp test/module-systems/commonjs-test.js $UNPACK_DESTINATION
-          cd $UNPACK_DESTINATION
-          npm install $ARCHIVE_FILENAME
-          node commonjs-test.js
-
-  esm-usage:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: '>=13.2.0'
-      - name: Package, install and test
-        run: |
-          export ARCHIVE_FILENAME=$(npm pack | tail -n 1)
-          export UNPACK_DESTINATION=$(mktemp -d)
-          mv $ARCHIVE_FILENAME $UNPACK_DESTINATION
-          cp test/module-systems/esm-test.mjs $UNPACK_DESTINATION
-          cd $UNPACK_DESTINATION
-          npm install $ARCHIVE_FILENAME
-          node esm-test.mjs
-
-  browser-usage:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Setup Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 12.x
-      - name: Install and test
-        run: |
-          npm ci
-          npx mocha test/module-systems/browser-test.js
-
-  deno-usage:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v1
-      - uses: denolib/setup-deno@master
-        with:
-          deno-version: 'v1.0.0'
-      - run: deno --version
-      - run: deno test --allow-net=deno.land test/module-systems/deno-test.ts
-
   build-output-sync:
     runs-on: ubuntu-latest
 
