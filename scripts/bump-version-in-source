@@ -33,19 +33,9 @@ class Bumper
 
 		# if bumped, do extra stuff and notify the user
 		if @bumped
+			`git add mustache.js`
+			`git commit --amend --no-edit`
 
-			# keep .mjs & .js|.min.js in sync
-			puts "> building and minifying `mustache.mjs`..."
-			`npm run build`
-
-			# stage files for commit
-			`git add package.json`
-			@sources.each {|source| `git add #{source.path}`}
-			`git add mustache.min.js`
-			`git commit -m ":ship: bump to version #{@target_v}"`
-
-			# notify codemonkey
-			puts "staged bumped files and created commit"
 			puts_c 32, "successfully bumped version to #{@target_v}!"
 			puts_c 33, "don't forget to `npm publish`!"
 		end

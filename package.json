@@ -35,7 +35,8 @@
     "test-render": "mocha  --reporter spec test/render-test",
     "pre-test-browser": "node test/create-browser-suite.js",
     "test-browser": "npm run pre-test-browser && zuul -- test/context-test.js test/parse-test.js test/scanner-test.js test/render-test-browser.js",
-    "test-browser-local": "npm run pre-test-browser && zuul --local 8080 -- test/context-test.js test/scanner-test.js test/parse-test.js test/render-test-browser.js"
+    "test-browser-local": "npm run pre-test-browser && zuul --local 8080 -- test/context-test.js test/scanner-test.js test/parse-test.js test/render-test-browser.js",
+    "postversion": "scripts/bump-version-in-source"
   },
   "devDependencies": {
     "chai": "^3.4.0",
