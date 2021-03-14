@@ -24,6 +24,13 @@
     "mustache.min.js",
     "wrappers/"
   ],
+  "exports": {
+    ".": {
+      "import": "./mustache.mjs",
+      "require": "./mustache.js"
+    },
+    "./*": "./*"
+  },
   "volo": {
     "url": "https://raw.github.com/janl/mustache.js/{version}/mustache.js"
   },

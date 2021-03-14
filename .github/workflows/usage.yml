@@ -90,9 +90,11 @@ jobs:
           export UNPACK_DESTINATION=$(mktemp -d)
           mv mustache.tgz $UNPACK_DESTINATION
           cp test/module-systems/esm-test.mjs $UNPACK_DESTINATION
+          cp test/module-systems/esm-test-exports.mjs $UNPACK_DESTINATION
           cd $UNPACK_DESTINATION
           npm install mustache.tgz
           node esm-test.mjs
+          node esm-test-exports.mjs
 
   browser-usage:
     runs-on: ubuntu-latest
