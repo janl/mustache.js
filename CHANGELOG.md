@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.2.0] / 28 March 2021
+
+### Added
+
+* [#773]: Add package.json `exports` field, by [@manzt].
+
 ## [4.1.0] / 6 December 2020
 
 ### Added
@@ -555,6 +561,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [#735]: https://github.com/janl/mustache.js/issues/735
 [#739]: https://github.com/janl/mustache.js/issues/739
 [#764]: https://github.com/janl/mustache.js/issues/764
+[#773]: https://github.com/janl/mustache.js/issues/773
 
 [@afc163]: https://github.com/afc163
 [@aielo]: https://github.com/aielo
@@ -582,6 +589,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
 [@kookookchoozeus]: https://github.com/kookookchoozeus
 [@kristijanmatic]: https://github.com/kristijanmatic
 [@kevindew]: https://github.com/kevindew
+[@manzt]: https://github.com/manzt
 [@mateusortiz]: https://github.com/mateusortiz
 [@mightyplow]: https://github.com/mightyplow
 [@mikesherov]: https://github.com/mikesherov
