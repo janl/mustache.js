@@ -483,6 +483,7 @@ This release is made to revert changes introduced in [2.3.1] that caused unexpec
   * Fixed a bug that clashed with QUnit (thanks [@kannix]).
   * Added volo support (thanks [@guybedford]).
 
+[4.2.0]: https://github.com/janl/mustache.js/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/janl/mustache.js/compare/v4.0.1...v4.1.0
 [4.0.1]: https://github.com/janl/mustache.js/compare/v4.0.0...v4.0.1
 [4.0.0]: https://github.com/janl/mustache.js/compare/v3.2.1...v4.0.0
