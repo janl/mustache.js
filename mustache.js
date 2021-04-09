@@ -703,7 +703,7 @@ Writer.prototype.invokeGlobalHelper = function invokeGlobalHelper (token, contex
     return view = view[arg[0]];
   }(argsHelper.split(/\.+/g).reverse());
 
-  return mustache.escape(mustache.helpers.get(helperName)(value)) || null;
+  return mustache.escape(mustache.helpers.get(helperName)(value));
 };
 
 Writer.prototype.getConfigTags = function getConfigTags (config) {
