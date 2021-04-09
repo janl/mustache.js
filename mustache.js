@@ -703,7 +703,7 @@ Writer.prototype.invokeGlobalHelper = function invokeGlobalHelper (token, contex
     return view = view[arg[0]];
   }(argsHelper.split(/\.+/g).reverse());
 
-  return mustache.escape(mustache.helpers.get(helperName)(value));
+  return mustache.escape(mustache.helpers[helperName](value));
 };
 
 Writer.prototype.getConfigTags = function getConfigTags (config) {
@@ -728,7 +728,7 @@ Writer.prototype.getConfigEscape = function getConfigEscape (config) {
 };
 
 var mustache = {
-  helpers: new Map(),
+  helpers: {},
   name: 'mustache.js',
   version: '4.2.0',
   tags: [ '{{', '}}' ],
@@ -786,7 +786,7 @@ mustache.globalHelper = function globalHelper (name, helper) {
     return false;
   }
 
-  mustache.helpers.set(name, helper);
+  mustache.helpers[name] = helper;
 };
 
 /**
