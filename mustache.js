@@ -78,7 +78,7 @@ var whiteRe = /\s*/;
 var spaceRe = /\s+/;
 var equalsRe = /\s*=/;
 var curlyRe = /\s*\}/;
-var tagRe = /#|\^|\/|>|\{|&|=|!/;
+var tagRe = /#|@|\^|\/|>|\{|&|=|!/;
 
 /**
  * Breaks up the given `template` string into a tree of tokens. If the `tags`
@@ -149,7 +149,7 @@ function parseTemplate (template, tags) {
 
   var scanner = new Scanner(template);
 
-  var start, type, value, chr, token, openSection;
+  var start, type, value, chr, token, openSection, argsGlobalHelper;
   while (!scanner.eos()) {
     start = scanner.pos;
 
@@ -202,6 +202,10 @@ function parseTemplate (template, tags) {
       scanner.scan(curlyRe);
       scanner.scanUntil(closingTagRe);
       type = '&';
+    } else if (type === '@') {
+      var data = scanner.scanArgsGlobalHelper(scanner.scanUntil(closingTagRe));
+      value = data.globalHelperName;
+      argsGlobalHelper = data.argsGlobalHelper;
     } else {
       value = scanner.scanUntil(closingTagRe);
     }
@@ -213,7 +217,7 @@ function parseTemplate (template, tags) {
     if (type == '>') {
       token = [ type, value, start, scanner.pos, indentation, tagIndex, lineHasNonSpace ];
     } else {
-      token = [ type, value, start, scanner.pos ];
+      token = [type, value, start, scanner.pos, argsGlobalHelper];
     }
     tagIndex++;
     tokens.push(token);
@@ -341,6 +345,20 @@ Scanner.prototype.scan = function scan (re) {
   this.pos += string.length;
 
   return string;
+};
+
+Scanner.prototype.scanArgsGlobalHelper = function scanArgsGlobalHelper (helperData) {
+  var argsGlobalHelper;
+  var data = helperData.split(/\s+/g);
+
+  for (var i = 1; i <= data.length; i++) {
+    if (data[i]) {
+      argsGlobalHelper = data[i];
+      break;
+    }
+  }
+
+  return {argsGlobalHelper: argsGlobalHelper, globalHelperName: data[0]};
 };
 
 /**
@@ -574,6 +592,7 @@ Writer.prototype.renderTokens = function renderTokens (tokens, context, partials
     else if (symbol === '&') value = this.unescapedValue(token, context);
     else if (symbol === 'name') value = this.escapedValue(token, context, config);
     else if (symbol === 'text') value = this.rawValue(token);
+    else if (symbol === '@') value = this.invokeGlobalHelper(token, context);
 
     if (value !== undefined)
       buffer += value;
@@ -671,6 +690,22 @@ Writer.prototype.rawValue = function rawValue (token) {
   return token[1];
 };
 
+Writer.prototype.invokeGlobalHelper = function invokeGlobalHelper (token, context) {
+
+  var helperName = token[1];
+  var argsHelper = token[4];
+  var view = Object.assign({}, context.view);
+
+  var value = function getValueFromView (arg) {
+    if (arg.length > 1)
+      getValueFromView(arg.slice(1));
+
+    return view = view[arg[0]];
+  }(argsHelper.split(/\.+/g).reverse());
+
+  return mustache.escape(mustache.helpers.get(helperName)(value)) || null;
+};
+
 Writer.prototype.getConfigTags = function getConfigTags (config) {
   if (isArray(config)) {
     return config;
@@ -693,6 +728,7 @@ Writer.prototype.getConfigEscape = function getConfigEscape (config) {
 };
 
 var mustache = {
+  helpers: new Map(),
   name: 'mustache.js',
   version: '4.2.0',
   tags: [ '{{', '}}' ],
@@ -736,6 +772,21 @@ mustache.clearCache = function clearCache () {
  */
 mustache.parse = function parse (template, tags) {
   return defaultWriter.parse(template, tags);
+};
+
+/**
+ * Add a global custom helper which is accessed from any template
+ * @param string name
+ * @param function helper
+ */
+
+mustache.globalHelper = function globalHelper (name, helper) {
+  if (!isFunction(helper)) {
+    console.error('helper must be a function');
+    return false;
+  }
+
+  mustache.helpers.set(name, helper);
 };
 
 /**
