@@ -37,6 +37,8 @@ $ npm install mustache --save
 Below is a quick example how to use mustache.js:
 
 ```js
+var Mustache = require('mustache');
+
 var view = {
   title: "Joe",
   calc: function () {
