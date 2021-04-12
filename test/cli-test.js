@@ -10,7 +10,7 @@ var moduleVersion = require('../package').version;
 
 function changeForOS (command) {
   var requireFlag = !isLegacyNodeVersion ? '--require esm' : '';
-  command = command.replace('bin/mustache', 'node ' + requireFlag + ' bin/mustache')
+  command = command.replace('bin/mustache', 'node ' + requireFlag + ' bin/mustache');
 
   if (process.platform === 'win32') {
     return command
