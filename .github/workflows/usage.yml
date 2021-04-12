@@ -51,13 +51,17 @@ jobs:
   common-js-usage:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x, 14.x, 15.x]
+
     needs: package
     steps:
       - uses: actions/checkout@v1
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: 12.x
+          node-version: ${{ matrix.node-version }}
       - name: Get package tarball from package step
         uses: actions/download-artifact@v2
         with:
@@ -74,13 +78,17 @@ jobs:
   esm-usage:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [14.x, 15.x]
+
     needs: package
     steps:
       - uses: actions/checkout@v1
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: '>=13.2.0'
+          node-version: ${{ matrix.node-version }}
       - name: Get package tarball from package step
         uses: actions/download-artifact@v2
         with:
