@@ -4,13 +4,13 @@
 
 [![Build Status](https://travis-ci.org/janl/mustache.js.svg?branch=master)](https://travis-ci.org/janl/mustache.js)
 
-[mustache.js](http://github.com/janl/mustache.js) is a zero-dependency implementation of the [mustache](http://mustache.github.com/) template system in JavaScript.
+[mustache.js](http://github.com/janl/mustache.js) is a zero-dependency implementation of the [mustache](http://mustache.github.io/) template system in JavaScript.
 
-[Mustache](http://mustache.github.com/) is a logic-less template syntax. It can be used for HTML, config files, source code - anything. It works by expanding tags in a template using values provided in a hash or object.
+[Mustache](http://mustache.github.io/) is a logic-less template syntax. It can be used for HTML, config files, source code - anything. It works by expanding tags in a template using values provided in a hash or object.
 
 We call it "logic-less" because there are no if statements, else clauses, or for loops. Instead there are only tags. Some tags are replaced with a value, some nothing, and others a series of values.
 
-For a language-agnostic overview of mustache's template syntax, see the `mustache(5)` [manpage](http://mustache.github.com/mustache.5.html).
+For a language-agnostic overview of mustache's template syntax, see the `mustache(5)` [manpage](http://mustache.github.io/mustache.5.html).
 
 ## Where to use mustache.js?
 
@@ -49,11 +49,11 @@ var view = {
 var output = Mustache.render("{{title}} spends {{calc}}", view);
 ```
 
-In this example, the `Mustache.render` function takes two parameters: 1) the [mustache](http://mustache.github.com/) template and 2) a `view` object that contains the data and code needed to render the template.
+In this example, the `Mustache.render` function takes two parameters: 1) the [mustache](http://mustache.github.io/) template and 2) a `view` object that contains the data and code needed to render the template.
 
 ## Templates
 
-A [mustache](http://mustache.github.com/) template is a string that contains any number of mustache tags. Tags are indicated by the double mustaches that surround them. `{{person}}` is a tag, as is `{{#person}}`. In both examples we refer to `person` as the tag's key. There are several types of tags available in mustache.js, described below.
+A [mustache](http://mustache.github.io/) template is a string that contains any number of mustache tags. Tags are indicated by the double mustaches that surround them. `{{person}}` is a tag, as is `{{#person}}`. In both examples we refer to `person` as the tag's key. There are several types of tags available in mustache.js, described below.
 
 There are several techniques that can be used to load templates and hand them to mustache.js, here are two of them:
 
