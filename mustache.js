@@ -396,7 +396,10 @@ Context.prototype.lookup = function lookup (name) {
   var value;
   if (cache.hasOwnProperty(name)) {
     value = cache[name];
-  } else {
+  } else if (name.includes('.') && cache['.'] && cache['.'].hasOwnProperty(name)) {
+    value = cache['.'][name];
+  }
+  else {
     var context = this, intermediateValue, names, index, lookupHit = false;
 
     while (context) {
