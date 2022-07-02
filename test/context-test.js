@@ -24,6 +24,12 @@ describe('A new Mustache.Context', function () {
       assert.equal(context.view.name, 'child');
       assert.equal(context.parent.view.name, 'parent');
     });
+    
+    
+    it('new. ---returns the child context', function () {
+      assert.equal(context.view.name, 'child');
+      assert.equal(context.parent.view.name, 'parent');
+    });
 
     it('is able to lookup properties of its own view', function () {
       assert.equal(context.lookup('name'), 'child');
@@ -40,6 +46,11 @@ describe('A new Mustache.Context', function () {
     it('is able to lookup nested properties of its parent view', function () {
       assert.equal(context.lookup('a.b'), 'b');
     });
+    
+    it('new. is able to lookup nested properties of its parent view', function () {
+      assert.equal(context.lookup('a.b'), 'b');
+    });
+    
   });
 });
 
