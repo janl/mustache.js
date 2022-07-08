@@ -227,6 +227,35 @@ describe('Mustache.render', function () {
     });
   });
 
+  describe('globals functions', function () {
+    it('the name of the function must be a string', function () {
+      assert.throws(function () {
+        Mustache.registerFunction(['wrong name'], function () {});
+      }, TypeError, 'String expected on first argument to mustache.registerFunction');
+    });
+
+    it('the function parameter must be a Function', function () {
+      assert.throws(function () {
+        Mustache.registerFunction('wrong name', ['wrong function']);
+      }, TypeError, 'Function expected on second argument to mustache.registerFunction');
+    });
+
+    it('should register a function', function () {
+      Mustache.registerFunction('formatNumber', function (number) {
+        return Number(number).toLocaleString('en-US',{ maximumFractionDigits: 2 });
+      });
+
+      assert.ok(Mustache.globalFunctions.hasOwnProperty('formatNumber'));
+    });
+
+    it('should render a template with a registered function', function () {
+
+      var template = 'Nicaragua has formatted the number {{number}} to {{#formatNumber}}{{number}}{{/formatNumber}}';
+
+      assert.equal(Mustache.render(template, {number: 1500.6655}), 'Nicaragua has formatted the number 1500.6655 to 1,500.67');
+    });
+  });
+
   tests.forEach(function (test) {
     var view = eval(test.view);
 
