@@ -227,6 +227,35 @@ describe('Mustache.render', function () {
     });
   });
 
+  describe('globals functions', function () {
+    it('the name of the function must be a string', function () {
+      assert.throws(function () {
+        Mustache.registerFunction(['wrong name'], function () {});
+      }, TypeError, 'String expected on first argument to mustache.registerFunction');
+    });
+
+    it('the function parameter must be a Function', function () {
+      assert.throws(function () {
+        Mustache.registerFunction('wrong name', ['wrong function']);
+      }, TypeError, 'Function expected on second argument to mustache.registerFunction');
+    });
+
+    it('should register a function', function () {
+      Mustache.registerFunction('upperCase', function (str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      });
+
+      assert.ok(Mustache.globalFunctions.hasOwnProperty('upperCase'));
+    });
+
+    it('should render a template with a registered function', function () {
+
+      var template = 'Hello from {{#upperCase}}{{country}}{{/upperCase}}';
+
+      assert.equal(Mustache.render(template, {country: 'nicaragua'}), 'Hello from Nicaragua');
+    });
+  });
+
   tests.forEach(function (test) {
     var view = eval(test.view);
 
