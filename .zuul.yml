@@ -9,4 +9,4 @@ browsers:
 concurrency: 1
 tunnel:
   type: ngrok
-  bind_tls: false
+  bind_tls: true
