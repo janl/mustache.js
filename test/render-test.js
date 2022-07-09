@@ -13,8 +13,8 @@ describe('Mustache.render', function () {
     assert.throws(function () {
       Mustache.render(['dummy template'], ['foo', 'bar']);
     }, TypeError, 'Invalid template! Template should be a "string" but ' +
-                  '"array" was given as the first argument ' +
-                  'for mustache#render(template, view, partials)');
+        '"array" was given as the first argument ' +
+        'for mustache#render(template, view, partials)');
   });
 
   describe('custom tags', function () {
@@ -24,7 +24,7 @@ describe('Mustache.render', function () {
       Mustache.tags = ['{{', '}}'];
       assert.equal(Mustache.render(template, { placeholder: 'foo' }, {}, ['<<', '>>']), 'foobar{{placeholder}}');
     });
-    
+
     it('uses config.tags argument instead of Mustache.tags when given', function () {
       var template = '<<placeholder>>bar{{placeholder}}';
 
@@ -39,7 +39,7 @@ describe('Mustache.render', function () {
       Mustache.render(template, { placeholder: 'foo' });
       assert.equal(Mustache.render(template, { placeholder: 'foo' }, {}, ['((', '))']), 'foobar{{placeholder}}');
     });
-    
+
     it('uses config.tags argument instead of Mustache.tags when given, even when it previously rendered the template using Mustache.tags', function () {
       var template = '((placeholder))bar{{placeholder}}';
 
@@ -54,7 +54,7 @@ describe('Mustache.render', function () {
       Mustache.render(template, { placeholder: 'foo' }, {}, ['<<', '>>']);
       assert.equal(Mustache.render(template, { placeholder: 'foo' }, {}, ['[[', ']]']), 'foobar<<placeholder>>');
     });
-    
+
     it('uses config.tags argument instead of Mustache.tags when given, even when it previously rendered the template using different tags', function () {
       var template = '[[placeholder]]bar<<placeholder>>';
 
@@ -71,7 +71,7 @@ describe('Mustache.render', function () {
       assert.equal(Mustache.tags, correctMustacheTags);
       assert.deepEqual(Mustache.tags, ['{{', '}}']);
     });
-    
+
     it('does not mutate Mustache.tags when given config.tags argument', function () {
       var correctMustacheTags = ['{{', '}}'];
       Mustache.tags = correctMustacheTags;
@@ -89,18 +89,18 @@ describe('Mustache.render', function () {
 
       assert.equal(output, 'Santa Claus');
     });
-    
+
     it('uses provided config.tags when rendering partials', function () {
       var output = Mustache.render('<%> partial %>', { name: 'Santa Claus' }, {
         partial: '<% name %>'
-      }, { tags: ['<%', '%>'] }); 
+      }, { tags: ['<%', '%>'] });
 
       assert.equal(output, 'Santa Claus');
     });
-    
+
     it('uses config.escape argument instead of Mustache.escape when given', function () {
       var template = 'Hello, {{placeholder}}';
-      
+
       function escapeBang (text) {
         return text + '!';
       }
@@ -109,7 +109,7 @@ describe('Mustache.render', function () {
 
     it('uses config.escape argument instead of Mustache.escape when given, even when it previously rendered the template using Mustache.escape', function () {
       var template = 'Hello, {{placeholder}}';
-      
+
       function escapeQuestion (text) {
         return text + '?';
       }
@@ -119,7 +119,7 @@ describe('Mustache.render', function () {
 
     it('uses config.escape argument instead of Mustache.escape when given, even when it previously rendered the template using a different escape function', function () {
       var template = 'Hello, {{placeholder}}';
-      
+
       function escapeQuestion (text) {
         return text + '?';
       }
@@ -129,7 +129,7 @@ describe('Mustache.render', function () {
       Mustache.render(template, { placeholder: 'foo' }, {}, { escape: escapeQuestion });
       assert.equal(Mustache.render(template, { placeholder: 'foo' }, {}, { escape: escapeBang }), 'Hello, foo!');
     });
-    
+
     it('does not mutate Mustache.escape when given config.escape argument', function () {
       var correctMustacheEscape = Mustache.escape;
 
@@ -141,21 +141,21 @@ describe('Mustache.render', function () {
       assert.equal(Mustache.escape, correctMustacheEscape);
       assert.equal(Mustache.escape('>&'), '&gt;&amp;');
     });
-    
+
     it('uses provided config.escape when rendering partials', function () {
       function escapeDoubleAmpersand (text) {
         return text.replace('&', '&&');
       }
       var output = Mustache.render('{{> partial }}', { name: 'Ampersand &' }, {
         partial: '{{ name }}'
-      }, { escape: escapeDoubleAmpersand }); 
+      }, { escape: escapeDoubleAmpersand });
 
       assert.equal(output, 'Ampersand &&');
     });
-    
+
     it('uses config.tags and config.escape arguments instead of Mustache.tags and Mustache.escape when given', function () {
       var template = 'Hello, {{placeholder}} [[placeholder]]';
-      
+
       function escapeTwoBangs (text) {
         return text + '!!';
       }
@@ -165,7 +165,7 @@ describe('Mustache.render', function () {
       };
       assert.equal(Mustache.render(template, { placeholder: 'world' }, {}, config), 'Hello, {{placeholder}} world!!');
     });
-    
+
     it('uses provided config.tags and config.escape when rendering partials', function () {
       function escapeDoubleAmpersand (text) {
         return text.replace('&', '&&');
@@ -176,20 +176,20 @@ describe('Mustache.render', function () {
       };
       var output = Mustache.render('[[> partial ]]', { name: 'Ampersand &' }, {
         partial: '[[ name ]]'
-      }, config); 
+      }, config);
 
       assert.equal(output, 'Ampersand &&');
     });
-    
+
     it('uses provided config.tags and config.escape when rendering sections', function () {
       var template = (
-        '<[[&value-raw]]: ' +
-        '[[#test-1]][[value-1]][[/test-1]]' +
-        '[[^test-2]][[value-2]][[/test-2]], ' +
-        '[[#test-lambda]][[value-lambda]][[/test-lambda]]' +
-        '>'
+          '<[[&value-raw]]: ' +
+          '[[#test-1]][[value-1]][[/test-1]]' +
+          '[[^test-2]][[value-2]][[/test-2]], ' +
+          '[[#test-lambda]][[value-lambda]][[/test-lambda]]' +
+          '>'
       );
-      
+
       function escapeQuotes (text) {
         return '"' + text + '"';
       }
@@ -219,11 +219,40 @@ describe('Mustache.render', function () {
         },
         'value-lambda': 'bar'
       };
-      var outputTrue = Mustache.render(template, viewTestTrue, {}, config); 
-      var outputFalse = Mustache.render(template, viewTestFalse, {}, config); 
+      var outputTrue = Mustache.render(template, viewTestTrue, {}, config);
+      var outputFalse = Mustache.render(template, viewTestFalse, {}, config);
 
       assert.equal(outputTrue, '<foo: "abc", lambda: "bar">');
       assert.equal(outputFalse, '<foo: "123", lambda: "bar">');
+    });
+  });
+
+  describe('globals functions', function () {
+    it('the name of the function must be a string', function () {
+      assert.throws(function () {
+        Mustache.registerFunction(['wrong name'], function () {});
+      }, TypeError, 'String expected on first argument to mustache.registerFunction');
+    });
+
+    it('the function parameter must be a Function', function () {
+      assert.throws(function () {
+        Mustache.registerFunction('wrong name', ['wrong function']);
+      }, TypeError, 'Function expected on second argument to mustache.registerFunction');
+    });
+
+    it('should register a function', function () {
+      Mustache.registerFunction('formatNumber', function (number) {
+        return Number(number).toLocaleString('en-US',{ maximumFractionDigits: 2 });
+      });
+
+      assert.ok(Mustache.globalFunctions.hasOwnProperty('formatNumber'));
+    });
+
+    it('should render a template with a registered function', function () {
+
+      var template = 'Nicaragua has formatted the number {{number}} to {{#formatNumber}}{{number}}{{/formatNumber}}';
+
+      assert.equal(Mustache.render(template, {number: 1500.6655}), 'Nicaragua has formatted the number 1500.6655 to 1,500.67');
     });
   });
 

@@ -12,6 +12,16 @@ function isFunction (object) {
   return typeof object === 'function';
 }
 
+function putFunctionsIntoView (view, functions) {
+  for (var fn in functions){
+    if (!view.hasOwnProperty(fn)){
+      view[fn] = functions[fn];
+    }
+  }
+
+  return view;
+}
+
 /**
  * More correct typeof string handling array
  * which normally returns typeof 'object'
@@ -38,10 +48,10 @@ function hasProperty (obj, propName) {
  */
 function primitiveHasOwnProperty (primitive, propName) {
   return (
-    primitive != null
-    && typeof primitive !== 'object'
-    && primitive.hasOwnProperty
-    && primitive.hasOwnProperty(propName)
+      primitive != null
+      && typeof primitive !== 'object'
+      && primitive.hasOwnProperty
+      && primitive.hasOwnProperty(propName)
   );
 }
 
@@ -425,8 +435,8 @@ Context.prototype.lookup = function lookup (name) {
         while (intermediateValue != null && index < names.length) {
           if (index === names.length - 1)
             lookupHit = (
-              hasProperty(intermediateValue, names[index])
-              || primitiveHasOwnProperty(intermediateValue, names[index])
+                hasProperty(intermediateValue, names[index])
+                || primitiveHasOwnProperty(intermediateValue, names[index])
             );
 
           intermediateValue = intermediateValue[names[index++]];
@@ -703,6 +713,7 @@ var mustache = {
   Scanner: undefined,
   Context: undefined,
   Writer: undefined,
+  globalFunctions: {},
   /**
    * Allows a user to override the default caching strategy, by providing an
    * object with set, get and clear methods. This can also be used to disable
@@ -745,11 +756,31 @@ mustache.parse = function parse (template, tags) {
 mustache.render = function render (template, view, partials, config) {
   if (typeof template !== 'string') {
     throw new TypeError('Invalid template! Template should be a "string" ' +
-                        'but "' + typeStr(template) + '" was given as the first ' +
-                        'argument for mustache#render(template, view, partials)');
+        'but "' + typeStr(template) + '" was given as the first ' +
+        'argument for mustache#render(template, view, partials)');
   }
 
-  return defaultWriter.render(template, view, partials, config);
+  return defaultWriter.render(template, putFunctionsIntoView(view, mustache.globalFunctions), partials, config);
+};
+
+mustache.registerFunction = function registerFunction (name, fn) {
+  if (typeStr(name) !== 'string') {
+    throw new TypeError('String expected on first argument to mustache.registerFunction');
+  }
+
+  if (!isFunction(fn)){
+    throw new TypeError('Function expected on second argument to mustache.registerFunction');
+  }
+
+  if (hasProperty(mustache.globalFunctions, name)){
+    console.warn('Function "' + name + '" is already registered, it will be overridden');
+  }
+
+  mustache.globalFunctions[name] = function globalFunction () {
+    return function run (text, render) {
+      return fn.call(null, render(text));
+    };
+  };
 };
 
 // Export the escaping function so that the user may override it.
