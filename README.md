@@ -37,16 +37,14 @@ $ npm install mustache --save
 Below is a quick example how to use mustache.js:
 
 ```js
-var Mustache = require('mustache');
+const Mustache = require('mustache');
 
-var view = {
+const view = {
   title: "Joe",
-  calc: function () {
-    return 2 + 4;
-  }
+  calc: () => ( 2 + 4 )
 };
 
-var output = Mustache.render("{{title}} spends {{calc}}", view);
+const output = Mustache.render("{{title}} spends {{calc}}", view);
 ```
 
 In this example, the `Mustache.render` function takes two parameters: 1) the [mustache](http://mustache.github.io/) template and 2) a `view` object that contains the data and code needed to render the template.
@@ -65,8 +63,8 @@ If you need a template for a dynamic part in a static website, you can consider 
 // file: render.js
 
 function renderHello() {
-  var template = document.getElementById('template').innerHTML;
-  var rendered = Mustache.render(template, { name: 'Luke' });
+  const template = document.getElementById('template').innerHTML;
+  const rendered = Mustache.render(template, { name: 'Luke' });
   document.getElementById('target').innerHTML = rendered;
 }
 ```
@@ -94,7 +92,7 @@ function renderHello() {
   fetch('template.mustache')
     .then((response) => response.text())
     .then((template) => {
-      var rendered = Mustache.render(template, { name: 'Luke' });
+      const rendered = Mustache.render(template, { name: 'Luke' });
       document.getElementById('target').innerHTML = rendered;    
     });
 }
@@ -430,7 +428,7 @@ Custom delimiters can be used in place of `{{` and `}}` by setting the new value
 The `Mustache.tags` property holds an array consisting of the opening and closing tag values. Set custom values by passing a new array of tags to `render()`, which gets honored over the default values, or by overriding the `Mustache.tags` property itself:
 
 ```js
-var customTags = [ '<%', '%>' ];
+const customTags = [ '<%', '%>' ];
 ```
 
 ##### Pass Value into Render Method
