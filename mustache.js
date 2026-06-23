@@ -397,13 +397,23 @@ Context.prototype.lookup = function lookup (name) {
   if (cache.hasOwnProperty(name)) {
     value = cache[name];
   } else {
-    var context = this, intermediateValue, names, index, lookupHit = false;
+    var context = this, intermediateValue, names, index, lookupHit = false, firstNameHit = false;
 
     while (context) {
       if (name.indexOf('.') > 0) {
         intermediateValue = context.view;
         names = name.split('.');
         index = 0;
+
+        /**
+         * The first name must resolve in this context for the remaining names
+         * to be looked up here; if it does, we commit to this context and do
+         * not fall back to a parent. Per the spec, dotted names are resolved
+         * against the former resolution, not re-resolved from scratch in each
+         * parent context.
+         **/
+        firstNameHit = hasProperty(intermediateValue, names[0])
+          || primitiveHasOwnProperty(intermediateValue, names[0]);
 
         /**
          * Using the dot notion path in `name`, we descend through the
@@ -460,6 +470,11 @@ Context.prototype.lookup = function lookup (name) {
         value = intermediateValue;
         break;
       }
+
+      // The first name resolved in this context but the full dotted path did
+      // not; do not fall back to a parent context.
+      if (firstNameHit)
+        break;
 
       context = context.parent;
     }
