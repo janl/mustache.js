@@ -40,6 +40,13 @@ describe('A new Mustache.Context', function () {
     it('is able to lookup nested properties of its parent view', function () {
       assert.equal(context.lookup('a.b'), 'b');
     });
+
+    it('does not fall back to the parent for a dotted name resolved in its own view', function () {
+      // `a` exists in this view (as {}), so `a.b` resolves against it and must
+      // not fall back to the parent's `a.b`
+      var ctx = new Context({ a: { b: 'parent' } }).push({ a: {} });
+      assert.equal(ctx.lookup('a.b'), undefined);
+    });
   });
 });
 
