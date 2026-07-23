@@ -23,7 +23,8 @@ if (hasVersionArg()) {
 }
 
 if (!templateArg || !viewArg) {
-  console.error('Syntax: mustache <view> <template> [output]');
+  console.error('Syntax: mustache [-p partial ...] <view> <template> [output]');
+  console.error('  -p  path to a partial template (may be repeated)');
   process.exit(1);
 }
 
