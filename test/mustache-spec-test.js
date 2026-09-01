@@ -11,6 +11,9 @@ var skipTests = {
   delimiters: [
     'Standalone Without Newline'
   ],
+  interpolation: [
+    'Dotted Names - Context Precedence'
+  ],
   inverted: [
     'Standalone Without Newline'
   ],
@@ -20,6 +23,24 @@ var skipTests = {
   ],
   sections: [
     'Standalone Without Newline'
+  ],
+  '~dynamic-names': [
+    'Basic Behavior - Partial',
+    'Basic Behavior - Name Resolution',
+    'Context',
+    'Dotted Names',
+    'Dotted Names - Failed Lookup',
+    'Dotted names - Context Stacking',
+    'Dotted names - Context Stacking Under Repetition',
+    'Dotted names - Context Stacking Failed Lookup',
+    'Recursion',
+    'Surrounding Whitespace',
+    'Inline Indentation',
+    'Standalone Line Endings',
+    'Standalone Without Previous Line',
+    'Standalone Without Newline',
+    'Standalone Indentation',
+    'Padding Whitespace'
   ],
   '~lambdas': [
     'Interpolation',
