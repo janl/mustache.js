@@ -78,7 +78,7 @@ var whiteRe = /\s*/;
 var spaceRe = /\s+/;
 var equalsRe = /\s*=/;
 var curlyRe = /\s*\}/;
-var tagRe = /#|\^|\/|>|\{|&|=|!/;
+var tagRe = /#|\^|\/|>|\{|&|=|!|\$|</;
 
 /**
  * Breaks up the given `template` string into a tree of tokens. If the `tags`
@@ -102,9 +102,15 @@ var tagRe = /#|\^|\/|>|\{|&|=|!/;
  * array of tokens in the subtree and 2) the index in the original template at
  * which the closing tag for that section begins.
  *
- * Tokens for partials also contain two more elements: 1) a string value of
- * indendation prior to that tag and 2) the index of that tag on that line -
- * eg a value of 2 indicates the partial is the third tag on this line.
+ * Tokens for partials also contain three more elements: 1) a string value of
+ * indentation prior to that tag, 2) the index of that tag on that line - eg a
+ * value of 2 indicates the partial is the third tag on this line - and 3)
+ * whether there was any non-space text on that line before the tag.
+ *
+ * Tokens for parent tags and block tags contain the same three elements as
+ * tokens for partials, so once nested their subtree array and closing tag
+ * index are found at indices 7 and 8. A block tag that stood alone on its
+ * line carries `true` as one additional element.
  */
 function parseTemplate (template, tags) {
   if (!template)
@@ -113,6 +119,7 @@ function parseTemplate (template, tags) {
   var sections = [];     // Stack to hold section tokens
   var tokens = [];       // Buffer to hold the tokens
   var spaces = [];       // Indices of whitespace tokens on the current line
+  var lineBlocks = [];
   var hasTag = false;    // Is there a {{tag}} on the current line?
   var nonSpace = false;  // Is there a non-space char on the current line?
   var indentation = '';  // Tracks indentation for tags that use it
@@ -124,8 +131,11 @@ function parseTemplate (template, tags) {
     if (hasTag && !nonSpace) {
       while (spaces.length)
         delete tokens[spaces.pop()];
+      while (lineBlocks.length)
+        lineBlocks.pop()[9] = true;
     } else {
       spaces = [];
+      lineBlocks = [];
     }
 
     hasTag = false;
@@ -210,7 +220,7 @@ function parseTemplate (template, tags) {
     if (!scanner.scan(closingTagRe))
       throw new Error('Unclosed tag at ' + scanner.pos);
 
-    if (type == '>') {
+    if (type == '>' || type == '<' || type == '$') {
       token = [ type, value, start, scanner.pos, indentation, tagIndex, lineHasNonSpace ];
     } else {
       token = [ type, value, start, scanner.pos ];
@@ -218,8 +228,10 @@ function parseTemplate (template, tags) {
     tagIndex++;
     tokens.push(token);
 
-    if (type === '#' || type === '^') {
+    if (type === '#' || type === '^' || type === '<' || type === '$') {
       sections.push(token);
+      if (type === '$')
+        lineBlocks.push(token);
     } else if (type === '/') {
       // Check section nesting.
       openSection = sections.pop();
@@ -295,10 +307,24 @@ function nestTokens (tokens) {
         sections.push(token);
         collector = token[4] = [];
         break;
+      case '<':
+      case '$':
+        collector.push(token);
+        sections.push(token);
+        collector = token[7] = [];
+        break;
       case '/':
         section = sections.pop();
-        section[5] = token[2];
-        collector = sections.length > 0 ? sections[sections.length - 1][4] : nestedTokens;
+        if (section[0] === '#' || section[0] === '^')
+          section[5] = token[2];
+        else
+          section[8] = token[2];
+        if (sections.length > 0) {
+          section = sections[sections.length - 1];
+          collector = section[0] === '#' || section[0] === '^' ? section[4] : section[7];
+        } else {
+          collector = nestedTokens;
+        }
         break;
       default:
         collector.push(token);
@@ -559,7 +585,7 @@ Writer.prototype.render = function render (template, view, partials, config) {
  * If the template doesn't use higher-order sections, this argument may
  * be omitted.
  */
-Writer.prototype.renderTokens = function renderTokens (tokens, context, partials, originalTemplate, config) {
+Writer.prototype.renderTokens = function renderTokens (tokens, context, partials, originalTemplate, config, blocks) {
   var buffer = '';
 
   var token, symbol, value;
@@ -568,9 +594,11 @@ Writer.prototype.renderTokens = function renderTokens (tokens, context, partials
     token = tokens[i];
     symbol = token[0];
 
-    if (symbol === '#') value = this.renderSection(token, context, partials, originalTemplate, config);
-    else if (symbol === '^') value = this.renderInverted(token, context, partials, originalTemplate, config);
-    else if (symbol === '>') value = this.renderPartial(token, context, partials, config);
+    if (symbol === '#') value = this.renderSection(token, context, partials, originalTemplate, config, blocks);
+    else if (symbol === '^') value = this.renderInverted(token, context, partials, originalTemplate, config, blocks);
+    else if (symbol === '<') value = this.renderParent(token, context, partials, originalTemplate, config, blocks);
+    else if (symbol === '$') value = this.renderBlock(token, context, partials, originalTemplate, config, blocks);
+    else if (symbol === '>') value = this.renderPartial(token, context, partials, config, blocks);
     else if (symbol === '&') value = this.unescapedValue(token, context);
     else if (symbol === 'name') value = this.escapedValue(token, context, config);
     else if (symbol === 'text') value = this.rawValue(token);
@@ -582,7 +610,7 @@ Writer.prototype.renderTokens = function renderTokens (tokens, context, partials
   return buffer;
 };
 
-Writer.prototype.renderSection = function renderSection (token, context, partials, originalTemplate, config) {
+Writer.prototype.renderSection = function renderSection (token, context, partials, originalTemplate, config, blocks) {
   var self = this;
   var buffer = '';
   var value = context.lookup(token[1]);
@@ -597,10 +625,10 @@ Writer.prototype.renderSection = function renderSection (token, context, partial
 
   if (isArray(value)) {
     for (var j = 0, valueLength = value.length; j < valueLength; ++j) {
-      buffer += this.renderTokens(token[4], context.push(value[j]), partials, originalTemplate, config);
+      buffer += this.renderTokens(token[4], context.push(value[j]), partials, originalTemplate, config, blocks);
     }
   } else if (typeof value === 'object' || typeof value === 'string' || typeof value === 'number') {
-    buffer += this.renderTokens(token[4], context.push(value), partials, originalTemplate, config);
+    buffer += this.renderTokens(token[4], context.push(value), partials, originalTemplate, config, blocks);
   } else if (isFunction(value)) {
     if (typeof originalTemplate !== 'string')
       throw new Error('Cannot use higher-order sections without the original template');
@@ -611,18 +639,18 @@ Writer.prototype.renderSection = function renderSection (token, context, partial
     if (value != null)
       buffer += value;
   } else {
-    buffer += this.renderTokens(token[4], context, partials, originalTemplate, config);
+    buffer += this.renderTokens(token[4], context, partials, originalTemplate, config, blocks);
   }
   return buffer;
 };
 
-Writer.prototype.renderInverted = function renderInverted (token, context, partials, originalTemplate, config) {
+Writer.prototype.renderInverted = function renderInverted (token, context, partials, originalTemplate, config, blocks) {
   var value = context.lookup(token[1]);
 
   // Use JavaScript's definition of falsy. Include empty arrays.
   // See https://github.com/janl/mustache.js/issues/186
   if (!value || (isArray(value) && value.length === 0))
-    return this.renderTokens(token[4], context, partials, originalTemplate, config);
+    return this.renderTokens(token[4], context, partials, originalTemplate, config, blocks);
 };
 
 Writer.prototype.indentPartial = function indentPartial (partial, indentation, lineHasNonSpace) {
@@ -636,7 +664,7 @@ Writer.prototype.indentPartial = function indentPartial (partial, indentation, l
   return partialByNl.join('\n');
 };
 
-Writer.prototype.renderPartial = function renderPartial (token, context, partials, config) {
+Writer.prototype.renderPartial = function renderPartial (token, context, partials, config, blocks) {
   if (!partials) return;
   var tags = this.getConfigTags(config);
 
@@ -650,8 +678,81 @@ Writer.prototype.renderPartial = function renderPartial (token, context, partial
       indentedValue = this.indentPartial(value, indentation, lineHasNonSpace);
     }
     var tokens = this.parse(indentedValue, tags);
-    return this.renderTokens(tokens, context, partials, indentedValue, config);
+    return this.renderTokens(tokens, context, partials, indentedValue, config, blocks);
   }
+};
+
+Writer.prototype.renderParent = function renderParent (token, context, partials, originalTemplate, config, blocks) {
+  if (!partials) return;
+  var tags = this.getConfigTags(config);
+
+  var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
+  if (value != null) {
+    var lineHasNonSpace = token[6];
+    var tagIndex = token[5];
+    var indentation = token[4];
+    var indentedValue = value;
+    if (tagIndex == 0 && indentation) {
+      indentedValue = this.indentPartial(value, indentation, lineHasNonSpace);
+    }
+    var mergedBlocks = {};
+    var children = token[7];
+    for (var i = 0, numChildren = children.length; i < numChildren; ++i) {
+      if (children[i][0] === '$')
+        mergedBlocks[children[i][1]] = { token: children[i], template: originalTemplate };
+    }
+    if (blocks) {
+      var names = Object.keys(blocks);
+      for (var j = 0, numNames = names.length; j < numNames; ++j) {
+        mergedBlocks[names[j]] = blocks[names[j]];
+      }
+    }
+    var tokens = this.parse(indentedValue, tags);
+    return this.renderTokens(tokens, context, partials, indentedValue, config, mergedBlocks);
+  }
+};
+
+Writer.prototype.renderBlock = function renderBlock (token, context, partials, originalTemplate, config, blocks) {
+  var override = blocks && blocks[token[1]];
+  if (!override)
+    return this.renderTokens(token[7], context, partials, originalTemplate, config, blocks);
+
+  var value = this.renderTokens(override.token[7], context, partials, override.template, config, blocks);
+  if (override.token[9])
+    value = this.dedentBlock(value);
+  if (token[9]) {
+    var content = originalTemplate.slice(token[3], token[8]);
+    var newLine = content.indexOf('\n');
+    var indentation = newLine === -1 ? token[4] : content.slice(newLine + 1).match(/^[ \t]*/)[0];
+    value = this.indentBlock(value, indentation);
+  }
+  return value;
+};
+
+Writer.prototype.dedentBlock = function dedentBlock (value) {
+  var lines = value.split('\n');
+  var indentation = lines[0].match(/^[ \t]*/)[0];
+  if (!indentation)
+    return value;
+  for (var i = 0; i < lines.length; i++) {
+    if (lines[i].indexOf(indentation) === 0)
+      lines[i] = lines[i].substring(indentation.length);
+  }
+  return lines.join('\n');
+};
+
+Writer.prototype.indentBlock = function indentBlock (value, indentation) {
+  if (!value)
+    return value;
+  var lines = value.split('\n');
+  for (var i = 0; i < lines.length; i++) {
+    if (lines[i].length)
+      lines[i] = indentation + lines[i];
+  }
+  value = lines.join('\n');
+  if (value.charAt(value.length - 1) !== '\n')
+    value += '\n';
+  return value;
 };
 
 Writer.prototype.unescapedValue = function unescapedValue (token, context) {

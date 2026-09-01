@@ -419,6 +419,50 @@ Mustache.render(template, view, {
 });
 ```
 
+### Blocks and Parents
+
+Blocks begin with a dollar sign and are closed like sections, so {{$title}}The News of Today{{/title}} is a block named `title`. A block renders its default content unless it is overridden.
+
+Parents begin with a less than sign and are closed the same way, like {{<article}}...{{/article}}. A parent is looked up by name in the same object of partials that is passed to `Mustache.render`, and renders that template. The blocks written between the parent's opening and closing tags override the blocks of the same name in it.
+
+For example, this parent template:
+
+    article.mustache:
+    <h1>{{$title}}Today's News{{/title}}</h1>
+    {{$body}}Nothing special happened.{{/body}}
+
+Rendered without overriding anything:
+
+```js
+Mustache.render('{{<article}}{{/article}}', view, {
+  article: articleTemplate
+});
+```
+
+Produces:
+
+```html
+<h1>Today's News</h1>
+Nothing special happened.
+```
+
+Whereas overriding one of its blocks:
+
+```js
+Mustache.render('{{<article}}{{$body}}It is a lovely day.{{/body}}{{/article}}', view, {
+  article: articleTemplate
+});
+```
+
+Produces:
+
+```html
+<h1>Today's News</h1>
+It is a lovely day.
+```
+
+A parent template may itself use parent tags, so overrides pass through chains of parents. When more than one template in such a chain overrides the same block, the outermost override wins.
+
 ### Custom Delimiters
 
 Custom delimiters can be used in place of `{{` and `}}` by setting the new values in JavaScript or in templates.
