@@ -172,4 +172,13 @@ describe('Partials spec', function () {
       var renderResult = Mustache.render(template, {}, partials, tags);
       assert.equal(renderResult, expected);
     });
+
+    it('Multiple partials on the same line should not have the whitespace between them stripped.', function () {
+      var template = '{{> a}} {{> b}} {{> c}}';
+      var data = {};
+      var partials = {a: 'A', b: 'B', c: 'C'};
+      var expected = 'A B C';
+      var renderResult = Mustache.render(template, data, partials);
+      assert.equal(renderResult, expected);
+    });
 });
