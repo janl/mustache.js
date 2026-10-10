@@ -9,6 +9,26 @@ describe('Mustache.render', function () {
     Mustache.clearCache();
   });
 
+  it('renders a hasOwnProperty data field without shadowing cache lookup', function () {
+    var view = { hasOwnProperty: 'field', name: 'Alice' };
+    assert.equal(Mustache.render('{{hasOwnProperty}} {{name}} {{hasOwnProperty}}', view), 'field Alice field');
+  });
+
+  it('handles a missing or false hasOwnProperty field before other names', function () {
+    assert.equal(Mustache.render('{{hasOwnProperty}} {{name}}', { hasOwnProperty: false, name: 'Alice' }), 'false Alice');
+    assert.equal(Mustache.render('{{hasOwnProperty}} {{name}}', { hasOwnProperty: undefined, name: 'Alice' }), ' Alice');
+  });
+
+  it('does not invoke a hasOwnProperty lambda to check other cached names', function () {
+    var calls = 0;
+    var view = {
+      hasOwnProperty: function hasOwnPropertyValue () { calls++; return 'field'; },
+      name: 'Alice'
+    };
+    assert.equal(Mustache.render('{{hasOwnProperty}} {{name}} {{hasOwnProperty}}', view), 'field Alice field');
+    assert.equal(calls, 2);
+  });
+
   it('requires template to be a string', function () {
     assert.throws(function () {
       Mustache.render(['dummy template'], ['foo', 'bar']);
