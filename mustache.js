@@ -394,7 +394,7 @@ Context.prototype.lookup = function lookup (name) {
   var cache = this.cache;
 
   var value;
-  if (cache.hasOwnProperty(name)) {
+  if (Object.prototype.hasOwnProperty.call(cache, name)) {
     value = cache[name];
   } else {
     var context = this, intermediateValue, names, index, lookupHit = false;
