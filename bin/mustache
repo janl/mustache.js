@@ -111,6 +111,7 @@ function toStdout (cb, str) {
 
 function streamToStr (stream, cb) {
   var data = '';
+  stream.setEncoding('utf8');
 
   stream.on('data', function onData (chunk) {
     data += chunk;
