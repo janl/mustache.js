@@ -6,7 +6,34 @@ describe('Partials spec', function () {
     Mustache.clearCache();
   });
 
-  
+  describe('multiple partials on one line', function () {
+    var partials = { first: 'A', second: 'B', third: 'C' };
+
+    ['', '\n', '\r\n'].forEach(function (ending) {
+      it('preserves separating whitespace with ending ' + JSON.stringify(ending), function () {
+        var template = '  {{> first}} \t {{> second}} {{> third}}  ' + ending;
+        assert.equal(Mustache.render(template, {}, partials), '  A \t B C  ' + ending);
+      });
+    });
+
+    it('resets the tag count before a standalone partial', function () {
+      var template = '{{> first}} {{> second}}\n  {{> third}}\n';
+      assert.equal(Mustache.render(template, {}, partials), 'A B\n  C');
+    });
+
+    it('does not duplicate indentation before inline content', function () {
+      assert.equal(Mustache.render('  {{> first}} text', {}, partials), '  A text');
+    });
+
+    it('preserves spaces around missing inline partials', function () {
+      assert.equal(Mustache.render('{{> first}} {{> missing}} {{> second}}', {}, partials), 'A  B');
+    });
+
+    it('preserves separators with custom delimiters', function () {
+      assert.equal(Mustache.render('[[> first]] [[> second]]', {}, partials, ['[[', ']]']), 'A B');
+    });
+  });
+
     it('The greater-than operator should expand to the named partial.', function () {
       var template = '"{{>text}}"';
       var data = {};
