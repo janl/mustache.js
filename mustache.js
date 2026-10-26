@@ -117,17 +117,23 @@ function parseTemplate (template, tags) {
   var nonSpace = false;  // Is there a non-space char on the current line?
   var indentation = '';  // Tracks indentation for tags that use it
   var tagIndex = 0;      // Stores a count of number of tags encountered on a line
+  var linePartial;       // First partial on the current line
 
   // Strips all whitespace tokens array for the current line
-  // if there was a {{#tag}} on it and otherwise only space.
+  // if there was a {{#tag}} on it and otherwise only space. A partial
+  // sharing its line with another tag is inline, not standalone.
   function stripSpace () {
-    if (hasTag && !nonSpace) {
+    if (hasTag && !nonSpace && (!linePartial || tagIndex === 1)) {
       while (spaces.length)
         delete tokens[spaces.pop()];
     } else {
       spaces = [];
+      // The leading whitespace remains in the template for inline partials.
+      if (linePartial)
+        linePartial[6] = true;
     }
 
+    linePartial = undefined;
     hasTag = false;
     nonSpace = false;
   }
@@ -212,6 +218,8 @@ function parseTemplate (template, tags) {
 
     if (type == '>') {
       token = [ type, value, start, scanner.pos, indentation, tagIndex, lineHasNonSpace ];
+      if (!linePartial)
+        linePartial = token;
     } else {
       token = [ type, value, start, scanner.pos ];
     }
