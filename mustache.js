@@ -121,7 +121,7 @@ function parseTemplate (template, tags) {
   // Strips all whitespace tokens array for the current line
   // if there was a {{#tag}} on it and otherwise only space.
   function stripSpace () {
-    if (hasTag && !nonSpace) {
+    if (hasTag && !nonSpace && tagIndex === 1) {
       while (spaces.length)
         delete tokens[spaces.pop()];
     } else {

@@ -65,6 +65,18 @@ describe('Partials spec', function () {
       var renderResult = Mustache.render(template, data, partials);
       assert.equal(renderResult, expected);
     });
+    it('Multiple inline partials should preserve whitespace between them', function () {
+      var template = '{{> first}} {{> second}} {{> third}}';
+      var data = {};
+      var partials = {
+        first: '<first>',
+        second: '<second>',
+        third: '<third>'
+      };
+      var expected = '<first> <second> <third>';
+      var renderResult = Mustache.render(template, data, partials);
+      assert.equal(renderResult, expected);
+    });
     it('"\r\n" should be considered a newline for standalone tags.', function () {
       var template = '|\r\n{{>partial}}\r\n|';
       var data = {};
